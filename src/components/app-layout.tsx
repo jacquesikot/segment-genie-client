@@ -59,8 +59,7 @@ const useSegments = () => {
     queryFn: getUserSegments,
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [appSegments, setAppSegments] = useState<Segment[]>(storage.getItem(keys.RECENT_SEGMENTS) || []);
+  const appSegments = storage.getItem(keys.RECENT_SEGMENTS);
 
   // Update segments in storage when they change
   if (segments) {
@@ -70,14 +69,12 @@ const useSegments = () => {
   return { appSegments };
 };
 
-// Loading component
 const LoadingScreen = () => (
   <div className="flex items-center justify-center h-screen w-screen">
     <p>SegmentGenie Loading...</p>
   </div>
 );
 
-// Error component
 const ErrorScreen = ({ message }: { message: string }) => (
   <div className="flex items-center justify-center h-screen w-screen">
     <p className="text-red-500">{message}</p>
@@ -104,7 +101,7 @@ const AppLayout = () => {
   return (
     <SidebarProvider>
       <div className="flex w-screen">
-        {isLoggedInLocally && <AppNav segments={appSegments} />}
+        {isLoggedInLocally && <AppNav segments={appSegments as Segment[]} />}
         <SidebarInset>
           <Outlet />
         </SidebarInset>
