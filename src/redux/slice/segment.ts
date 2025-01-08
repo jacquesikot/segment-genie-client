@@ -24,6 +24,6 @@ const segmentsSlice = createSlice({
   },
 });
 
-export const { setSegments } = segmentsSlice.actions;
+export const { setSegments, addNewSegment } = segmentsSlice.actions;
 
 export default segmentsSlice.reducer;

@@ -15,6 +15,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import { useAppDispatch } from '@/redux/hooks';
+import { addNewSegment } from '@/redux/slice/segment';
 
 interface FormValues {
   title: string;
@@ -52,6 +54,7 @@ const FormTooltip = ({ content, children }: { content: string; children: React.R
 );
 
 export function NewSegmentForm() {
+  const dispatch = useAppDispatch();
   const { user } = useUser();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
@@ -99,6 +102,7 @@ export function NewSegmentForm() {
       });
 
       form.reset();
+      dispatch(addNewSegment(research.data.segment));
       await navigate(`/segment/${research.data.segment._id}`);
     } catch (error) {
       console.error('Error submitting form:', error);
