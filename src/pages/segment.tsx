@@ -28,6 +28,9 @@ export default function Segment() {
       setProgress(100);
       setReport(segment.data);
       setTitle(segment.title);
+    } else if (segment) {
+      setProgress(parseInt(segment?.status.progress));
+      setStatusText(segment?.status.message);
     }
   }, [segment]);
 

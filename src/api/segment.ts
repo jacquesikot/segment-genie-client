@@ -5,6 +5,13 @@ export interface Segment {
   _id: string;
   userId: string;
   title: string;
+  status: {
+    message: string;
+    progress: string;
+    isComplete: boolean;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    data?: any[];
+  };
   input: NewResearch;
   data?: ResearchReport;
   timestamp: Date;
@@ -18,9 +25,9 @@ export const getSegment = async (segmentId: string): Promise<Segment> => {
   return (await client.get(`/segment/${segmentId}`)).data.data;
 };
 
-export const getUserSegments = async (): Promise<Segment[] | []> => {
+export const getUserSegments = async (userId: string): Promise<Segment[] | []> => {
   try {
-    return (await client.get(`/segment/user`)).data.data;
+    return (await client.get(`/segment/user/${userId}`)).data.data;
   } catch (error) {
     console.log('🚀 ~ getUserSegments ~ error:', error);
     return [];

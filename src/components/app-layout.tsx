@@ -52,23 +52,6 @@ const useAuthState = () => {
   };
 };
 
-// Custom hook to handle segments
-const useSegments = () => {
-  const { data: segments } = useQuery({
-    queryKey: ['segments'],
-    queryFn: getUserSegments,
-  });
-
-  const appSegments = storage.getItem(keys.RECENT_SEGMENTS);
-
-  // Update segments in storage when they change
-  if (segments) {
-    storage.setItem(keys.RECENT_SEGMENTS, segments);
-  }
-
-  return { appSegments };
-};
-
 const LoadingScreen = () => (
   <div className="flex items-center justify-center h-screen w-screen">
     <p>SegmentGenie Loading...</p>
@@ -83,7 +66,13 @@ const ErrorScreen = ({ message }: { message: string }) => (
 
 const AppLayout = () => {
   const { isLoaded, isLoggedInLocally, error, updateUserData } = useAuthState();
-  const { appSegments } = useSegments();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const user: any = storage.getItem(keys.USER);
+  console.log('🚀 ~ AppLayout ~ user:', user);
+  const { data: segments, isLoading } = useQuery({
+    queryKey: ['segments'],
+    queryFn: () => getUserSegments(user!.id),
+  });
 
   // Update auth state when component mounts
   useEffect(() => {
@@ -101,7 +90,7 @@ const AppLayout = () => {
   return (
     <SidebarProvider>
       <div className="flex w-screen">
-        {isLoggedInLocally && <AppNav segments={appSegments as Segment[]} />}
+        {isLoggedInLocally && <AppNav segments={segments as Segment[]} isLoading={isLoading} />}
         <SidebarInset>
           <Outlet />
         </SidebarInset>

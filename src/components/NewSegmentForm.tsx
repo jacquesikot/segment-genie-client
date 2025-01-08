@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useUser } from '@clerk/clerk-react';
-import { BarChart3, Info, Lightbulb, Sparkles, Users } from 'lucide-react';
+import { BarChart3, Info, Lightbulb, Sparkles, Users, Loader2 } from 'lucide-react';
 import { startNewResearch } from '@/api/research';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,7 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 
 interface FormValues {
   title: string;
@@ -53,6 +54,7 @@ const FormTooltip = ({ content, children }: { content: string; children: React.R
 export function NewSegmentForm() {
   const { user } = useUser();
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -73,33 +75,49 @@ export function NewSegmentForm() {
   });
 
   const onSubmit = async (values: FormValues) => {
-    const research = await startNewResearch({
-      title: values.title,
-      userId: user!.id,
-      input: {
-        customerProfile: {
-          segment: values.segment,
-          painPoints: values.painPoints,
+    try {
+      setIsLoading(true);
+      const research = await startNewResearch({
+        title: values.title,
+        userId: user!.id,
+        input: {
+          customerProfile: {
+            segment: values.segment,
+            painPoints: values.painPoints,
+          },
+          solutionOverview: {
+            problemToSolve: values.problem,
+            solutionOffered: values.solution,
+            uniqueFeatures: values.features,
+          },
+          marketContext: {
+            industry: values.industry,
+            competitors: values.competitors,
+            channels: values.channels,
+          },
         },
-        solutionOverview: {
-          problemToSolve: values.problem,
-          solutionOffered: values.solution,
-          uniqueFeatures: values.features,
-        },
-        marketContext: {
-          industry: values.industry,
-          competitors: values.competitors,
-          channels: values.channels,
-        },
-      },
-    });
+      });
 
-    form.reset();
-    navigate(`/segment/${research.data.jobId}`);
+      form.reset();
+      await navigate(`/segment/${research.data.segment._id}`);
+    } catch (error) {
+      console.error('Error submitting form:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <Card className="w-[800px] shadow-lg">
+      {isLoading && (
+        <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center">
+          <div className="flex flex-col items-center space-y-4">
+            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            <p className="text-lg font-medium text-primary">Generating Customer Report...</p>
+            <p className="text-sm text-muted-foreground">This may take a few moments</p>
+          </div>
+        </div>
+      )}
       <CardHeader className="space-y-2 border-b bg-muted/30">
         <div className="flex items-center gap-2 mb-5">
           <Sparkles className="h-5 w-5 text-primary" />
@@ -356,9 +374,22 @@ export function NewSegmentForm() {
             </div>
 
             <div className="flex justify-end pt-4">
-              <Button type="submit" className="px-8 py-6 text-lg font-medium transition-all hover:scale-[1.02]">
-                <Sparkles className="mr-2 h-5 w-5" />
-                Generate Customer Report
+              <Button
+                disabled={isLoading}
+                type="submit"
+                className="px-8 py-6 text-lg font-medium transition-all hover:scale-[1.02]"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="mr-2 h-5 w-5" />
+                    Generate Customer Report
+                  </>
+                )}
               </Button>
             </div>
           </form>

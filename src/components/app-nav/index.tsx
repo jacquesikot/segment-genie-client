@@ -31,9 +31,10 @@ const mainNavRoutes = {
 
 interface Props extends React.ComponentProps<typeof CNSidebar> {
   segments: Segment[];
+  isLoading: boolean;
 }
 
-function AppNav({ segments, ...props }: Props) {
+function AppNav({ segments, isLoading, ...props }: Props) {
   const location = useLocation();
   const navMain = mainNavRoutes.navMain.map((item) => ({
     ...item,
@@ -61,7 +62,7 @@ function AppNav({ segments, ...props }: Props) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={navMain} />
-        <NavSegments segments={segments || []} isLoading={false} />
+        <NavSegments segments={segments || []} isLoading={isLoading} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser />
