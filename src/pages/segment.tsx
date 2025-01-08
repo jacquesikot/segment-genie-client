@@ -1,5 +1,3 @@
-'use client';
-
 import { ResearchReport, WSEvent } from '@/api/research';
 import { getSegment } from '@/api/segment';
 import CustomerReportView from '@/components/CustomerReportView';
@@ -35,7 +33,7 @@ export default function Segment() {
   }, [segment]);
 
   useEffect(() => {
-    const eventSource = new EventSource('https://segment-genie-api.onrender.com/events');
+    const eventSource = new EventSource(`${import.meta.env.VITE_API_URL}/events`);
 
     eventSource.onmessage = (event) => {
       const data: WSEvent = JSON.parse(event.data);
