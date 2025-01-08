@@ -6,6 +6,8 @@ import { useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import AppNav from './app-nav';
 import { SidebarInset, SidebarProvider } from './ui/sidebar';
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
+import { setSegments } from '@/redux/slice/segment';
 
 interface UserData {
   email: string | undefined;
@@ -65,20 +67,23 @@ const ErrorScreen = ({ message }: { message: string }) => (
 );
 
 const AppLayout = () => {
+  const dispatch = useAppDispatch();
   const { isLoaded, isLoggedInLocally, error, updateUserData } = useAuthState();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const user: any = storage.getItem(keys.USER);
-  console.log('🚀 ~ AppLayout ~ user:', user);
+  const appSegments = useAppSelector((s) => s.segment.segments);
   const { data: segments, isLoading } = useQuery({
     queryKey: ['segments'],
     queryFn: () => getUserSegments(user!.id),
   });
 
-  console.log('🚀 ~ AppLayout ~ segments:', segments);
   // Update auth state when component mounts
   useEffect(() => {
     updateUserData();
-  }, [updateUserData]);
+    if (segments) {
+      dispatch(setSegments(segments));
+    }
+  }, [updateUserData, segments, dispatch]);
 
   if (!isLoaded && !isLoggedInLocally) {
     return <LoadingScreen />;
@@ -91,7 +96,7 @@ const AppLayout = () => {
   return (
     <SidebarProvider>
       <div className="flex w-screen">
-        {isLoggedInLocally && <AppNav segments={segments as Segment[]} isLoading={isLoading} />}
+        {isLoggedInLocally && <AppNav segments={appSegments as Segment[]} isLoading={isLoading} />}
         <SidebarInset>
           <Outlet />
         </SidebarInset>
