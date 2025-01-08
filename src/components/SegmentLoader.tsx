@@ -1,11 +1,9 @@
-'use client';
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Loader2 } from 'lucide-react';
 
 interface Props {
-  progress: number;
+  progress: string;
   statusText: string;
 }
 
@@ -22,7 +20,7 @@ export default function SegmentLoader({ progress, statusText }: Props) {
 
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Progress value={progress} className="h-2 transition-all duration-300" />
+          <Progress value={parseInt(progress)} className="h-2 transition-all duration-300" />
           <div className="flex justify-between text-sm text-muted-foreground">
             <span>Progress</span>
             <span className="font-medium">{progress}%</span>

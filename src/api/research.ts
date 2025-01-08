@@ -36,7 +36,8 @@ interface ReportResponse {
 }
 
 export interface WSEvent {
-  id: string;
+  jobId: string;
+  segmentId: string;
   progress: number;
   status: string;
   data?: ResearchReport | null;
