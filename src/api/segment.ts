@@ -27,7 +27,8 @@ export const getSegment = async (segmentId: string): Promise<Segment> => {
 
 export const getUserSegments = async (userId: string): Promise<Segment[] | []> => {
   try {
-    return (await client.get(`/segment/user/${userId}`)).data.data;
+    const data = await client.get(`/segment/user/${userId}`);
+    return data.data.data;
   } catch (error) {
     console.log('🚀 ~ getUserSegments ~ error:', error);
     return [];

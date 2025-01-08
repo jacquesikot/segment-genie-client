@@ -35,10 +35,11 @@ export default function Segment() {
   }, [segment]);
 
   useEffect(() => {
-    const eventSource = new EventSource('http://localhost:5002/events');
+    const eventSource = new EventSource('https://segment-genie-api.onrender.com/events');
 
     eventSource.onmessage = (event) => {
       const data: WSEvent = JSON.parse(event.data);
+      console.log('🚀 ~ useEffect ~ data:', data);
       setProgress(data.progress);
       setStatusText(data.status);
       if (data.data) {

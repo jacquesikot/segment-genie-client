@@ -74,6 +74,7 @@ const AppLayout = () => {
     queryFn: () => getUserSegments(user!.id),
   });
 
+  console.log('🚀 ~ AppLayout ~ segments:', segments);
   // Update auth state when component mounts
   useEffect(() => {
     updateUserData();
