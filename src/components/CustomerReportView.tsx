@@ -1,207 +1,229 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState } from 'react';
-import { Link, ExternalLink } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
-import rehypeRaw from 'rehype-raw';
-import remarkGfm from 'remark-gfm';
-import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { ResearchReport } from '@/api/research';
+import React from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { CircleDollarSign, TrendingUp, Users, Info, ExternalLink } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { MarketSize } from '@/api/research';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
 
-interface Section {
-  id: string;
-  title: string;
-  data?: string;
-  urls: { url: string; title: string }[];
-  icon: string;
-}
-
-interface CustomerReportProps {
-  reportData: ResearchReport;
-}
-
-const MarkdownComponents: Record<string, React.FC<any>> = {
-  h1: ({ node, ...props }) => <h1 className="text-2xl font-bold mb-4 mt-6" {...props} />,
-  h2: ({ node, ...props }) => <h2 className="text-xl font-semibold mb-3 mt-5" {...props} />,
-  h3: ({ node, ...props }) => <h3 className="text-lg font-medium mb-2 mt-4" {...props} />,
-  p: ({ node, ...props }) => <p className="text-sm text-gray-600 mb-3 leading-relaxed" {...props} />,
-  ul: ({ node, ...props }) => <ul className="list-disc pl-6 mb-4 text-sm text-gray-600 space-y-2" {...props} />,
-  ol: ({ node, ...props }) => <ol className="list-decimal pl-6 mb-4 text-sm text-gray-600 space-y-2" {...props} />,
-  li: ({ node, ...props }) => <li className="mb-1" {...props} />,
-  strong: ({ node, ...props }) => <strong className="font-semibold text-gray-900" {...props} />,
-  em: ({ node, ...props }) => <em className="italic text-gray-800" {...props} />,
-  blockquote: ({ node, ...props }) => (
-    <blockquote className="border-l-4 border-blue-200 pl-4 my-4 italic bg-blue-50 py-2 rounded-r" {...props} />
-  ),
-  code: ({ node, inline, ...props }) =>
-    inline ? (
-      <code className="bg-gray-100 rounded px-1 py-0.5 font-mono text-sm" {...props} />
-    ) : (
-      <code className="block bg-gray-100 rounded p-4 my-4 overflow-auto font-mono text-sm" {...props} />
-    ),
-  table: ({ node, ...props }) => (
-    <div className="overflow-auto my-4">
-      <table className="min-w-full divide-y divide-gray-200" {...props} />
-    </div>
-  ),
-  th: ({ node, ...props }) => (
-    <th
-      className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-      {...props}
-    />
-  ),
-  td: ({ node, ...props }) => <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500" {...props} />,
+const formatCurrency = (value: number): string => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    notation: 'compact',
+    maximumFractionDigits: 1,
+  }).format(value);
 };
 
-const CustomerReport: React.FC<CustomerReportProps> = ({ reportData }) => {
-  const [activeSection, setActiveSection] = useState<string>('market-demand-overview');
-
-  const sections: Section[] = [
-    {
-      id: 'market-demand-overview',
-      title: 'Market Demand Overview',
-      data: reportData.marketDemandOverview?.data,
-      urls: reportData.marketDemandOverview?.urls || [],
-      icon: '📊',
-    },
-    {
-      id: 'pain-points',
-      title: 'Pain Points',
-      data: reportData.painPoints?.data,
-      urls: reportData.painPoints?.urls || [],
-      icon: '🎯',
-    },
-    {
-      id: 'competitive-analysis',
-      title: 'Competitive Analysis',
-      data: reportData.competitiveAnalysis?.data,
-      urls: reportData.competitiveAnalysis?.urls || [],
-      icon: '⚔️',
-    },
-    {
-      id: 'desired-features',
-      title: 'Desired Features',
-      data: reportData.desiredFeatures?.data,
-      urls: reportData.desiredFeatures?.urls || [],
-      icon: '✨',
-    },
-    {
-      id: 'sentiment-analysis',
-      title: 'Sentiment Analysis',
-      data: reportData.sentimentAnalysis?.data,
-      urls: reportData.sentimentAnalysis?.urls || [],
-      icon: '🎭',
-    },
-    {
-      id: 'market-trend-analysis',
-      title: 'Market Trend Analysis',
-      data: reportData.marketTrendAnalysis?.data,
-      urls: reportData.marketTrendAnalysis?.urls || [],
-      icon: '📈',
-    },
-    {
-      id: 'demographic-insights',
-      title: 'Demographic Insights',
-      data: reportData.geodemographicInsights?.data,
-      urls: reportData.geodemographicInsights?.urls || [],
-      icon: '🌎',
-    },
-  ];
-
-  const activeContent = sections.find((section) => section.id === activeSection);
-
+const ProgressWithLabel: React.FC<{ value: number; total: number; label: string }> = ({ value, total, label }) => {
+  const percentage = (value / total) * 100;
   return (
-    <div className="flex h-screen">
-      {/* Side Navigation */}
-      <div className="w-64 bg-white">
-        <div className="p-4">
-          <h2 className="text-lg font-semibold text-gray-900">Report Sections</h2>
+    <HoverCard>
+      <HoverCardTrigger asChild>
+        <div className="space-y-2">
+          <div className="flex justify-between text-sm text-gray-500">
+            <span>{label}</span>
+            <span>{percentage.toFixed(1)}% of total</span>
+          </div>
+          <Progress value={percentage} className="h-2" />
         </div>
-        <ScrollArea className="h-[calc(100vh-60px)]">
-          <nav className="space-y-1 p-2">
-            {sections.map((section) => (
-              <button
-                key={section.id}
-                onClick={() => setActiveSection(section.id)}
-                className={`w-full flex items-center space-x-3 px-4 py-3 text-left rounded-lg transition-colors ${
-                  activeSection === section.id
-                    ? 'bg-gray-100 text-black font-semibold'
-                    : 'text-gray-700 hover:bg-gray-50'
-                }`}
-              >
-                <span className="text-xl">{section.icon}</span>
-                <span className="text-sm font-medium">{section.title}</span>
-              </button>
-            ))}
-          </nav>
-        </ScrollArea>
-      </div>
-
-      {/* Main Content */}
-      <div className="flex-1 min-w-0">
-        <Card className="m-6 bg-white shadow-sm h-[calc(100vh-48px)]">
-          <CardHeader className="flex-row items-center justify-between space-y-0 pb-4">
-            <div>
-              <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                <span>{activeContent?.icon}</span>
-                {activeContent?.title}
-              </CardTitle>
-              <CardDescription className="text-gray-600 mt-1">Detailed analysis and insights</CardDescription>
-            </div>
-            {activeContent?.urls && activeContent.urls.length > 0 && (
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button variant="outline" size="sm" className="flex items-center gap-2">
-                    <Link className="h-4 w-4" />
-                    View Sources
-                  </Button>
-                </SheetTrigger>
-                <SheetContent>
-                  <div className="flex flex-col h-full">
-                    <SheetHeader className="flex-shrink-0">
-                      <SheetTitle>Data Sources</SheetTitle>
-                      <SheetDescription>References and sources used in this section</SheetDescription>
-                    </SheetHeader>
-                    <ScrollArea className="flex-1 mt-6 -mr-6 pr-6">
-                      <ul className="space-y-4">
-                        {activeContent.urls.map((source, index) => (
-                          <li
-                            key={index}
-                            className={`pb-4 ${index !== activeContent.urls.length - 1 ? 'border-b' : ''}`}
-                          >
-                            <a
-                              href={source.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center gap-2 text-blue-600 hover:text-blue-800"
-                            >
-                              <ExternalLink className="h-4 w-4 flex-shrink-0" />
-                              <span className="text-sm break-all">{source.title}</span>
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
-                    </ScrollArea>
-                  </div>
-                </SheetContent>
-              </Sheet>
-            )}
-          </CardHeader>
-
-          <ScrollArea className="h-[calc(100vh-200px)] w-full overflow-x-auto px-6">
-            <div className="prose prose-sm max-w-none pb-6">
-              <ReactMarkdown components={MarkdownComponents} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
-                {activeContent?.data || ''}
-              </ReactMarkdown>
-            </div>
-          </ScrollArea>
-        </Card>
-      </div>
-    </div>
+      </HoverCardTrigger>
+      <HoverCardContent className="w-80">
+        <div className="space-y-2">
+          <h4 className="font-semibold">Market Share Details</h4>
+          <p className="text-sm text-gray-500">
+            {formatCurrency(value)} out of {formatCurrency(total)}
+          </p>
+          <p className="text-sm">This represents the portion of the market that {label.toLowerCase()} encompasses.</p>
+        </div>
+      </HoverCardContent>
+    </HoverCard>
   );
 };
 
-export default CustomerReport;
+const CustomerReportView: React.FC<{ marketSize: MarketSize }> = ({ marketSize }) => {
+  const lastUpdated = new Date(marketSize.metadata.lastUpdated).toDateString();
+
+  return (
+    <TooltipProvider>
+      <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Market Size Analysis</h1>
+            <p className="text-gray-500">Last updated: {lastUpdated}</p>
+          </div>
+          <div className="flex gap-2">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Badge variant="secondary" className="flex items-center gap-1 cursor-help">
+                  <Info className="w-4 h-4" />
+                  Industry Confidence: {(marketSize.metadata.industryConfidence * 100).toFixed(0)}%
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="w-64">
+                  This score reflects the reliability of industry data and market research used in this analysis. Higher
+                  scores indicate more reliable market predictions.
+                </p>
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Badge variant="secondary" className="flex items-center gap-1 cursor-help">
+                  <Info className="w-4 h-4" />
+                  Data Availability: {(marketSize.metadata.dataAvailability * 100).toFixed(0)}%
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="w-64">
+                  Indicates the completeness of available market data. Higher percentages suggest more comprehensive
+                  market coverage.
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card className="relative overflow-hidden">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CircleDollarSign className="w-5 h-5 text-blue-500" />
+                TAM
+              </CardTitle>
+              <CardDescription>Total Addressable Market</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="text-3xl font-bold text-blue-600">{formatCurrency(marketSize.tam.revenue.value!)}</div>
+                {marketSize.tam.growthRate && (
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4 text-green-500" />
+                    <span className="text-sm text-green-600">Growth Rate: {marketSize.tam.growthRate}</span>
+                  </div>
+                )}
+                <p className="text-sm text-gray-600">{marketSize.tam.explanation}</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-purple-500" />
+                SAM
+              </CardTitle>
+              <CardDescription>Serviceable Addressable Market</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="text-3xl font-bold text-purple-600">
+                  {formatCurrency(marketSize.sam.revenue.value!)}
+                </div>
+                <ProgressWithLabel
+                  value={marketSize.sam.revenue.value!}
+                  total={marketSize.tam.revenue.value!}
+                  label="Serviceable Market"
+                />
+                <p className="text-sm text-gray-600">{marketSize.sam.explanation}</p>
+                {marketSize.sam.segmentationCriteria && (
+                  <Alert>
+                    <AlertDescription>{marketSize.sam.segmentationCriteria}</AlertDescription>
+                  </Alert>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-green-500" />
+                SOM
+              </CardTitle>
+              <CardDescription>Serviceable Obtainable Market</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="text-3xl font-bold text-green-600">{formatCurrency(marketSize.som.revenue.value!)}</div>
+                <ProgressWithLabel
+                  value={marketSize.som.revenue.value!}
+                  total={marketSize.sam.revenue.value!}
+                  label="Obtainable Market"
+                />
+                <p className="text-sm text-gray-600">{marketSize.som.explanation}</p>
+                {marketSize.som.marketSharePercentage && (
+                  <div className="flex items-center gap-2 mt-2">
+                    <Badge variant="outline" className="text-green-600">
+                      Target Market Share: {marketSize.som.marketSharePercentage}%
+                    </Badge>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Data Sources</CardTitle>
+            <CardDescription>Reference Materials and Confidence Scores</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {marketSize.metadata.sources.map((source, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <ExternalLink className="w-4 h-4 text-blue-500" />
+                      <a
+                        href={source.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline"
+                      >
+                        {source.url}
+                      </a>
+                    </div>
+                    <div className="text-sm text-gray-500 mt-1">
+                      Published: {new Date(source.datePublished!).toLocaleDateString()}
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Badge variant="secondary" className="cursor-help">
+                          Credibility: {(source.credibilityScore * 100).toFixed(0)}%
+                        </Badge>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Reliability score based on source reputation and data quality</p>
+                      </TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Badge variant="secondary" className="cursor-help">
+                          Relevance: {(source.relevanceScore * 100).toFixed(0)}%
+                        </Badge>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>How closely the source data matches our market analysis needs</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </TooltipProvider>
+  );
+};
+
+export default CustomerReportView;

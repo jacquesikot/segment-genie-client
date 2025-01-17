@@ -42,11 +42,21 @@ export default function Segment() {
     data: null,
   });
 
-  const { data: segment } = useQuery({
+  const { data: segment, refetch } = useQuery({
     queryKey: ['segment', id],
     queryFn: () => getSegment(id as string),
     enabled: !!id,
   });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (state.isComplete === true && !state.data) {
+        await refetch();
+      }
+    };
+
+    fetchData();
+  }, [state, refetch]);
 
   useEffect(() => {
     if (!segment) return;
@@ -97,7 +107,7 @@ export default function Segment() {
       <div className="flex flex-1 flex-col gap-4 p-4 pt-0 overflow-hidden">
         {state.data ? (
           <div className="overflow-x-auto">
-            <CustomerReportView reportData={state.data} />
+            <CustomerReportView marketSize={state.data.marketSize} />
           </div>
         ) : (
           <SegmentLoader progress={state.progress} statusText={state.message} />

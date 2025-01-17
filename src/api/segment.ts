@@ -34,3 +34,9 @@ export const getUserSegments = async (userId: string): Promise<Segment[] | []> =
     return [];
   }
 };
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const deleteSegment = async (segmentId: string): Promise<any> => {
+  const res = await client.delete(`/segment/${segmentId}`);
+  return res.data.data;
+};

@@ -2,7 +2,8 @@
 
 import { Segment } from '@/api/segment';
 // import { Segment } from '@/api/segment';
-import { ArrowUpRight, FolderSearch, HeartCrack, Hourglass, MoreHorizontal, StarOff, Trash2 } from 'lucide-react';
+import { FolderSearch, HeartCrack, Hourglass, MoreHorizontal, StarOff, Trash2 } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,15 +20,16 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '../../components/ui/sidebar';
-import { useLocation } from 'react-router-dom';
 
 export function NavSegments({ segments, isLoading }: { segments: Segment[]; isLoading: boolean }) {
   const { isMobile } = useSidebar();
   const location = useLocation();
 
+  const handleDelete = () => {};
+
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      <SidebarGroupLabel>My Segments</SidebarGroupLabel>
+      <SidebarGroupLabel>Favorites 🚀</SidebarGroupLabel>
       {segments && segments.length > 0 ? (
         <SidebarMenu>
           {segments.map((item) => (
@@ -55,12 +57,7 @@ export function NavSegments({ segments, isLoading }: { segments: Segment[]; isLo
                     <span>Remove from Favorites</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <ArrowUpRight className="text-muted-foreground" />
-                    <span>Open in New Tab</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleDelete}>
                     <Trash2 className="text-muted-foreground" />
                     <span>Delete</span>
                   </DropdownMenuItem>
