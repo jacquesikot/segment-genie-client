@@ -7,7 +7,7 @@ import { SidebarTrigger } from './ui/sidebar';
 import { useNavigate } from 'react-router-dom';
 
 interface PageHeaderProps {
-  title: string;
+  title?: string;
   hasPrevious?: boolean;
   hasNext?: boolean;
   children?: ReactNode;
