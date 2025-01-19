@@ -28,7 +28,7 @@ interface Props {
 
 export function NewSegmentForm({ form }: Props) {
   return (
-    <Card className="w-[800px] shadow-lg">
+    <Card className="shadow-lg">
       <CardContent className="p-6">
         {/* Customer Profile Section */}
         <div className="space-y-6">

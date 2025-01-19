@@ -121,7 +121,7 @@ const EmptyState = () => {
       <p className="text-muted-foreground mb-6 max-w-md">
         Start by creating your first segment analysis. We'll help you understand your target market better.
       </p>
-      <Button onClick={() => navigate('/dashboard')} className="bg-primary hover:bg-primary/90">
+      <Button onClick={() => navigate('/')} className="bg-primary hover:bg-primary/90">
         <Plus className="mr-2 h-4 w-4" />
         Create Your First Segment
       </Button>
@@ -142,22 +142,24 @@ const SegmentsPage = () => {
     <>
       <PageHeader />
       <div className="max-w-[1400px] mx-auto p-4 md:p-6 space-y-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-semibold">Your Segments</h1>
-            <p className="text-muted-foreground">View and manage your market segment analyses</p>
+        {segments && segments.length ? (
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-3xl font-semibold">Your Segments</h1>
+              <p className="text-muted-foreground">View and manage your market segment analyses</p>
+            </div>
+            <Button onClick={() => navigate('/')} className="bg-primary hover:bg-primary/90" disabled={isLoading}>
+              {isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <>
+                  <Plus className="mr-2 h-4 w-4" />
+                  New Segment
+                </>
+              )}
+            </Button>
           </div>
-          <Button onClick={() => navigate('/')} className="bg-primary hover:bg-primary/90" disabled={isLoading}>
-            {isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <>
-                <Plus className="mr-2 h-4 w-4" />
-                New Segment
-              </>
-            )}
-          </Button>
-        </div>
+        ) : null}
 
         {isLoading ? (
           <LoadingState />

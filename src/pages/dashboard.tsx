@@ -100,7 +100,7 @@ export default function Dashboard() {
 
       form.reset();
       dispatch(addNewSegment(research.data.segment));
-      await navigate(`/segment/${research.data.segment._id}`);
+      await navigate(`/segments`);
     } finally {
       setIsFinalLoading(false);
     }

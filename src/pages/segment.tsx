@@ -90,7 +90,7 @@ export default function Segment() {
   return (
     <>
       <PageHeader />
-      <div className="flex flex-1 flex-col gap-4 p-4 pt-0 overflow-hidden">
+      <div className="flex flex-1 flex-col gap-4 p-4 pt-5 overflow-hidden">
         {state.data ? (
           <div className="overflow-x-auto">
             <CustomerReportView marketSize={state.data.marketSize} validIndustry={state.data.validIndustry} />
