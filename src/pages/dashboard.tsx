@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Form } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
 import { useAppDispatch } from '@/redux/hooks';
 import { addNewSegment } from '@/redux/slice/segment';
 import { useUser } from '@clerk/clerk-react';
@@ -35,6 +36,7 @@ const recentExamples = [
 ];
 
 export default function Dashboard() {
+  const { toast } = useToast();
   const dispatch = useAppDispatch();
   const { user } = useUser();
   const navigate = useNavigate();
@@ -101,6 +103,13 @@ export default function Dashboard() {
       form.reset();
       dispatch(addNewSegment(research.data.segment));
       await navigate(`/segments`);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (err) {
+      toast({
+        variant: 'destructive',
+        title: 'Uh oh! Something went wrong.',
+        description: 'There was a problem with your request.',
+      });
     } finally {
       setIsFinalLoading(false);
     }

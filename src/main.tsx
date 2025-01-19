@@ -7,6 +7,7 @@ import { Provider } from 'react-redux';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import AppLayout from './components/app-layout.js';
 import { ThemeProvider } from './components/theme-provider.js';
+import { Toaster } from './components/ui/toaster.js';
 import './index.css';
 import ProtectedRoute from './lib/protected-route.js';
 import Dashboard from './pages/dashboard.js';
@@ -89,6 +90,7 @@ if (rootElement) {
         <QueryClientProvider client={queryClient}>
           <ThemeProvider storageKey="vite-ui-theme">
             <RouterProvider router={router} />
+            <Toaster />
           </ThemeProvider>
         </QueryClientProvider>
       </Provider>
