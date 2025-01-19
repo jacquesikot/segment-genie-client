@@ -1,7 +1,4 @@
-'use client';
-
 import { Segment } from '@/api/segment';
-// import { Segment } from '@/api/segment';
 import { FolderSearch, HeartCrack, Hourglass, MoreHorizontal, StarOff, Trash2 } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import {
@@ -69,7 +66,7 @@ export function NavSegments({ segments, isLoading }: { segments: Segment[]; isLo
       ) : !isLoading ? (
         <div className="flex flex-col items-center justify-center text-center p-4">
           <HeartCrack className="mb-2 h-12 w-12 text-muted-foreground" />
-          <p className="text-lg font-medium text-muted-foreground">No Segments Yet</p>
+          <p className="text-lg font-medium text-muted-foreground">No Favorites Yet</p>
           <p className="text-sm text-muted-foreground">Create a new segment to see it here.</p>
         </div>
       ) : (
