@@ -1,3 +1,4 @@
+import { researchInputForm } from '@/pages/dashboard';
 import client from './client';
 import type { Segment } from './segment';
 import { z } from 'zod';
@@ -163,4 +164,9 @@ export interface ResearchReport {
 export const startNewResearch = async (data: NewResearch): Promise<NewResearchResponse> => {
   const res = await client.post('/research', data);
   return res.data;
+};
+
+export const getResearchInput = async (query: string): Promise<z.infer<typeof researchInputForm>> => {
+  const res = await client.post('/research/input', { query });
+  return res.data.data;
 };

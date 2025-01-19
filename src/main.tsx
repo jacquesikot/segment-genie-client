@@ -6,15 +6,15 @@ import ReactDOM from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import AppLayout from './components/app-layout.js';
+import { ThemeProvider } from './components/theme-provider.js';
 import './index.css';
 import ProtectedRoute from './lib/protected-route.js';
 import Dashboard from './pages/dashboard.js';
 import { ErrorPage } from './pages/error.js';
-import NewSegment from './pages/new-segment';
 import { NotFound } from './pages/not-found.js';
 import Segment from './pages/segment.js';
+import Segments from './pages/segments.js';
 import { store } from './redux/store';
-import { ThemeProvider } from './components/theme-provider.js';
 
 const queryClient = new QueryClient();
 
@@ -60,10 +60,10 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: '/new-segment',
+        path: 'segments',
         element: (
           <ProtectedRoute>
-            <NewSegment />
+            <Segments />
           </ProtectedRoute>
         ),
       },

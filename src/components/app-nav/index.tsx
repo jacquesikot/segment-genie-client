@@ -1,6 +1,7 @@
 import { Segment } from '@/api/segment';
-import { Command, Home, Plus } from 'lucide-react';
+import { Command, Home, Layers } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
+import { ModeToggle } from '../mode-toggle';
 import {
   Sidebar as CNSidebar,
   SidebarContent,
@@ -13,7 +14,6 @@ import {
 import { NavMain } from './nav-main';
 import { NavSegments } from './nav-segments';
 import { NavUser } from './nav-user';
-import { ModeToggle } from '../mode-toggle';
 
 const mainNavRoutes = {
   navMain: [
@@ -23,9 +23,9 @@ const mainNavRoutes = {
       icon: Home,
     },
     {
-      title: 'New Customer Segment',
-      url: '/new-segment',
-      icon: Plus,
+      title: 'Segments',
+      url: '/segments',
+      icon: Layers,
     },
   ],
 };
