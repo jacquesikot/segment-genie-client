@@ -106,7 +106,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="max-w-[1400px] mx-auto p-4 md:p-6 space-y-6">
+    <div className="flex w-[800px] flex-col align-middle flex-1  p-4 md:p-6 space-y-6 self-center">
       {/* Premium Banner */}
       <div className="bg-gradient-to-r from-indigo-500/10 to-purple-500/10 dark:from-indigo-500/20 dark:to-purple-500/20 rounded-lg p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-2 text-sm text-indigo-700 dark:text-indigo-300">
