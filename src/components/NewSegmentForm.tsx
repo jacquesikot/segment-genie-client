@@ -10,30 +10,6 @@ import { BarChart3, Info, Lightbulb, Users } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
 import { z } from 'zod';
 
-// interface FormValues {
-//   title: string;
-//   segment: string;
-//   painPoints: string;
-//   problem: string;
-//   solution: string;
-//   features: string;
-//   industry: string;
-//   competitors: string;
-//   channels: string;
-// }
-
-// const formSchema = z.object({
-//   title: z.string().min(2, { message: 'Title must be at least 2 characters' }),
-//   segment: z.string().min(2, { message: 'Segment must be at least 2 characters.' }),
-//   painPoints: z.string().min(5, { message: 'Pain Points must be at least 5 characters.' }),
-//   problem: z.string().min(5, { message: 'Problem must be at least 5 characters.' }),
-//   solution: z.string().min(5, { message: 'Solution must be at least 5 characters.' }),
-//   features: z.string().min(5, { message: 'Features must be at least 5 characters.' }),
-//   industry: z.string().min(2, { message: 'Industry must be at least 2 characters.' }),
-//   competitors: z.string().min(5, { message: 'Competitors must be at least 5 characters.' }),
-//   channels: z.string().min(5, { message: 'Channels must be at least 5 characters.' }),
-// });
-
 const FormTooltip = ({ content, children }: { content: string; children: React.ReactNode }) => (
   <TooltipProvider>
     <Tooltip>
@@ -51,57 +27,8 @@ interface Props {
 }
 
 export function NewSegmentForm({ form }: Props) {
-  // const dispatch = useAppDispatch();
-  // const { user } = useUser();
-  // const navigate = useNavigate();
-  // const [isLoading, setIsLoading] = useState(false);
-
-  // const onSubmit = async (values: FormValues) => {
-  //   try {
-  //     setIsLoading(true);
-  //     const research = await startNewResearch({
-  //       title: values.title,
-  //       userId: user!.id,
-  //       input: {
-  //         customerProfile: {
-  //           segment: values.segment,
-  //           painPoints: values.painPoints,
-  //         },
-  //         solutionOverview: {
-  //           problemToSolve: values.problem,
-  //           solutionOffered: values.solution,
-  //           uniqueFeatures: values.features,
-  //         },
-  //         marketContext: {
-  //           industry: values.industry,
-  //           competitors: values.competitors,
-  //           channels: values.channels,
-  //         },
-  //       },
-  //     });
-
-  //     form.reset();
-  //     dispatch(addNewSegment(research.data.segment));
-  //     await navigate(`/segment/${research.data.segment._id}`);
-  //   } catch (error) {
-  //     console.error('Error submitting form:', error);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
-
   return (
     <Card className="w-[800px] shadow-lg">
-      {/* {isLoading && (
-        <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center">
-          <div className="flex flex-col items-center space-y-4">
-            <Loader2 className="h-12 w-12 animate-spin text-primary" />
-            <p className="text-lg font-medium text-primary">Generating Customer Report...</p>
-            <p className="text-sm text-muted-foreground">This may take a few moments</p>
-          </div>
-        </div>
-      )} */}
-
       <CardContent className="p-6">
         {/* Customer Profile Section */}
         <div className="space-y-6">

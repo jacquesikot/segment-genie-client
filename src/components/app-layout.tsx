@@ -1,13 +1,13 @@
 import { getUserSegments, Segment } from '@/api/segment';
 import { keys, storage } from '@/lib/storage';
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
+import { setSegments } from '@/redux/slice/segment';
 import { useAuth, useUser } from '@clerk/clerk-react';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import AppNav from './app-nav';
 import { SidebarInset, SidebarProvider } from './ui/sidebar';
-import { useAppDispatch, useAppSelector } from '@/redux/hooks';
-import { setSegments } from '@/redux/slice/segment';
 
 interface UserData {
   email: string | undefined;

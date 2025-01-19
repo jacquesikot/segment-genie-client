@@ -1,10 +1,8 @@
 import { ResearchReport, WSEvent } from '@/api/research';
 import { getSegment } from '@/api/segment';
 import CustomerReportView from '@/components/CustomerReportView';
+import PageHeader from '@/components/page-header';
 import SegmentLoader from '@/components/SegmentLoader';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from '@/components/ui/breadcrumb';
-import { Separator } from '@/components/ui/separator';
-import { SidebarTrigger } from '@/components/ui/sidebar';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
@@ -91,19 +89,7 @@ export default function Segment() {
 
   return (
     <>
-      <header className="flex h-16 shrink-0 items-center gap-2">
-        <div className="flex items-center gap-2 px-4">
-          <SidebarTrigger className="ml-1" />
-          <Separator orientation="vertical" className="mr-2 h-4" />
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbPage className="line-clamp-1">{segment?.title}</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
-      </header>
+      <PageHeader />
       <div className="flex flex-1 flex-col gap-4 p-4 pt-0 overflow-hidden">
         {state.data ? (
           <div className="overflow-x-auto">

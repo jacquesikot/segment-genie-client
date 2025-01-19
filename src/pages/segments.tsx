@@ -1,4 +1,5 @@
 import { getUserSegments } from '@/api/segment';
+import PageHeader from '@/components/page-header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -138,36 +139,39 @@ const SegmentsPage = () => {
   });
 
   return (
-    <div className="max-w-[1400px] mx-auto p-4 md:p-6 space-y-6">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-semibold">Your Segments</h1>
-          <p className="text-muted-foreground">View and manage your market segment analyses</p>
+    <>
+      <PageHeader />
+      <div className="max-w-[1400px] mx-auto p-4 md:p-6 space-y-6">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-3xl font-semibold">Your Segments</h1>
+            <p className="text-muted-foreground">View and manage your market segment analyses</p>
+          </div>
+          <Button onClick={() => navigate('/')} className="bg-primary hover:bg-primary/90" disabled={isLoading}>
+            {isLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <>
+                <Plus className="mr-2 h-4 w-4" />
+                New Segment
+              </>
+            )}
+          </Button>
         </div>
-        <Button onClick={() => navigate('/')} className="bg-primary hover:bg-primary/90" disabled={isLoading}>
-          {isLoading ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <>
-              <Plus className="mr-2 h-4 w-4" />
-              New Segment
-            </>
-          )}
-        </Button>
-      </div>
 
-      {isLoading ? (
-        <LoadingState />
-      ) : (segments || []).length === 0 ? (
-        <EmptyState />
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {(segments || []).map((segment) => (
-            <SegmentCard key={segment._id} segment={segment} />
-          ))}
-        </div>
-      )}
-    </div>
+        {isLoading ? (
+          <LoadingState />
+        ) : (segments || []).length === 0 ? (
+          <EmptyState />
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {(segments || []).map((segment) => (
+              <SegmentCard key={segment._id} segment={segment} />
+            ))}
+          </div>
+        )}
+      </div>
+    </>
   );
 };
 

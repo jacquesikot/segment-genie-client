@@ -1,7 +1,6 @@
 import { Segment } from '@/api/segment';
 import { Command, Home, Layers } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
-import { ModeToggle } from '../mode-toggle';
 import {
   Sidebar as CNSidebar,
   SidebarContent,
@@ -58,7 +57,6 @@ function AppNav({ segments, isLoading, ...props }: Props) {
                 </div>
               </a>
             </SidebarMenuButton>
-            <ModeToggle />
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
