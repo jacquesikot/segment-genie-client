@@ -14,6 +14,7 @@ import NewSegment from './pages/new-segment';
 import { NotFound } from './pages/not-found.js';
 import Segment from './pages/segment.js';
 import { store } from './redux/store';
+import { ThemeProvider } from './components/theme-provider.js';
 
 const queryClient = new QueryClient();
 
@@ -86,7 +87,9 @@ if (rootElement) {
     <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
       <Provider store={store}>
         <QueryClientProvider client={queryClient}>
-          <RouterProvider router={router} />
+          <ThemeProvider storageKey="vite-ui-theme">
+            <RouterProvider router={router} />
+          </ThemeProvider>
         </QueryClientProvider>
       </Provider>
     </ClerkProvider>

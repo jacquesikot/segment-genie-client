@@ -141,9 +141,22 @@ export interface WSEvent {
   data?: ResearchReport | null;
 }
 
-export type MarketSize = z.infer<typeof marketSizeSchema>;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const industryValidationSchema = z.object({
+  suggestedIndustry: z.string(),
+  alternativeClassifications: z.array(z.string()),
+  industryConfidence: z.number().min(0).max(1),
+  naicsCode: z
+    .string()
+    .regex(/^\d{2,6}$/)
+    .optional(),
+  explanation: z.string().min(1),
+});
 
+export type MarketSize = z.infer<typeof marketSizeSchema>;
+export type ValidIndustry = z.infer<typeof industryValidationSchema>;
 export interface ResearchReport {
+  validIndustry: ValidIndustry;
   marketSize: MarketSize;
 }
 

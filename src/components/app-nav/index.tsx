@@ -13,6 +13,7 @@ import {
 import { NavMain } from './nav-main';
 import { NavSegments } from './nav-segments';
 import { NavUser } from './nav-user';
+import { ModeToggle } from '../mode-toggle';
 
 const mainNavRoutes = {
   navMain: [
@@ -45,9 +46,9 @@ function AppNav({ segments, isLoading, ...props }: Props) {
     <CNSidebar variant="inset" {...props}>
       <SidebarHeader>
         <SidebarMenu>
-          <SidebarMenuItem>
+          <SidebarMenuItem className="flex items-center justify-between">
             <SidebarMenuButton size="lg" asChild>
-              <a href="#">
+              <a href="#" className="flex items-center space-x-2">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                   <Command className="size-4" />
                 </div>
@@ -57,6 +58,7 @@ function AppNav({ segments, isLoading, ...props }: Props) {
                 </div>
               </a>
             </SidebarMenuButton>
+            <ModeToggle />
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>

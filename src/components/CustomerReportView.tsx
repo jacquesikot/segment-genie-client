@@ -1,12 +1,13 @@
-import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ResearchReport } from '@/api/research';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { CircleDollarSign, TrendingUp, Users, Info, ExternalLink } from 'lucide-react';
-import { Progress } from '@/components/ui/progress';
-import { MarketSize } from '@/api/research';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
+import { Progress } from '@/components/ui/progress';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Building2, CheckCircle2, CircleDollarSign, ExternalLink, Info, TrendingUp, Users } from 'lucide-react';
+import React from 'react';
+import { Separator } from '@/components/ui/separator';
 
 const formatCurrency = (value: number): string => {
   return new Intl.NumberFormat('en-US', {
@@ -23,7 +24,7 @@ const ProgressWithLabel: React.FC<{ value: number; total: number; label: string 
     <HoverCard>
       <HoverCardTrigger asChild>
         <div className="space-y-2">
-          <div className="flex justify-between text-sm text-gray-500">
+          <div className="flex justify-between text-sm text-muted-foreground">
             <span>{label}</span>
             <span>{percentage.toFixed(1)}% of total</span>
           </div>
@@ -33,7 +34,7 @@ const ProgressWithLabel: React.FC<{ value: number; total: number; label: string 
       <HoverCardContent className="w-80">
         <div className="space-y-2">
           <h4 className="font-semibold">Market Share Details</h4>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted-foreground">
             {formatCurrency(value)} out of {formatCurrency(total)}
           </p>
           <p className="text-sm">This represents the portion of the market that {label.toLowerCase()} encompasses.</p>
@@ -43,16 +44,77 @@ const ProgressWithLabel: React.FC<{ value: number; total: number; label: string 
   );
 };
 
-const CustomerReportView: React.FC<{ marketSize: MarketSize }> = ({ marketSize }) => {
+const CustomerReportView: React.FC<ResearchReport> = ({ marketSize, validIndustry }) => {
   const lastUpdated = new Date(marketSize.metadata.lastUpdated).toDateString();
 
   return (
     <TooltipProvider>
-      <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
+      <div className="p-6 space-y-6 bg-background/50 min-h-screen">
+        {/* Industry Section */}
+        <Card className="border-l-4 border-l-blue-500">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Building2 className="w-6 h-6 text-blue-500" />
+                <div>
+                  <CardTitle>Industry Classification</CardTitle>
+                  <CardDescription>Market Segmentation and Analysis</CardDescription>
+                </div>
+              </div>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Badge
+                    variant={validIndustry.industryConfidence > 0.7 ? 'default' : 'secondary'}
+                    className="flex items-center gap-1 cursor-help"
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    Confidence: {(validIndustry.industryConfidence * 100).toFixed(0)}%
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="w-64">
+                    Confidence level in the industry classification based on market research and data analysis
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground">Primary Classification</div>
+                  <div className="text-lg font-semibold">{validIndustry.suggestedIndustry}</div>
+                  {validIndustry.naicsCode && (
+                    <div className="flex items-center gap-2 mt-1">
+                      <Badge variant="outline">NAICS: {validIndustry.naicsCode}</Badge>
+                    </div>
+                  )}
+                </div>
+                <Separator />
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground mb-2">Alternative Classifications</div>
+                  <div className="flex flex-wrap gap-2">
+                    {validIndustry.alternativeClassifications.map((classification, index) => (
+                      <Badge key={index} variant="secondary">
+                        {classification}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div>
+                <div className="text-sm font-medium text-muted-foreground mb-2">Industry Analysis</div>
+                <p className="text-sm text-muted-foreground/90 leading-relaxed">{validIndustry.explanation}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Market Size Analysis</h1>
-            <p className="text-gray-500">Last updated: {lastUpdated}</p>
+            <h1 className="text-3xl font-bold">Market Size Analysis</h1>
+            <p className="text-muted-foreground">Last updated: {lastUpdated}</p>
           </div>
           <div className="flex gap-2">
             <Tooltip>
@@ -64,8 +126,7 @@ const CustomerReportView: React.FC<{ marketSize: MarketSize }> = ({ marketSize }
               </TooltipTrigger>
               <TooltipContent>
                 <p className="w-64">
-                  This score reflects the reliability of industry data and market research used in this analysis. Higher
-                  scores indicate more reliable market predictions.
+                  This score reflects the reliability of industry data and market research used in this analysis.
                 </p>
               </TooltipContent>
             </Tooltip>
@@ -77,17 +138,14 @@ const CustomerReportView: React.FC<{ marketSize: MarketSize }> = ({ marketSize }
                 </Badge>
               </TooltipTrigger>
               <TooltipContent>
-                <p className="w-64">
-                  Indicates the completeness of available market data. Higher percentages suggest more comprehensive
-                  market coverage.
-                </p>
+                <p className="w-64">Indicates the completeness of available market data.</p>
               </TooltipContent>
             </Tooltip>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="relative overflow-hidden">
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <CircleDollarSign className="w-5 h-5 text-blue-500" />
@@ -97,14 +155,18 @@ const CustomerReportView: React.FC<{ marketSize: MarketSize }> = ({ marketSize }
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="text-3xl font-bold text-blue-600">{formatCurrency(marketSize.tam.revenue.value!)}</div>
+                <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+                  {formatCurrency(marketSize.tam.revenue.value!)}
+                </div>
                 {marketSize.tam.growthRate && (
                   <div className="flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4 text-green-500" />
-                    <span className="text-sm text-green-600">Growth Rate: {marketSize.tam.growthRate}</span>
+                    <TrendingUp className="w-4 h-4 text-green-500 dark:text-green-400" />
+                    <span className="text-sm text-green-600 dark:text-green-400">
+                      Growth Rate: {marketSize.tam.growthRate}
+                    </span>
                   </div>
                 )}
-                <p className="text-sm text-gray-600">{marketSize.tam.explanation}</p>
+                <p className="text-sm text-muted-foreground">{marketSize.tam.explanation}</p>
               </div>
             </CardContent>
           </Card>
@@ -119,7 +181,7 @@ const CustomerReportView: React.FC<{ marketSize: MarketSize }> = ({ marketSize }
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="text-3xl font-bold text-purple-600">
+                <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">
                   {formatCurrency(marketSize.sam.revenue.value!)}
                 </div>
                 <ProgressWithLabel
@@ -127,7 +189,7 @@ const CustomerReportView: React.FC<{ marketSize: MarketSize }> = ({ marketSize }
                   total={marketSize.tam.revenue.value!}
                   label="Serviceable Market"
                 />
-                <p className="text-sm text-gray-600">{marketSize.sam.explanation}</p>
+                <p className="text-sm text-muted-foreground">{marketSize.sam.explanation}</p>
                 {marketSize.sam.segmentationCriteria && (
                   <Alert>
                     <AlertDescription>{marketSize.sam.segmentationCriteria}</AlertDescription>
@@ -147,16 +209,18 @@ const CustomerReportView: React.FC<{ marketSize: MarketSize }> = ({ marketSize }
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="text-3xl font-bold text-green-600">{formatCurrency(marketSize.som.revenue.value!)}</div>
+                <div className="text-3xl font-bold text-green-600 dark:text-green-400">
+                  {formatCurrency(marketSize.som.revenue.value!)}
+                </div>
                 <ProgressWithLabel
                   value={marketSize.som.revenue.value!}
                   total={marketSize.sam.revenue.value!}
                   label="Obtainable Market"
                 />
-                <p className="text-sm text-gray-600">{marketSize.som.explanation}</p>
+                <p className="text-sm text-muted-foreground">{marketSize.som.explanation}</p>
                 {marketSize.som.marketSharePercentage && (
                   <div className="flex items-center gap-2 mt-2">
-                    <Badge variant="outline" className="text-green-600">
+                    <Badge variant="outline" className="text-green-600 dark:text-green-400">
                       Target Market Share: {marketSize.som.marketSharePercentage}%
                     </Badge>
                   </div>
@@ -176,7 +240,7 @@ const CustomerReportView: React.FC<{ marketSize: MarketSize }> = ({ marketSize }
               {marketSize.metadata.sources.map((source, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                  className="flex items-center justify-between p-4 bg-muted rounded-lg hover:bg-muted/80 transition-colors"
                 >
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
@@ -185,12 +249,12 @@ const CustomerReportView: React.FC<{ marketSize: MarketSize }> = ({ marketSize }
                         href={source.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline"
+                        className="text-blue-600 hover:underline dark:text-blue-400"
                       >
                         {source.url}
                       </a>
                     </div>
-                    <div className="text-sm text-gray-500 mt-1">
+                    <div className="text-sm text-muted-foreground mt-1">
                       Published: {new Date(source.datePublished!).toLocaleDateString()}
                     </div>
                   </div>
