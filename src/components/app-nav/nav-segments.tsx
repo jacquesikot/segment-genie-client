@@ -24,6 +24,39 @@ export function NavSegments({ segments, isLoading }: { segments: Segment[]; isLo
 
   const handleDelete = () => {};
 
+  const renderEmpty = () => (
+    <div className="flex flex-col items-center justify-center p-8 space-y-4">
+      <div className="relative">
+        <div className="absolute -inset-1 rounded-full animate-pulse bg-muted"></div>
+        <div className="relative bg-background rounded-full p-3">
+          <HeartCrack className="h-8 w-8 text-muted-foreground" />
+        </div>
+      </div>
+      <div className="space-y-2 text-center">
+        <h3 className="font-semibold text-foreground">No Favorites Yet</h3>
+        <p className="text-sm text-muted-foreground">Start adding segments to your favorites</p>
+      </div>
+    </div>
+  );
+
+  const renderLoading = () => (
+    <div className="flex flex-col items-center justify-center p-8 space-y-4">
+      <div className="relative">
+        <div className="absolute inset-0 rounded-full animate-ping opacity-75 bg-indigo-100 dark:bg-indigo-900/50"></div>
+        <div className="relative bg-background rounded-full p-3">
+          <Hourglass className="h-8 w-8 text-indigo-600 dark:text-indigo-400 animate-pulse" />
+        </div>
+      </div>
+      <div className="space-y-1.5 text-center">
+        <h3 className="font-semibold text-foreground animate-pulse">Loading Segments</h3>
+        <div className="flex flex-col items-center gap-2">
+          <div className="h-2 w-24 bg-muted rounded animate-pulse"></div>
+          <div className="h-2 w-32 bg-muted rounded animate-pulse"></div>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarGroupLabel>Favorites 🚀</SidebarGroupLabel>
@@ -64,16 +97,9 @@ export function NavSegments({ segments, isLoading }: { segments: Segment[]; isLo
           ))}
         </SidebarMenu>
       ) : !isLoading ? (
-        <div className="flex flex-col items-center justify-center text-center p-4">
-          <HeartCrack className="mb-2 h-12 w-12 text-muted-foreground" />
-          <p className="text-lg font-medium text-muted-foreground">No Favorites Yet</p>
-          <p className="text-sm text-muted-foreground">Create a new segment to see it here.</p>
-        </div>
+        renderEmpty()
       ) : (
-        <div className="flex flex-col items-center justify-center text-center p-4">
-          <Hourglass className="mb-2 h-12 w-12 text-muted-foreground" />
-          <p className="text-lg font-medium text-muted-foreground">Loading segments</p>
-        </div>
+        renderLoading()
       )}
     </SidebarGroup>
   );

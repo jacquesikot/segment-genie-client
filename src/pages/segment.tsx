@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 interface SegmentStatus {
-  progress: string;
+  progress: number;
   message: string;
   isComplete: boolean;
   data?: ResearchReport | null;
@@ -34,7 +34,7 @@ const useEventSource = (url: string, onMessage: (data: WSEvent) => void) => {
 export default function Segment() {
   const { id } = useParams<{ id: string }>();
   const [state, setState] = useState<SegmentStatus>({
-    progress: '0',
+    progress: 0,
     message: 'Fetching Segment...',
     isComplete: false,
     data: null,
@@ -80,12 +80,16 @@ export default function Segment() {
     if (data.segmentId === id) {
       setState((prev) => ({
         ...prev,
-        progress: data.progress.toString(),
+        progress: data.progress,
         message: data.status,
         data: data.data,
       }));
     }
   });
+
+  useEffect(() => {
+    if (segment === null) throw new Error('Segment not found');
+  }, [segment]);
 
   return (
     <>
@@ -96,7 +100,11 @@ export default function Segment() {
             <CustomerReportView marketSize={state.data.marketSize} validIndustry={state.data.validIndustry} />
           </div>
         ) : (
-          <SegmentLoader progress={state.progress} statusText={state.message} />
+          <SegmentLoader
+            progress={state.progress.toString()}
+            statusText={state.message}
+            error={state.progress < 0 ? state.message : undefined}
+          />
         )}
       </div>
     </>

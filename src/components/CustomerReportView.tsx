@@ -184,11 +184,11 @@ const CustomerReportView: React.FC<ResearchReport> = ({ marketSize, validIndustr
                       <div>
                         <div className="text-sm font-medium text-muted-foreground">Primary Classification</div>
                         <div className="text-lg font-semibold">{validIndustry.suggestedIndustry}</div>
-                        {validIndustry.naicsCode && (
+                        {/* {validIndustry.naicsCode && (
                           <div className="flex items-center gap-2 mt-1">
                             <Badge variant="outline">NAICS: {validIndustry.naicsCode}</Badge>
                           </div>
-                        )}
+                        )} */}
                       </div>
                       <Separator />
                       <div>

@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { keys, storage } from '@/lib/storage';
 import { useQuery } from '@tanstack/react-query';
-import { BarChart, CheckCircle2, Clock, Loader2, Plus, Sparkles } from 'lucide-react';
+import { AlertCircle, BarChart, CheckCircle2, CircleAlert, Clock, Loader2, Plus, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 // Helper function to format date
@@ -62,8 +62,11 @@ const SegmentCard = ({ segment }: any) => {
   const getStatusIcon = () => {
     if (segment.status.isComplete) {
       return <CheckCircle2 className="h-5 w-5 text-green-500" />;
+    } else if (segment.status.progress < 0) {
+      return <CircleAlert className="h-5 w-5 text-red-500" />;
+    } else {
+      return <Clock className="h-5 w-5 text-amber-500 animate-pulse" />;
     }
-    return <Clock className="h-5 w-5 text-amber-500 animate-pulse" />;
   };
 
   return (
@@ -97,6 +100,11 @@ const SegmentCard = ({ segment }: any) => {
             <Button variant="ghost" size="sm" className="hover:text-primary hover:bg-primary/10">
               View Details →
             </Button>
+          </div>
+        ) : segment.status.progress < 0 ? (
+          <div className="flex items-center space-x-2 mt-4 text-sm text-muted-foreground">
+            <AlertCircle className="h-4 w-4" />
+            <span>{segment.status.message}</span>
           </div>
         ) : (
           <div className="flex items-center space-x-2 mt-4 text-sm text-muted-foreground">
