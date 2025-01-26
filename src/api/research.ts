@@ -41,6 +41,7 @@ const marketSizeSchema = z.object({
         .array(
           z.object({
             url: z.string().describe('Full URL of the source document or webpage'),
+            title: z.string(),
             credibilityScore: z.number().min(0).max(1).describe('Assessment of source reliability and authority (0-1)'),
             relevanceScore: z
               .number()

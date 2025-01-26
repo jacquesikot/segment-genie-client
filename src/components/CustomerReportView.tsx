@@ -346,6 +346,74 @@ const CustomerReportView: React.FC<ResearchReport> = ({ marketSize, validIndustr
                         className="flex items-center justify-between p-4 bg-muted rounded-lg hover:bg-muted/80 transition-colors"
                       >
                         <div className="flex-1">
+                          <div className="flex items-center justify-between">
+                            <div className="space-y-1">
+                              <div className="font-medium">{source.title}</div>
+                              {source.datePublished && (
+                                <div className="text-sm text-muted-foreground">
+                                  Published: {new Date(source.datePublished).toLocaleDateString()}
+                                </div>
+                              )}
+                            </div>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <a
+                                  href={source.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="ml-2 p-2 rounded-full hover:bg-background transition-colors"
+                                  aria-label="Open source link"
+                                >
+                                  <ExternalLink className="w-4 h-4 text-blue-500" />
+                                </a>
+                              </TooltipTrigger>
+                              <TooltipContent side="left">
+                                <p>View source material</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </div>
+                        </div>
+                        <div className="flex gap-2 ml-4">
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Badge variant="secondary" className="cursor-help">
+                                Credibility: {(source.credibilityScore * 100).toFixed(0)}%
+                              </Badge>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Reliability score based on source reputation and data quality</p>
+                            </TooltipContent>
+                          </Tooltip>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Badge variant="secondary" className="cursor-help">
+                                Relevance: {(source.relevanceScore * 100).toFixed(0)}%
+                              </Badge>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>How closely the source data matches our market analysis needs</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* <Card>
+                <CardHeader>
+                  <CardTitle>Data Sources</CardTitle>
+                  <CardDescription>Reference Materials and Confidence Scores</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {marketSize.metadata.sources.map((source, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between p-4 bg-muted rounded-lg hover:bg-muted/80 transition-colors"
+                      >
+                        <div className="flex-1">
                           <div className="flex items-center gap-2">
                             <ExternalLink className="w-4 h-4 text-blue-500" />
                             <a
@@ -387,7 +455,7 @@ const CustomerReportView: React.FC<ResearchReport> = ({ marketSize, validIndustr
                     ))}
                   </div>
                 </CardContent>
-              </Card>
+              </Card> */}
             </div>
           ) : (
             <ComingSoonSection title={SECTIONS.find((s) => s.id === activeSection)?.label || ''} />

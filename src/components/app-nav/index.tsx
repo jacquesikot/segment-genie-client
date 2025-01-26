@@ -47,7 +47,7 @@ function AppNav({ segments, isLoading, ...props }: Props) {
         <SidebarMenu>
           <SidebarMenuItem className="flex items-center justify-between">
             <SidebarMenuButton size="lg" asChild>
-              <a href="#" className="flex items-center space-x-2">
+              <a href="/" className="flex items-center space-x-2">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                   <Command className="size-4" />
                 </div>
