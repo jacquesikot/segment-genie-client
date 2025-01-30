@@ -100,7 +100,7 @@ export default function SegmentLoader({
           {/* Title Section */}
           <div className="text-center space-y-1.5">
             <CardTitle className={`text-xl font-semibold ${getStatusColor()}`}>
-              {isComplete ? `${title} Ready` : `Generating Your ${title}`}
+              {isComplete ? `${title} Ready` : error ? `Error generating ${title}` : `Generating ${title}`}
             </CardTitle>
             {!error && !isComplete && (
               <p className="text-sm text-gray-600 dark:text-gray-400">Please wait while we process your data</p>

@@ -1,6 +1,6 @@
 import { researchInputForm } from '@/pages/dashboard';
 import client from './client';
-import type { Segment } from './segment';
+import type { Segment, SegmentStatus } from './segment';
 import { z } from 'zod';
 
 const revenueSchema = z.object({
@@ -106,26 +106,28 @@ const marketSizeSchema = z.object({
     .describe('Serviceable Obtainable Market (SOM) metrics and analysis'),
 });
 
+export interface ResearchInput {
+  customerProfile: {
+    segment: string;
+    demographics?: string;
+    painPoints?: string;
+  };
+  solutionOverview: {
+    problemToSolve: string;
+    solutionOffered: string;
+    uniqueFeatures?: string;
+  };
+  marketContext: {
+    industry?: string;
+    competitors?: string;
+    channels?: string;
+  };
+}
+
 export interface NewResearch {
   title: string;
   userId: string;
-  input: {
-    customerProfile: {
-      segment: string;
-      demographics?: string;
-      painPoints?: string;
-    };
-    solutionOverview: {
-      problemToSolve: string;
-      solutionOffered: string;
-      uniqueFeatures?: string;
-    };
-    marketContext: {
-      industry?: string;
-      competitors?: string;
-      channels?: string;
-    };
-  };
+  input: ResearchInput;
 }
 
 interface NewResearchResponse {
@@ -136,11 +138,8 @@ interface NewResearchResponse {
 }
 
 export interface WSEvent {
-  jobId: string;
   segmentId: string;
-  progress: number;
-  status: string;
-  data?: ResearchReport | null;
+  status: SegmentStatus;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -155,11 +154,89 @@ const industryValidationSchema = z.object({
   explanation: z.string().min(1),
 });
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const painPointsSchema = z.object({
+  metadata: z.object({
+    dataFreshness: z.string(),
+    sourceDiversity: z.number().min(0).max(1),
+    sentimentScore: z.number().min(-1).max(1),
+    validationScore: z.number().min(0).max(1),
+    totalSourcesAnalyzed: z.number(),
+    dateRange: z.object({
+      earliest: z.string(),
+      latest: z.string(),
+    }),
+    platformBreakdown: z.array(
+      z.object({
+        platform: z.string(),
+        sourceCount: z.number(),
+        averageEngagement: z.number(),
+      })
+    ),
+  }),
+  painPointClusters: z.array(
+    z.object({
+      clusterName: z.string(),
+      description: z.string(),
+      relatedPainPoints: z.array(z.string()),
+    })
+  ),
+  painPoints: z.array(
+    z.object({
+      id: z.string(),
+      description: z.string(),
+      frequency: z.enum(['Rare', 'Occasional', 'Common', 'Ubiquitous']),
+      intensity: z.number().min(1).max(5),
+      cluster: z.string(),
+      sources: z.array(
+        z.object({
+          url: z.string(),
+          excerpt: z.string(),
+          date: z.string(),
+          platform: z.string(),
+          authorType: z.enum(['User', 'Expert', 'Business', 'Unknown']),
+          engagement: z.object({
+            upvotes: z.number().optional(),
+            replies: z.number().optional(),
+            shares: z.number().optional(),
+          }),
+          sentiment: z.number().min(-1).max(1),
+        })
+      ),
+      emotions: z.array(z.string()),
+      keywords: z.array(z.string()),
+      impact: z.object({
+        businessSize: z.array(z.string()),
+        monetaryMentions: z.array(z.string()),
+        timeWasted: z.array(z.string()),
+      }),
+      existingSolutions: z.array(
+        z.object({
+          name: z.string(),
+          description: z.string(),
+          effectiveness: z.number().min(0).max(1),
+          limitations: z.array(z.string()),
+          sources: z.array(z.string()),
+        })
+      ),
+      workarounds: z.array(z.string()),
+      trends: z.object({
+        seasonal: z.boolean(),
+        increasing: z.boolean(),
+        geography: z.array(z.string()),
+      }),
+      confidence: z.number().min(0).max(1),
+    })
+  ),
+});
+
 export type MarketSize = z.infer<typeof marketSizeSchema>;
 export type ValidIndustry = z.infer<typeof industryValidationSchema>;
+export type PainPoints = z.infer<typeof painPointsSchema>;
 export interface ResearchReport {
   validIndustry: ValidIndustry;
   marketSize: MarketSize;
+  painPoints: PainPoints;
 }
 
 export const startNewResearch = async (data: NewResearch): Promise<NewResearchResponse> => {

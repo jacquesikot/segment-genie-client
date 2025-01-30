@@ -1,4 +1,4 @@
-import { getUserSegments } from '@/api/segment';
+import { getUserSegments, Segment } from '@/api/segment';
 import PageHeader from '@/components/page-header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -55,14 +55,13 @@ const LoadingState = () => {
   );
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const SegmentCard = ({ segment }: any) => {
+const SegmentCard = ({ segment }: { segment: Segment }) => {
   const navigate = useNavigate();
 
   const getStatusIcon = () => {
-    if (segment.status.isComplete) {
+    if (segment.status.marketSize.isComplete) {
       return <CheckCircle2 className="h-5 w-5 text-green-500" />;
-    } else if (segment.status.progress < 0) {
+    } else if (segment.status.marketSize.progress < 0) {
       return <CircleAlert className="h-5 w-5 text-red-500" />;
     } else {
       return <Clock className="h-5 w-5 text-amber-500 animate-pulse" />;
@@ -82,7 +81,9 @@ const SegmentCard = ({ segment }: any) => {
           </div>
           {getStatusIcon()}
         </div>
-        <p className="text-sm text-muted-foreground">{formatDate(segment.timestamp)}</p>
+        {segment.timestamp && (
+          <p className="text-sm text-muted-foreground">{formatDate(new Date(segment.timestamp).toDateString())}</p>
+        )}
       </CardHeader>
       <CardContent className="space-y-2">
         <div className="text-sm">
@@ -91,7 +92,7 @@ const SegmentCard = ({ segment }: any) => {
         <div className="text-sm">
           <span className="font-medium">Target Segment:</span> {segment.input.customerProfile.segment}
         </div>
-        {segment.status.isComplete ? (
+        {segment.status.marketSize.isComplete ? (
           <div className="flex items-center justify-between mt-4 text-sm">
             <div className="flex items-center space-x-1 text-green-600">
               <CheckCircle2 className="h-4 w-4" />
@@ -101,15 +102,15 @@ const SegmentCard = ({ segment }: any) => {
               View Details →
             </Button>
           </div>
-        ) : segment.status.progress < 0 ? (
+        ) : segment.status.marketSize.progress < 0 ? (
           <div className="flex items-center space-x-2 mt-4 text-sm text-muted-foreground">
             <AlertCircle className="h-4 w-4" />
-            <span>{segment.status.message}</span>
+            <span>{segment.status.marketSize.message}</span>
           </div>
         ) : (
           <div className="flex items-center space-x-2 mt-4 text-sm text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" />
-            <span>{segment.status.message}</span>
+            <span>{segment.status.marketSize.message}</span>
           </div>
         )}
       </CardContent>

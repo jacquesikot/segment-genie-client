@@ -1,18 +1,26 @@
 import client from './client';
-import type { NewResearch, ResearchReport } from './research';
+import type { ResearchInput, ResearchReport } from './research';
+
+export interface Status {
+  progress: number;
+  message: string;
+  isComplete: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  data?: any;
+}
+
+export interface SegmentStatus {
+  general: Status;
+  marketSize: Status;
+  painPoints: Status;
+}
 
 export interface Segment {
   _id: string;
   userId: string;
   title: string;
-  status: {
-    message: string;
-    progress: number;
-    isComplete: boolean;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    data?: any[];
-  };
-  input: NewResearch;
+  status: SegmentStatus;
+  input: ResearchInput;
   data?: ResearchReport;
   timestamp: Date;
 }
