@@ -13,6 +13,7 @@ import {
   ChevronDown,
   ChevronUp,
   Clock,
+  ExternalLink,
   Frown,
   Link2,
   MapPin,
@@ -87,11 +88,19 @@ const SourceList = ({ sources }: any) => (
     {sources.map((source: any, idx: number) => (
       <div key={idx} className="bg-muted rounded-lg p-3">
         <div className="flex items-start justify-between gap-4 mb-2">
-          <div className="flex items-center gap-2">
+          <a
+            href={source.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors group"
+          >
             <Link2 className="w-4 h-4" />
-            <span className="text-sm font-medium">{source.platform}</span>
-            <span className="text-sm text-muted-foreground">{new Date(source.date).toLocaleDateString()}</span>
-          </div>
+            <span>{source.platform}</span>
+            <span>•</span>
+            <span>{new Date(source.date).toLocaleDateString()}</span>
+            <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+          </a>
+
           <Badge variant="outline">{source.authorType}</Badge>
         </div>
         <p className="text-sm text-muted-foreground mb-2">"{source.excerpt}"</p>
