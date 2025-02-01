@@ -1,32 +1,33 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { PainPoints } from '@/api/research';
+import { Status } from '@/api/segment';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils';
 import {
   AlertCircle,
-  BarChart3,
+  ArrowUpRight,
+  BarChart,
   Brain,
   ChevronDown,
   ChevronUp,
-  Clock,
   ExternalLink,
+  Flame,
   Frown,
+  Info,
   Link2,
-  MapPin,
   Meh,
   SmilePlus,
-  TrendingDown,
   TrendingUp,
+  Users,
 } from 'lucide-react';
 import React from 'react';
 import SegmentLoader from './SegmentLoader';
-import { Status } from '@/api/segment';
+import { HoverCard, HoverCardTrigger, HoverCardContent } from './ui/hover-card';
 
-// Sentiment Indicator component remains the same
 const SentimentIndicator = ({ score }: any) => {
   const getSentimentInfo = (score: any) => {
     if (score >= 0.3) return { icon: SmilePlus, color: 'text-green-500', text: 'Positive' };
@@ -37,13 +38,13 @@ const SentimentIndicator = ({ score }: any) => {
   const { icon: Icon, color, text } = getSentimentInfo(score);
 
   return (
-    <div className="flex items-center gap-4 p-4 bg-muted rounded-lg">
-      <Icon className={`w-8 h-8 ${color}`} />
+    <div className="flex items-center gap-3 p-4 bg-background rounded-lg border">
+      <Icon className={`w-6 h-6 ${color}`} />
       <div className="space-y-1">
-        <div className="text-sm font-medium">Overall Sentiment: {text}</div>
+        <div className="text-sm font-medium">{text} Sentiment</div>
         <div className="flex items-center gap-2">
-          <Progress value={(score + 1) * 50} className="w-32 h-2" />
-          <span className="text-sm text-muted-foreground">{score.toFixed(2)}</span>
+          <Progress value={(score + 1) * 50} className="w-24 h-2" />
+          <span className="text-xs font-mono text-muted-foreground">{score.toFixed(2)}</span>
         </div>
       </div>
     </div>
@@ -52,14 +53,17 @@ const SentimentIndicator = ({ score }: any) => {
 
 const PlatformBreakdown = ({ platforms }: any) => (
   <div className="space-y-3">
-    {platforms.map((platform: any, index: number) => (
-      <div key={index} className="flex items-center justify-between">
-        <span className="text-sm">{platform.platform}</span>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-muted-foreground">{platform.sourceCount} sources</span>
+    {platforms.map((platform: any) => (
+      <div key={platform.platform} className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-2 text-sm w-32">
+          <span className="text-muted-foreground">{platform.platform}</span>
+          <span className="text-muted-foreground/70">({platform.sourceCount})</span>
+        </div>
+        <div className="flex-1">
           <Progress
             value={(platform.sourceCount / Math.max(...platforms.map((p: any) => p.sourceCount))) * 100}
-            className="w-24 h-2"
+            className="h-2"
+            // indicatorClassName="bg-gradient-to-r from-blue-500 to-purple-500"
           />
         </div>
       </div>
@@ -67,135 +71,126 @@ const PlatformBreakdown = ({ platforms }: any) => (
   </div>
 );
 
-const ClusterCard = ({ cluster }: any) => (
-  <Card className="bg-muted/50">
-    <CardContent className="p-4">
-      <h4 className="font-medium mb-2">{cluster.clusterName}</h4>
-      <p className="text-sm text-muted-foreground mb-3">{cluster.description}</p>
-      <div className="flex flex-wrap gap-2">
-        {cluster.relatedPainPoints.map((point: any, idx: number) => (
-          <Badge key={idx} variant="secondary" className="text-xs">
-            {point}
-          </Badge>
-        ))}
-      </div>
-    </CardContent>
-  </Card>
-);
-
-const SourceList = ({ sources }: any) => (
-  <div className="space-y-3">
-    {sources.map((source: any, idx: number) => (
-      <div key={idx} className="bg-muted rounded-lg p-3">
-        <div className="flex items-start justify-between gap-4 mb-2">
-          <a
-            href={source.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors group"
-          >
-            <Link2 className="w-4 h-4" />
-            <span>{source.platform}</span>
-            <span>•</span>
-            <span>{new Date(source.date).toLocaleDateString()}</span>
-            <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-          </a>
-
-          <Badge variant="outline">{source.authorType}</Badge>
-        </div>
-        <p className="text-sm text-muted-foreground mb-2">"{source.excerpt}"</p>
-        <div className="flex items-center gap-4 text-sm">
-          {source.engagement.upvotes && <span className="text-muted-foreground">👍 {source.engagement.upvotes}</span>}
-          {source.engagement.replies && <span className="text-muted-foreground">💬 {source.engagement.replies}</span>}
-        </div>
-      </div>
-    ))}
+const ClusterChip = ({ cluster }: any) => (
+  <div className="p-3 bg-background rounded-lg border">
+    <div className="flex items-center gap-2 mb-2">
+      <Flame className="w-4 h-4 text-orange-500" />
+      <h4 className="font-medium text-sm">{cluster.clusterName}</h4>
+    </div>
+    <p className="text-sm text-muted-foreground mb-3">{cluster.description}</p>
+    <div className="flex flex-wrap gap-2">
+      {cluster.relatedPainPoints.map((point: any) => (
+        <Badge key={point} variant="outline" className="text-xs py-1 px-2 font-normal">
+          {point}
+        </Badge>
+      ))}
+    </div>
   </div>
 );
 
-const TrendInfo = ({ trends }: any) => (
-  <div className="flex flex-wrap gap-4">
-    {trends.seasonal && (
-      <Badge variant="outline" className="flex items-center gap-1">
-        <Clock className="w-3 h-3" /> Seasonal
+const SourceItem = ({ source }: any) => (
+  <div className="group bg-background rounded-lg border p-3 hover:border-primary/50 transition-colors">
+    <div className="flex items-start justify-between gap-2 mb-2">
+      <a
+        href={source.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center gap-2 text-sm hover:text-primary transition-colors"
+      >
+        <span className="inline-flex items-center gap-1.5">
+          <Link2 className="w-4 h-4 text-muted-foreground" />
+          <span className="font-medium">{source.platform}</span>
+        </span>
+        <span className="text-muted-foreground/70 text-xs">{new Date(source.date).toLocaleDateString()}</span>
+        <ExternalLink className="w-3 h-3 ml-1 text-muted-foreground/70" />
+      </a>
+      <Badge variant="outline" className="text-xs capitalize">
+        {source.authorType.toLowerCase()}
       </Badge>
-    )}
-    <Badge
-      variant="outline"
-      className={`flex items-center gap-1 ${trends.increasing ? 'text-green-500' : 'text-red-500'}`}
-    >
-      {trends.increasing ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-      {trends.increasing ? 'Increasing' : 'Decreasing'}
-    </Badge>
-    {trends.geography.length > 0 && (
-      <HoverCard>
-        <HoverCardTrigger>
-          <Badge variant="outline" className="flex items-center gap-1 cursor-help">
-            <MapPin className="w-3 h-3" />
-            {trends.geography.length} Regions
-          </Badge>
-        </HoverCardTrigger>
-        <HoverCardContent>
-          <div className="text-sm">{trends.geography.join(', ')}</div>
-        </HoverCardContent>
-      </HoverCard>
-    )}
+    </div>
+    <p className="text-sm text-muted-foreground line-clamp-2 mb-2">"{source.excerpt}"</p>
+    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+      {source.engagement.upvotes > 0 && (
+        <span className="flex items-center gap-1">
+          <TrendingUp className="w-3.5 h-3.5" /> {source.engagement.upvotes}
+        </span>
+      )}
+      <SentimentBadge score={source.sentiment} />
+    </div>
   </div>
 );
+
+const SentimentBadge = ({ score }: any) => {
+  const getSentimentColor = (score: number) => {
+    if (score >= 0.3) return 'bg-green-500/20 text-green-600';
+    if (score <= -0.3) return 'bg-red-500/20 text-red-600';
+    return 'bg-yellow-500/20 text-yellow-600';
+  };
+
+  return (
+    <span
+      className={cn('px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1', getSentimentColor(score))}
+    >
+      {score >= 0.3 ? 'Positive' : score <= -0.3 ? 'Negative' : 'Neutral'}
+    </span>
+  );
+};
 
 const PainPointCard = ({ point }: any) => {
   const [isExpanded, setIsExpanded] = React.useState(false);
 
   return (
-    <Card className="overflow-hidden transition-all duration-200">
-      <CardContent className="p-6">
-        <div className="flex gap-4">
-          <div className="rounded-full p-3 bg-muted h-fit">
-            <AlertCircle
-              className={`w-5 h-5 ${
+    <Card className="overflow-hidden transition-all duration-200 hover:border-primary/30">
+      <CardContent className="p-4">
+        <div className="flex gap-3">
+          <div className="flex flex-col items-center gap-2">
+            <div
+              className={cn(
+                'w-10 h-10 rounded-full flex items-center justify-center',
                 point.intensity >= 4.5
-                  ? 'text-red-500'
+                  ? 'bg-red-500/20 text-red-500'
                   : point.intensity >= 3.5
-                  ? 'text-orange-500'
-                  : point.intensity >= 2.5
-                  ? 'text-yellow-500'
-                  : 'text-blue-500'
-              }`}
-            />
+                  ? 'bg-orange-500/20 text-orange-500'
+                  : 'bg-blue-500/20 text-blue-500'
+              )}
+            >
+              <AlertCircle className="w-5 h-5" />
+            </div>
+            <Badge
+              variant="outline"
+              className={cn(
+                'text-xs py-1 px-2 h-auto',
+                point.frequency === 'Ubiquitous'
+                  ? 'border-red-500/30 text-red-600'
+                  : point.frequency === 'Common'
+                  ? 'border-orange-500/30 text-orange-600'
+                  : 'border-blue-500/30 text-blue-600'
+              )}
+            >
+              {point.frequency}
+            </Badge>
           </div>
-          <div className="space-y-4 w-full">
-            <div className="flex items-start justify-between gap-4">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-lg font-medium">{point.description}</h3>
-                  <Badge variant="outline" className="text-xs">
+
+          <div className="flex-1 space-y-3">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <h3 className="font-medium">{point.description}</h3>
+                <div className="flex items-center gap-2 mt-1">
+                  <Badge variant="outline" className="text-xs py-1 px-2">
                     {point.cluster}
                   </Badge>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Badge
-                    className={`
-                    ${
-                      point.frequency === 'Ubiquitous'
-                        ? 'bg-red-100 text-red-800'
-                        : point.frequency === 'Common'
-                        ? 'bg-orange-100 text-orange-800'
-                        : point.frequency === 'Occasional'
-                        ? 'bg-yellow-100 text-yellow-800'
-                        : 'bg-blue-100 text-blue-800'
-                    }
-                  `}
-                  >
-                    {point.frequency}
-                  </Badge>
-                  {point.emotions.map((emotion: any, idx: number) => (
-                    <Badge key={idx} variant="secondary">
-                      {emotion}
-                    </Badge>
-                  ))}
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <Users className="w-3.5 h-3.5" />
+                    {point.impact.businessSize.join(', ')}
+                  </div>
                 </div>
               </div>
-              <Button variant="ghost" size="sm" className="mt-1" onClick={() => setIsExpanded(!isExpanded)}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="mt-1 p-2 h-auto text-muted-foreground"
+                onClick={() => setIsExpanded(!isExpanded)}
+              >
                 {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
               </Button>
             </div>
@@ -204,82 +199,87 @@ const PainPointCard = ({ point }: any) => {
               <>
                 <Separator />
 
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <h4 className="font-medium mb-3">Impact Analysis</h4>
-                    <div className="space-y-3">
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="font-medium mb-2 flex items-center gap-2 text-sm">
+                        <BarChart className="w-4 h-4" />
+                        Impact Analysis
+                      </h4>
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2 text-sm">
+                          <Tooltip content="Estimated financial impact including potential losses, costs, or revenue impact">
+                            <span className="text-muted-foreground">Monetary Impact:</span>
+                          </Tooltip>
+                          <span className="font-medium text-red-500">{point.impact.monetaryMentions.join(', ')}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <Tooltip content="Estimated time wasted due to this issue, converted to business impact">
+                            <span className="text-muted-foreground">Time Wasted:</span>
+                          </Tooltip>
+                          <span className="font-medium">{point.impact.timeWasted.join(', ')}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="font-medium mb-2 flex items-center gap-2 text-sm">
+                        <TrendingUp className="w-4 h-4" />
+                        Trends & Patterns
+                      </h4>
+                      <div className="flex flex-wrap gap-2">
+                        <Badge
+                          variant="outline"
+                          className={cn(
+                            'text-xs py-1 px-2',
+                            point.trends.increasing
+                              ? 'text-green-500 border-green-500/30'
+                              : 'text-red-500 border-red-500/30'
+                          )}
+                        >
+                          {point.trends.increasing ? 'Increasing' : 'Decreasing'}
+                        </Badge>
+                        <Tooltip content="Statistical confidence in the accuracy of this data point">
+                          <Badge variant="outline" className="text-xs py-1 px-2">
+                            Confidence: {(point.confidence * 100).toFixed(0)}%
+                          </Badge>
+                        </Tooltip>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    {point.existingSolutions.length > 0 && (
                       <div>
-                        <h5 className="text-sm font-medium mb-2">Business Size Impact</h5>
-                        <div className="flex gap-2">
-                          {point.impact.businessSize.map((size: any, idx: number) => (
-                            <Badge key={idx} variant="outline">
-                              {size}
-                            </Badge>
+                        <h4 className="font-medium mb-2 flex items-center gap-2 text-sm">
+                          <ArrowUpRight className="w-4 h-4" />
+                          Existing Solutions
+                        </h4>
+                        <div className="space-y-2">
+                          {point.existingSolutions.map((solution: any) => (
+                            <div key={solution.name} className="bg-muted/30 rounded p-2">
+                              <div className="flex items-center justify-between">
+                                <span className="text-sm font-medium">{solution.name}</span>
+                                <Badge variant="outline" className="text-xs">
+                                  {(solution.effectiveness * 100).toFixed(0)}% Effective
+                                </Badge>
+                              </div>
+                              <p className="text-xs text-muted-foreground">{solution.description}</p>
+                            </div>
                           ))}
                         </div>
                       </div>
-                      {point.impact.monetaryMentions.length > 0 && (
-                        <div>
-                          <h5 className="text-sm font-medium mb-2">Monetary Impact</h5>
-                          <ul className="text-sm text-muted-foreground">
-                            {point.impact.monetaryMentions.map((mention: any, idx: number) => (
-                              <li key={idx}>{mention}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div>
-                    <h4 className="font-medium mb-3">Trends & Patterns</h4>
-                    <TrendInfo trends={point.trends} />
-                    <div className="mt-4">
-                      <Badge variant="outline" className="flex items-center gap-1">
-                        <BarChart3 className="w-3 h-3" />
-                        Confidence: {(point.confidence * 100).toFixed(0)}%
-                      </Badge>
-                    </div>
+                    )}
                   </div>
                 </div>
 
-                {point.existingSolutions.length > 0 && (
-                  <div>
-                    <h4 className="font-medium mb-3">Existing Solutions</h4>
-                    <div className="space-y-3">
-                      {point.existingSolutions.map((solution: any, idx: number) => (
-                        <div key={idx} className="bg-muted rounded-lg p-4">
-                          <div className="flex items-start justify-between gap-4">
-                            <div>
-                              <div className="flex items-center gap-2 mb-2">
-                                <TrendingUp className="w-4 h-4 text-green-500" />
-                                <span className="font-medium">{solution.name}</span>
-                              </div>
-                              <p className="text-sm text-muted-foreground">{solution.description}</p>
-                            </div>
-                            <Badge variant="outline">Effectiveness: {(solution.effectiveness * 100).toFixed(0)}%</Badge>
-                          </div>
-                          {solution.limitations.length > 0 && (
-                            <div className="mt-3 pt-3 border-t">
-                              <h6 className="text-sm font-medium mb-2">Limitations</h6>
-                              <div className="flex flex-wrap gap-2">
-                                {solution.limitations.map((limitation: any, lidx: number) => (
-                                  <Badge key={lidx} variant="secondary" className="text-xs">
-                                    {limitation}
-                                  </Badge>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
+                <div className="space-y-4">
+                  <h4 className="font-medium text-sm">Supporting Evidence</h4>
+                  <div className="grid gap-2">
+                    {point.sources.map((source: any) => (
+                      <SourceItem key={source.url} source={source} />
+                    ))}
                   </div>
-                )}
-
-                <div>
-                  <h4 className="font-medium mb-3">Sources & Evidence</h4>
-                  <SourceList sources={point.sources} />
                 </div>
               </>
             )}
@@ -299,11 +299,11 @@ const PainPointsView = ({ data, status }: Props) => {
   if (!data) {
     return (
       <SegmentLoader
-        title="Pain points"
         progress={status.progress.toString()}
         statusText={status.message}
         isComplete={status.isComplete}
         error={status.progress < 0 ? status.message : undefined}
+        title="Pain points"
       />
     );
   }
@@ -311,78 +311,62 @@ const PainPointsView = ({ data, status }: Props) => {
   const { metadata, painPoints, painPointClusters } = data;
 
   return (
-    <div className="space-y-8">
-      {/* Overview Card */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Brain className="w-6 h-6 text-purple-500" />
-              <div>
-                <CardTitle>Pain Points Analysis</CardTitle>
-                <CardDescription>
-                  Data from {new Date(metadata.dateRange.earliest).toLocaleDateString()} to{' '}
-                  {new Date(metadata.dateRange.latest).toLocaleDateString()}
-                </CardDescription>
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <Badge variant="outline">{metadata.totalSourcesAnalyzed} Sources Analyzed</Badge>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-6">
-            {/* Key Metrics */}
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="space-y-6">
+      {/* Overview Section */}
+      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="md:col-span-2 lg:col-span-4">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Brain className="w-5 h-5 text-purple-500" />
+              Pain Points Analysis
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <SentimentIndicator score={metadata.sentimentScore} />
-
-              <div className="p-4 bg-muted rounded-lg">
-                <div className="space-y-2">
-                  <h3 className="text-sm font-medium">Source Diversity</h3>
-                  <Progress value={metadata.sourceDiversity * 100} className="h-2" />
-                  <p className="text-sm text-muted-foreground">
-                    {(metadata.sourceDiversity * 100).toFixed(0)}% diverse sources
-                  </p>
-                </div>
-              </div>
-
-              <div className="p-4 bg-muted rounded-lg">
-                <div className="space-y-2">
-                  <h3 className="text-sm font-medium">Validation Score</h3>
-                  <Progress value={metadata.validationScore * 100} className="h-2" />
-                  <p className="text-sm text-muted-foreground">
-                    {(metadata.validationScore * 100).toFixed(0)}% confidence
-                  </p>
-                </div>
-              </div>
+              <MetricCard
+                title="Sources Analyzed"
+                value={metadata.totalSourcesAnalyzed}
+                icon={<Link2 className="w-5 h-5 text-blue-500" />}
+                tooltip="Total number of sources analyzed for this research"
+              />
+              <MetricCard
+                title="Source Diversity"
+                value={`${(metadata.sourceDiversity * 100).toFixed(0)}%`}
+                icon={<Users className="w-5 h-5 text-green-500" />}
+                tooltip="Measure of how diverse the sources are across different platforms"
+              />
+              <MetricCard
+                title="Validation Score"
+                value={`${(metadata.validationScore * 100).toFixed(0)}%`}
+                icon={<Flame className="w-5 h-5 text-orange-500" />}
+                tooltip="Confidence level in the accuracy and reliability of the data"
+              />
             </div>
 
             <Separator />
 
-            {/* Platform Distribution */}
             <div>
-              <h3 className="text-lg font-medium mb-4">Platform Distribution</h3>
+              <h3 className="font-medium mb-3">Platform Distribution</h3>
               <PlatformBreakdown platforms={metadata.platformBreakdown} />
             </div>
 
             <Separator />
 
-            {/* Pain Point Clusters */}
             <div>
-              <h3 className="text-lg font-medium mb-4">Pain Point Clusters</h3>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {painPointClusters.map((cluster, index) => (
-                  <ClusterCard key={index} cluster={cluster} />
+              <h3 className="font-medium mb-3">Key Clusters</h3>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {painPointClusters.map((cluster) => (
+                  <ClusterChip key={cluster.clusterName} cluster={cluster} />
                 ))}
               </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Pain Points List */}
-      <div className="space-y-4">
+      <div className="space-y-3">
         {painPoints.map((point) => (
           <PainPointCard key={point.id} point={point} />
         ))}
@@ -390,5 +374,34 @@ const PainPointsView = ({ data, status }: Props) => {
     </div>
   );
 };
+
+const MetricCard = ({ title, value, icon, tooltip }: any) => (
+  <div className="bg-background rounded-lg border p-4 flex items-center gap-3">
+    <div className="p-2 rounded-full bg-muted">{icon}</div>
+    <div>
+      <div className="text-sm text-muted-foreground flex items-center gap-1">
+        {title}
+        {tooltip && (
+          <Tooltip content={tooltip}>
+            <span></span>
+          </Tooltip>
+        )}
+      </div>
+      <div className="text-xl font-semibold">{value}</div>
+    </div>
+  </div>
+);
+
+const Tooltip = ({ children, content }: any) => (
+  <HoverCard>
+    <HoverCardTrigger asChild>
+      <span className="inline-flex items-center gap-1 cursor-help">
+        {children}
+        <Info className="w-3.5 h-3.5 text-muted-foreground/70" />
+      </span>
+    </HoverCardTrigger>
+    <HoverCardContent className="text-sm p-3 max-w-[280px]">{content}</HoverCardContent>
+  </HoverCard>
+);
 
 export default PainPointsView;

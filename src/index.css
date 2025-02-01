@@ -128,3 +128,13 @@ button:focus-visible {
     @apply bg-background text-foreground;
   }
 }
+
+/* Report Sidebar Responsive */
+.backdrop-blur-sm {
+  backdrop-filter: blur(4px);
+}
+
+.transition-transform {
+  transition-property: transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}

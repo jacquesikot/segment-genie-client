@@ -13,6 +13,7 @@ export interface SegmentStatus {
   general: Status;
   marketSize: Status;
   painPoints: Status;
+  competitors: Status;
 }
 
 export interface Segment {

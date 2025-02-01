@@ -230,13 +230,323 @@ const painPointsSchema = z.object({
   ),
 });
 
+const competitorDetailSchema = z.object({
+  name: z.string().describe('Official company name of the competitor'),
+  website: z.string().nullable().describe('Primary website URL of the competitor'),
+  category: z
+    .enum(['direct', 'indirect', 'potential'])
+    .describe(
+      'Classification of competitor based on market overlap: direct (same solution), indirect (different solution, same problem), potential (could enter market)'
+    )
+    .optional(),
+
+  companyProfile: z
+    .object({
+      foundedYear: z.number().nullable().optional().describe('Year the company was founded'),
+      headquartersLocation: z.string().nullable().optional().describe('Main headquarters location (city, country)'),
+      employeeCount: z.string().nullable().optional().describe('Approximate number of employees (ranges acceptable)'),
+      fundingStatus: z
+        .string()
+        .nullable()
+        .optional()
+        .describe('Current funding stage or status (e.g., Seed, Series A, Public)'),
+      lastFundingAmount: z.string().nullable().optional().describe('Most recent funding amount raised'),
+      keyExecutives: z.array(z.string()).optional().describe('Names and roles of key leadership team members'),
+    })
+    .describe('Basic company information and key metrics')
+    .optional(),
+
+  productDetails: z
+    .object({
+      mainProducts: z.array(z.string()).describe('Primary products or services offered'),
+      keyFeatures: z.array(z.string()).describe('Main features or capabilities of their products'),
+      uniqueSellingPoints: z.array(z.string()).describe('Distinctive value propositions or differentiators'),
+      technologiesUsed: z.array(z.string()).optional().describe('Key technologies or platforms used in their solution'),
+      integrationsOffered: z.array(z.string()).optional().describe('Major third-party integrations or partnerships'),
+    })
+    .describe('Product and feature information')
+    .optional(),
+
+  marketPosition: z
+    .object({
+      targetMarkets: z.array(z.string()).describe('Primary industries or markets served'),
+      geographicPresence: z.array(z.string()).optional().describe('Regions or countries where they operate'),
+      marketShare: z.number().nullable().optional().describe('Estimated market share percentage if available'),
+      growthRate: z.string().nullable().optional().describe('Recent growth rate or trajectory'),
+      customerSegments: z.array(z.string()).optional().describe('Main customer segments or personas targeted'),
+    })
+    .describe('Market presence and positioning information')
+    .optional(),
+
+  swotAnalysis: z
+    .object({
+      strengths: z
+        .array(
+          z.object({
+            point: z.string().describe('Specific strength of the competitor'),
+            impact: z
+              .enum(['Low', 'Medium', 'High'])
+              .describe('Impact level of this strength on their market position'),
+            evidence: z.string().describe('Concrete example or proof of this strength'),
+          })
+        )
+        .min(1)
+        .describe('Key competitive strengths'),
+
+      weaknesses: z
+        .array(
+          z.object({
+            point: z.string().describe('Specific weakness or limitation'),
+            impact: z
+              .enum(['Low', 'Medium', 'High'])
+              .describe('Impact level of this weakness on their market position'),
+            evidence: z.string().describe('Concrete example or proof of this weakness'),
+          })
+        )
+        .min(1)
+        .describe('Notable weaknesses or limitations'),
+
+      opportunities: z
+        .array(
+          z.object({
+            point: z.string().describe('Potential market or growth opportunity'),
+            relevance: z.enum(['Low', 'Medium', 'High']).describe('Relevance to their current market position'),
+            timeframe: z
+              .enum(['Short-term', 'Medium-term', 'Long-term'])
+              .describe('Expected timeline for opportunity realization'),
+          })
+        )
+        .optional()
+        .describe('Growth opportunities available'),
+
+      threats: z
+        .array(
+          z.object({
+            point: z.string().describe('Potential threat or risk factor'),
+            severity: z.enum(['Low', 'Medium', 'High']).describe('Impact severity if threat materializes'),
+            likelihood: z.enum(['Low', 'Medium', 'High']).describe('Probability of threat occurring'),
+          })
+        )
+        .optional()
+        .describe('Market threats and risks'),
+    })
+    .describe('Comprehensive SWOT analysis')
+    .optional(),
+
+  pricingStrategy: z
+    .object({
+      model: z.string().describe('Primary pricing model (e.g., subscription, usage-based)'),
+      pricePoints: z.array(z.string()).optional().describe('Key pricing tiers or packages'),
+      comparativeValue: z.string().optional().describe('Price positioning relative to competitors'),
+    })
+    .describe('Pricing structure and strategy')
+    .optional(),
+
+  customerInsights: z
+    .object({
+      satisfaction: z
+        .object({
+          overallScore: z
+            .number()
+            .min(0)
+            .max(5)
+            .nullable()
+            .optional()
+            .describe('Average customer satisfaction score (0-5)'),
+          positiveThemes: z.array(z.string()).optional().describe('Common positive feedback themes'),
+          negativeThemes: z.array(z.string()).optional().describe('Common negative feedback themes'),
+          reviewSources: z.array(z.string()).optional().describe('Sources of customer reviews analyzed'),
+        })
+        .optional()
+        .describe('Customer satisfaction metrics'),
+      painPoints: z.array(z.string()).optional().describe('Common customer complaints or issues'),
+      switchingCosts: z.string().optional().describe('Barriers or costs for customers to switch from this competitor'),
+    })
+    .describe('Customer feedback and satisfaction analysis')
+    .optional(),
+
+  recentDevelopments: z
+    .array(
+      z.object({
+        date: z.string().describe('Date of the development'),
+        development: z.string().describe('Description of the event or update'),
+        significance: z.string().describe('Impact or importance of this development'),
+      })
+    )
+    .optional()
+    .describe('Recent significant company developments or changes'),
+
+  sources: z
+    .array(
+      z.object({
+        url: z.string().describe('Source URL'),
+        type: z.enum(['company_website', 'news', 'review', 'social', 'financial', 'other']).describe('Type of source'),
+        date: z.string().describe('Date of the source content'),
+        relevance: z.number().min(0).max(1).describe('Relevance score of source (0-1)'),
+      })
+    )
+    .min(1)
+    .describe('All data source URLs used for analysis')
+    .optional(),
+});
+
+// Step 3: Comparative Analysis Schema
+const comparativeAnalysisSchema = z
+  .object({
+    marketOverview: z
+      .object({
+        totalAddressableMarket: z
+          .string()
+          .describe(
+            'Estimated market size in dollar value (e.g., "$5B annually"). Include year of estimate if available.'
+          ),
+        growthRate: z
+          .string()
+          .describe('Annual market growth rate as a percentage with timeframe (e.g., "15% YoY for 2023-2024")'),
+        maturityStage: z
+          .string()
+          .describe(
+            'Current market lifecycle stage (e.g., "Emerging", "Growth", "Mature", "Declining") with key characteristics'
+          ),
+        keyTrends: z
+          .array(z.string())
+          .describe(
+            'Major market trends affecting the industry. Each trend should include: trend name, impact, and timeline'
+          )
+          .min(3),
+        entryBarriers: z
+          .array(z.string())
+          .describe(
+            'Significant barriers to market entry, each with description of difficulty and mitigation strategies'
+          )
+          .min(2),
+      })
+      .describe('Overall market analysis and key metrics'),
+
+    competitiveLandscape: z
+      .object({
+        competitorDensity: z
+          .string()
+          .describe(
+            'Assessment of number and distribution of competitors (e.g., "Highly fragmented with 100+ solutions" or "Consolidated with 3 major players")'
+          ),
+        marketConcentration: z
+          .string()
+          .describe(
+            'Degree of market share concentration among top players (e.g., "Top 3 players control 75% of market")'
+          ),
+        keyPlayerGroups: z
+          .array(
+            z.object({
+              group: z
+                .string()
+                .describe(
+                  'Category name for this group of competitors (e.g., "Enterprise Incumbents", "Emerging Startups")'
+                ),
+              description: z.string().describe('Characteristics and competitive approach of this group'),
+              representatives: z
+                .array(z.string())
+                .describe('Names of key companies in this group, minimum 2 companies')
+                .min(2),
+            })
+          )
+          .describe('Classification of competitor types and their characteristics')
+          .min(2),
+      })
+      .describe('Analysis of competitive dynamics and player categorization'),
+
+    featureComparison: z
+      .array(
+        z.object({
+          feature: z.string().describe('Specific feature or capability name'),
+          importance: z
+            .enum(['Critical', 'Important', 'Nice-to-have'])
+            .describe(
+              'Business impact of this feature: Critical (must-have), Important (differentiator), Nice-to-have (auxiliary)'
+            ),
+          competitors: z
+            .array(
+              z.object({
+                name: z.string().describe('Competitor company name'),
+                implementation: z
+                  .enum(['None', 'Basic', 'Advanced', 'Best-in-class'])
+                  .describe(
+                    'Quality of feature implementation: None (not available), Basic (minimal), Advanced (solid), Best-in-class (exceptional)'
+                  ),
+                notes: z.string().describe('Specific details about implementation, limitations, or unique aspects'),
+              })
+            )
+            .min(3)
+            .describe('How competitors implement this feature'),
+        })
+      )
+      .min(5)
+      .describe('Detailed feature-by-feature comparison across competitors'),
+
+    opportunitySpaces: z
+      .array(
+        z.object({
+          description: z.string().describe('Clear description of the market opportunity or gap'),
+          unservedNeeds: z.array(z.string()).describe('Specific customer needs or problems not being addressed').min(2),
+          potentialSize: z
+            .string()
+            .describe('Estimated size of opportunity (e.g., "~$1M ARR in first year" or "20% of current market")'),
+          entryDifficulty: z
+            .enum(['Low', 'Medium', 'High'])
+            .describe(
+              'Difficulty of capturing this opportunity: Low (few barriers), Medium (some challenges), High (significant barriers)'
+            ),
+          timeToMarket: z.string().describe('Estimated time needed to address this opportunity (e.g., "6-8 months")'),
+        })
+      )
+      .min(2)
+      .describe('Analysis of market gaps and opportunities'),
+
+    recommendations: z
+      .array(
+        z.object({
+          recommendation: z.string().describe('Specific, actionable recommendation for product or market strategy'),
+          rationale: z.string().describe('Clear explanation of why this recommendation matters and expected benefits'),
+          priority: z.enum(['Low', 'Medium', 'High']).describe('Implementation priority based on impact and urgency'),
+          resourceRequirements: z
+            .string()
+            .describe('Required resources, including estimated time, team size, and other requirements'),
+          risks: z
+            .array(z.string())
+            .describe('Potential risks or challenges in implementing this recommendation')
+            .min(1),
+        })
+      )
+      .min(3)
+      .describe('Strategic recommendations based on competitive analysis'),
+  })
+  .describe('Comprehensive comparative analysis of market and competition');
+
+export const competitionSchema = z.object({
+  metadata: z.object({
+    analysisDate: z.string(),
+    totalCompetitors: z.number(),
+    confidenceScore: z.number(),
+    dataFreshness: z.object({
+      mostRecent: z.string(),
+      oldest: z.string(),
+      averageAge: z.string(),
+    }),
+  }),
+  competitors: z.array(competitorDetailSchema),
+  comparativeAnalysis: comparativeAnalysisSchema,
+  recommendations: z.object({}),
+});
+
 export type MarketSize = z.infer<typeof marketSizeSchema>;
 export type ValidIndustry = z.infer<typeof industryValidationSchema>;
 export type PainPoints = z.infer<typeof painPointsSchema>;
+export type Competitors = z.infer<typeof competitionSchema>;
 export interface ResearchReport {
   validIndustry: ValidIndustry;
   marketSize: MarketSize;
   painPoints: PainPoints;
+  competitors: Competitors;
 }
 
 export const startNewResearch = async (data: NewResearch): Promise<NewResearchResponse> => {

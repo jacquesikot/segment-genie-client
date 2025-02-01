@@ -4,9 +4,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { BarChart3, Brain, Building2, Clock, Target, Users2 } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import MarketSizeView from './market-size-view';
 import PainPointsView from './pain-points-view';
+import CompetitionView from './competition-view';
+import { X, Menu } from 'lucide-react';
 
 const SECTIONS = [
   {
@@ -63,35 +65,57 @@ interface Props {
 
 const CustomerReportView: React.FC<Props> = ({ report, status }) => {
   const [activeSection, setActiveSection] = useState('industry-market');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+
+  const handleSectionChange = (sectionId: string) => {
+    setActiveSection(sectionId);
+    if (isMobile) setIsSidebarOpen(false);
+  };
 
   return (
     <TooltipProvider>
       <div className="flex h-screen bg-background/50">
         {/* Navigation Sidebar */}
-        <div className="w-64 border-r bg-background p-4 space-y-2">
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold mb-2">Report Sections</h2>
-            <p className="text-sm text-muted-foreground">Explore different aspects of the market analysis</p>
+        <div
+          className={cn(
+            `w-64 ${!isMobile && 'border-r'} bg-background/95 backdrop-blur-sm p-4 space-y-2`,
+            'fixed md:relative md:translate-x-0 z-40 h-full',
+            'transition-transform duration-300 ease-in-out',
+            isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          )}
+        >
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-lg font-semibold">Report Sections</h2>
+            <button onClick={toggleSidebar} className="md:hidden p-1 hover:bg-muted rounded-full">
+              <X className="w-5 h-5" />
+            </button>
           </div>
           {SECTIONS.map((section) => {
             const Icon = section.icon;
+            const isActive = activeSection === section.id;
             return (
               <button
                 key={section.id}
-                onClick={() => setActiveSection(section.id)}
+                onClick={() => handleSectionChange(section.id)}
                 className={cn(
-                  'w-full flex items-center gap-3 p-3 rounded-lg text-sm transition-colors',
-                  'hover:bg-muted',
-                  activeSection === section.id ? 'bg-muted' : 'transparent'
+                  'w-full flex items-center gap-3 p-3 rounded-lg text-sm transition-all',
+                  'hover:bg-muted/50 hover:pl-4',
+                  isActive ? 'bg-primary/10 border-l-4 border-primary pl-4 text-primary' : 'pl-3 text-foreground'
                 )}
               >
-                <Icon
-                  className={cn('w-5 h-5', activeSection === section.id ? 'text-primary' : 'text-muted-foreground')}
-                />
+                <Icon className={cn('w-5 h-5 flex-shrink-0', isActive ? 'text-primary' : 'text-muted-foreground')} />
                 <div className="text-left">
-                  <div className={cn('font-medium', activeSection === section.id ? 'text-primary' : 'text-foreground')}>
-                    {section.label}
-                  </div>
+                  <div className={cn('font-medium', isActive && 'text-primary')}>{section.label}</div>
                   <div className="text-xs text-muted-foreground hidden md:block">{section.description}</div>
                 </div>
               </button>
@@ -100,7 +124,19 @@ const CustomerReportView: React.FC<Props> = ({ report, status }) => {
         </div>
 
         {/* Main Content Area */}
-        <div className="flex-1 overflow-auto p-6">
+        <div className="flex-1 overflow-auto p-4 md:p-6 transition-all duration-300">
+          {/* Mobile Navigation Button - Moved to Top of Main Content */}
+          <div className="flex justify-between items-center mb-6 md:hidden">
+            <h1 className="text-2xl font-bold">Market Analysis Report</h1>
+            <button onClick={toggleSidebar} className="p-2 rounded-lg bg-background border shadow-sm">
+              {isSidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
+
+          {/* Overlay for mobile sidebar */}
+          {isSidebarOpen && <div onClick={toggleSidebar} className="md:hidden fixed inset-0 bg-black/50 z-30" />}
+
+          {/* Content remains the same */}
           {activeSection === 'industry-market' ? (
             <MarketSizeView
               marketSize={report ? report.marketSize : undefined}
@@ -109,6 +145,8 @@ const CustomerReportView: React.FC<Props> = ({ report, status }) => {
             />
           ) : activeSection === 'pain-points' ? (
             <PainPointsView data={report ? report.painPoints : undefined} status={status.painPoints} />
+          ) : activeSection === 'competition' ? (
+            <CompetitionView data={report ? report.competitors : undefined} status={status.competitors} />
           ) : (
             <ComingSoonSection title={SECTIONS.find((s) => s.id === activeSection)?.label || ''} />
           )}

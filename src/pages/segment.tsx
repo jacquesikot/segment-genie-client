@@ -44,6 +44,12 @@ export default function Segment() {
       isComplete: false,
       data: null,
     },
+    competitors: {
+      progress: 0,
+      message: 'Fetching Segment...',
+      isComplete: false,
+      data: null,
+    },
   });
 
   const { data: segment } = useQuery({
