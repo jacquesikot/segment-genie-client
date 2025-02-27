@@ -35,13 +35,8 @@ export const getSegment = async (segmentId: string): Promise<Segment> => {
 };
 
 export const getUserSegments = async (userId: string): Promise<Segment[] | []> => {
-  try {
-    const data = await client.get(`/segment/user/${userId}`);
-    return data.data.data;
-  } catch (error) {
-    console.log('🚀 ~ getUserSegments ~ error:', error);
-    return [];
-  }
+  const data = await client.get(`/segment/user/${userId}`);
+  return data.data.data;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

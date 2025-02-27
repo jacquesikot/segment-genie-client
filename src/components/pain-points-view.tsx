@@ -179,10 +179,12 @@ const PainPointCard = ({ point }: any) => {
                   <Badge variant="outline" className="text-xs py-1 px-2">
                     {point.cluster}
                   </Badge>
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <Users className="w-3.5 h-3.5" />
-                    {point.impact.businessSize.join(', ')}
-                  </div>
+                  {point.impact.businessSize && (
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Users className="w-3.5 h-3.5" />
+                      {point.impact.businessSize.join(', ')}
+                    </div>
+                  )}
                 </div>
               </div>
               <Button
@@ -227,24 +229,26 @@ const PainPointCard = ({ point }: any) => {
                         <TrendingUp className="w-4 h-4" />
                         Trends & Patterns
                       </h4>
-                      <div className="flex flex-wrap gap-2">
-                        <Badge
-                          variant="outline"
-                          className={cn(
-                            'text-xs py-1 px-2',
-                            point.trends.increasing
-                              ? 'text-green-500 border-green-500/30'
-                              : 'text-red-500 border-red-500/30'
-                          )}
-                        >
-                          {point.trends.increasing ? 'Increasing' : 'Decreasing'}
-                        </Badge>
-                        <Tooltip content="Statistical confidence in the accuracy of this data point">
-                          <Badge variant="outline" className="text-xs py-1 px-2">
-                            Confidence: {(point.confidence * 100).toFixed(0)}%
+                      {point.trends && (
+                        <div className="flex flex-wrap gap-2">
+                          <Badge
+                            variant="outline"
+                            className={cn(
+                              'text-xs py-1 px-2',
+                              point.trends.increasing
+                                ? 'text-green-500 border-green-500/30'
+                                : 'text-red-500 border-red-500/30'
+                            )}
+                          >
+                            {point.trends.increasing ? 'Increasing' : 'Decreasing'}
                           </Badge>
-                        </Tooltip>
-                      </div>
+                          <Tooltip content="Statistical confidence in the accuracy of this data point">
+                            <Badge variant="outline" className="text-xs py-1 px-2">
+                              Confidence: {(point.confidence * 100).toFixed(0)}%
+                            </Badge>
+                          </Tooltip>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -346,10 +350,12 @@ const PainPointsView = ({ data, status }: Props) => {
 
             <Separator />
 
-            <div>
-              <h3 className="font-medium mb-3">Platform Distribution</h3>
-              <PlatformBreakdown platforms={metadata.platformBreakdown} />
-            </div>
+            {metadata.platformBreakdown && (
+              <div>
+                <h3 className="font-medium mb-3">Platform Distribution</h3>
+                <PlatformBreakdown platforms={metadata.platformBreakdown} />
+              </div>
+            )}
 
             <Separator />
 

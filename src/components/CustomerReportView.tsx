@@ -3,12 +3,9 @@ import { SegmentStatus } from '@/api/segment';
 import { Card, CardContent } from '@/components/ui/card';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import { BarChart3, Brain, Building2, Clock, Target, Users2 } from 'lucide-react';
-import React, { useState, useEffect } from 'react';
+import { BarChart3, Brain, Building2, Clock, Menu, Target, Users2, X } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 import MarketSizeView from './market-size-view';
-import PainPointsView from './pain-points-view';
-import CompetitionView from './competition-view';
-import { X, Menu } from 'lucide-react';
 
 const SECTIONS = [
   {
@@ -138,16 +135,13 @@ const CustomerReportView: React.FC<Props> = ({ report, status }) => {
 
           {/* Content remains the same */}
           {activeSection === 'industry-market' ? (
-            <MarketSizeView
-              marketSize={report ? report.marketSize : undefined}
-              industry={report ? report.validIndustry : undefined}
-              status={status.marketSize}
-            />
-          ) : activeSection === 'pain-points' ? (
-            <PainPointsView data={report ? report.painPoints : undefined} status={status.painPoints} />
-          ) : activeSection === 'competition' ? (
-            <CompetitionView data={report ? report.competitors : undefined} status={status.competitors} />
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            <MarketSizeView marketSize={report ? (report.marketSize as any) : undefined} status={status.marketSize} />
           ) : (
+            // ) : activeSection === 'pain-points' ? (
+            //   <PainPointsView data={report ? report.painPoints : undefined} status={status.painPoints} />
+            // ) : activeSection === 'competition' ? (
+            //   <CompetitionView data={report ? report.competitors : undefined} status={status.competitors} />
             <ComingSoonSection title={SECTIONS.find((s) => s.id === activeSection)?.label || ''} />
           )}
         </div>

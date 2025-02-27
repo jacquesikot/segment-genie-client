@@ -8,14 +8,12 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import {
-  Activity,
   AlertCircle,
   BarChart3,
   Building2,
   Calendar,
   Check,
   Clock,
-  DollarSign,
   ExternalLink,
   Globe,
   Info,
@@ -112,7 +110,7 @@ const CompetitionView = ({ data, status }: Props) => {
               </div>
             </CardHeader>
             <CardContent className="p-6 space-y-6 dark:bg-gray-900">
-              <div className="grid md:grid-cols-3 gap-4">
+              {/* <div className="grid md:grid-rows-3 gap-4">
                 <MetricCard
                   title="Market Size"
                   value={comparativeAnalysis.marketOverview.totalAddressableMarket}
@@ -134,7 +132,7 @@ const CompetitionView = ({ data, status }: Props) => {
                   color="yellow"
                   darkClass="dark:bg-yellow-950/30 dark:border-yellow-900/30 dark:text-yellow-300"
                 />
-              </div>
+              </div> */}
 
               <div className="space-y-4">
                 <SectionBlock
@@ -233,15 +231,15 @@ const CompetitionView = ({ data, status }: Props) => {
 };
 
 // Reusable Components
-const MetricCard = ({ title, value, icon: Icon, color, darkClass }: any) => (
-  <div className={cn(`p-4 rounded-lg bg-${color}-50 border border-${color}-100`, darkClass)}>
-    <div className="flex items-center gap-2 mb-2">
-      <Icon className={`w-5 h-5 text-${color}-600 dark:text-${color}-400`} />
-      <span className={`text-sm font-medium text-${color}-700 dark:text-${color}-300`}>{title}</span>
-    </div>
-    <div className={`text-2xl font-semibold text-${color}-800 dark:text-${color}-200`}>{value}</div>
-  </div>
-);
+// const MetricCard = ({ title, value, icon: Icon, color, darkClass }: any) => (
+//   <div className={cn(`p-4 rounded-lg bg-${color}-50 border border-${color}-100`, darkClass)}>
+//     <div className="flex items-center gap-2 mb-2">
+//       <Icon className={`w-5 h-5 text-${color}-600 dark:text-${color}-400`} />
+//       <span className={`text-sm font-medium text-${color}-700 dark:text-${color}-300`}>{title}</span>
+//     </div>
+//     <div className={`text-2xl font-semibold text-${color}-800 dark:text-${color}-200`}>{value}</div>
+//   </div>
+// );
 
 const SectionBlock = ({ title, items, icon: Icon, color, darkTextClass }: any) => (
   <div className="space-y-3">
@@ -312,7 +310,7 @@ const CompetitorCard = ({ competitor }: any) => {
                       <div className="space-y-2">
                         <Progress value={competitor.marketPosition.marketShare || 0} className="h-2" />
                         <div className="text-sm text-muted-foreground dark:text-gray-300">
-                          {competitor.marketPosition.marketShare || 0}% Market Share
+                          {competitor.marketPosition.marketShare || 0}
                         </div>
                       </div>
                     ),
@@ -381,40 +379,43 @@ const InfoBlock = ({ title, icon: Icon, items }: any) => (
 );
 
 const FeatureComparisonBlock = ({ feature }: any) => (
-  <div className="space-y-3">
+  <div className="space-y-4 border-b border-gray-100 dark:border-gray-800 pb-5 last:border-0 last:pb-0">
     <div className="flex items-center justify-between">
-      <div className="font-medium text-gray-900 dark:text-white">{feature.feature}</div>
-      <Badge
-        variant={
-          feature.importance === 'Critical'
-            ? 'destructive'
-            : feature.importance === 'Important'
-            ? 'default'
-            : 'secondary'
-        }
-      >
-        {feature.importance}
-      </Badge>
+      <div className="font-medium text-gray-900 dark:text-white text-lg">{feature.feature}</div>
     </div>
-    <div className="space-y-2">
+
+    <p className="text-sm text-muted-foreground dark:text-gray-400">{feature.importance}</p>
+
+    <div className="space-y-4">
       {feature.competitors.map((comp: any) => (
-        <div key={comp.name} className="flex items-center gap-4">
-          <div className="w-32 text-sm text-muted-foreground dark:text-gray-300">{comp.name}</div>
+        <div key={comp.name} className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-3 space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="font-medium text-gray-900 dark:text-white">{comp.name}</div>
+            <Badge variant="outline" className="bg-white dark:bg-gray-800">
+              {comp.implementation.split(',')[0].includes('Highly') || comp.implementation.includes('Strong')
+                ? 'Best-in-class'
+                : comp.implementation.includes('Simple') || comp.implementation.includes('Limited')
+                ? 'Basic'
+                : 'Advanced'}
+            </Badge>
+          </div>
+
+          <div className="text-sm text-muted-foreground dark:text-gray-300 mb-2">{comp.implementation}</div>
+
           <Progress
             value={
-              comp.implementation === 'Best-in-class'
-                ? 100
-                : comp.implementation === 'Advanced'
-                ? 75
-                : comp.implementation === 'Basic'
-                ? 50
-                : 0
+              comp.implementation.includes('Highly') || comp.implementation.includes('Strong')
+                ? 90
+                : comp.implementation.includes('Simple') || comp.implementation.includes('Limited')
+                ? 40
+                : 70
             }
-            className="flex-1"
+            className="h-2"
           />
-          <Badge variant="outline" className="w-28">
-            {comp.implementation}
-          </Badge>
+
+          {comp.notes && (
+            <div className="text-xs text-muted-foreground dark:text-gray-400 mt-2 italic">Note: {comp.notes}</div>
+          )}
         </div>
       ))}
     </div>
@@ -423,35 +424,50 @@ const FeatureComparisonBlock = ({ feature }: any) => (
 
 const OpportunityCard = ({ opportunity }: any) => (
   <Card className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-950/30 dark:to-blue-950/30 dark:border-gray-800">
-    <CardContent className="p-4 space-y-3">
-      <h3 className="font-semibold text-gray-900 dark:text-white">{opportunity.description}</h3>
-      <div className="flex flex-wrap gap-2">
-        {opportunity.unservedNeeds.map((need: string, idx: number) => (
-          <Badge key={idx} variant="outline" className="bg-white/80 dark:bg-gray-800/50">
-            {need}
-          </Badge>
-        ))}
+    <CardContent className="p-5 space-y-4">
+      <div className="flex items-start gap-3">
+        <Lightbulb className="w-5 h-5 text-green-600 dark:text-green-400 mt-1 flex-shrink-0" />
+        <h3 className="font-semibold text-lg text-gray-900 dark:text-white">{opportunity.description}</h3>
       </div>
-      <div className="flex items-center gap-4 text-sm text-muted-foreground dark:text-gray-300">
-        <div className="flex items-center gap-1">
-          <DollarSign className="w-4 h-4" />
-          <span>{opportunity.potentialSize}</span>
+
+      <div className="space-y-3">
+        <div>
+          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Unserved Needs:</h4>
+          <div className="space-y-2">
+            {opportunity.unservedNeeds.map((need: string, idx: number) => (
+              <div key={idx} className="flex items-start gap-2 text-sm text-muted-foreground dark:text-gray-300">
+                <span className="flex-shrink-0">•</span>
+                <span>{need}</span>
+              </div>
+            ))}
+          </div>
         </div>
-        <Badge
-          variant="outline"
-          className={cn(
-            opportunity.entryDifficulty === 'High'
-              ? 'bg-red-100 dark:bg-red-950/30 text-red-800 dark:text-red-400'
-              : opportunity.entryDifficulty === 'Medium'
-              ? 'bg-yellow-100 dark:bg-yellow-950/30 text-yellow-800 dark:text-yellow-400'
-              : 'bg-green-100 dark:bg-green-950/30 text-green-800 dark:text-green-400'
-          )}
-        >
-          {opportunity.entryDifficulty}
-        </Badge>
-        <div className="flex items-center gap-1">
-          <Clock className="w-4 h-4" />
-          <span>{opportunity.timeToMarket}</span>
+
+        <div>
+          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Market Potential:</h4>
+          <p className="text-sm text-muted-foreground dark:text-gray-300">{opportunity.potentialSize}</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 pt-2">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <ShieldAlert className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+            <h4 className="text-xs font-medium text-gray-700 dark:text-gray-300">Entry Difficulty</h4>
+          </div>
+          <div className="bg-white/70 dark:bg-gray-800/50 rounded-md p-3 text-sm border border-gray-100 dark:border-gray-700">
+            <p className="text-gray-800 dark:text-gray-200">{opportunity.entryDifficulty}</p>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Clock className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+            <h4 className="text-xs font-medium text-gray-700 dark:text-gray-300">Time to Market</h4>
+          </div>
+          <div className="bg-white/70 dark:bg-gray-800/50 rounded-md p-3 text-sm border border-gray-100 dark:border-gray-700">
+            <p className="text-gray-800 dark:text-gray-200">{opportunity.timeToMarket}</p>
+          </div>
         </div>
       </div>
     </CardContent>

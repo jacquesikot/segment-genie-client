@@ -11,8 +11,8 @@ import { useAppDispatch } from '@/redux/hooks';
 import { addNewSegment } from '@/redux/slice/segment';
 import { useUser } from '@clerk/clerk-react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowLeft, ArrowRight, History, Loader2, Plus, Sparkles, Sun } from 'lucide-react';
-import { useState } from 'react';
+import { ArrowLeft, ArrowRight, History, Loader2, Plus, Sparkles, Sun, InfoIcon } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
@@ -33,6 +33,7 @@ const recentExamples = [
   'A subscription box service for exotic cooking ingredients with recipe cards',
   'An AI-powered personal stylist app that suggests daily outfits',
   'A marketplace for local artists to sell and rent their artwork',
+  'A smart home gardening system for urban apartments',
 ];
 
 export default function Dashboard() {
@@ -44,7 +45,9 @@ export default function Dashboard() {
   const [isInitialLoading, setIsInitialLoading] = useState(false);
   const [showDetailedForm, setShowDetailedForm] = useState(false);
   const [isFinalLoading, setIsFinalLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
 
+  // Form instance with validation
   const form = useForm({
     resolver: zodResolver(researchInputForm),
     defaultValues: {
@@ -60,19 +63,58 @@ export default function Dashboard() {
     },
   });
 
+  // Simulate loading progress for better UX
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isFinalLoading) {
+      interval = setInterval(() => {
+        setProgress((prev) => {
+          const newProgress = prev + Math.random() * 10;
+          return newProgress > 95 ? 95 : newProgress;
+        });
+      }, 600);
+    } else {
+      setProgress(0);
+    }
+    return () => clearInterval(interval);
+  }, [isFinalLoading]);
+
   const handleInitialAnalysis = async () => {
-    if (!initialIdea.trim()) return;
+    if (!initialIdea.trim()) {
+      toast({
+        variant: 'default',
+        title: 'Idea required',
+        description: 'Please describe your business idea to continue.',
+      });
+      return;
+    }
+
     setIsInitialLoading(true);
     try {
       // Simulate API call
       const response = await getResearchInput(initialIdea);
       form.reset(response);
+
+      // Smooth transition to detailed form
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       setShowDetailedForm(true);
     } catch (error) {
       console.error('Error:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Analysis failed',
+        description: 'Unable to analyze your idea. Please try again later.',
+      });
     } finally {
       setIsInitialLoading(false);
     }
+  };
+
+  const handleExampleClick = (example: string) => {
+    setInitialIdea(example);
+    // Focus on textarea after selecting example
+    const textarea = document.querySelector('textarea');
+    if (textarea) textarea.focus();
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -81,7 +123,7 @@ export default function Dashboard() {
     try {
       const research = await startNewResearch({
         title: values.title,
-        userId: user!.id,
+        userId: user?.id || '',
         input: {
           customerProfile: {
             segment: values.segment,
@@ -102,169 +144,201 @@ export default function Dashboard() {
 
       form.reset();
       dispatch(addNewSegment(research.data.segment));
+
+      toast({
+        variant: 'default',
+        title: 'Success!',
+        description: 'Your customer report has been generated.',
+      });
+
       await navigate(`/segments`);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
+      console.error('Error:', err);
       toast({
         variant: 'destructive',
         title: 'Uh oh! Something went wrong.',
-        description: 'There was a problem with your request.',
+        description: 'There was a problem generating your report. Please try again.',
       });
     } finally {
       setIsFinalLoading(false);
+      setProgress(0);
     }
   };
 
   return (
     <>
       <PageHeader />
-      <div className="flex w-[800px] flex-col align-middle flex-1  p-4 md:p-6 space-y-6 self-center">
-        {/* Premium Banner */}
-        <div className="bg-gradient-to-r from-indigo-500/10 to-purple-500/10 dark:from-indigo-500/20 dark:to-purple-500/20 rounded-lg p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-sm text-indigo-700 dark:text-indigo-300">
-            <Sparkles size={16} className="text-indigo-500" />
-            <span>Unlock advanced features with Segment Genie Pro</span>
-          </div>
-          <Button
-            variant="default"
-            className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-sm w-full sm:w-auto"
-          >
-            Upgrade to Pro
-          </Button>
-        </div>
-
-        {/* Greeting Section */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-full">
-              <Sun className="text-amber-500 dark:text-amber-400" size={28} />
+      <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-6xl">
+        <div className="flex flex-col space-y-6 py-6">
+          {/* Premium Banner */}
+          <div className="bg-gradient-to-r from-indigo-500/10 to-purple-500/10 dark:from-indigo-500/20 dark:to-purple-500/20 rounded-lg p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2 text-xs sm:text-sm text-indigo-700 dark:text-indigo-300">
+              <Sparkles size={16} className="text-indigo-500 flex-shrink-0" />
+              <span>Unlock advanced features with Segment Genie Pro</span>
             </div>
-            <div>
-              <h1 className="text-2xl md:text-3xl font-semibold text-gray-900 dark:text-white">
-                Welcome to Segment Genie
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400 text-sm md:text-base">
-                Your AI-powered market research assistant
-              </p>
+            <Button
+              variant="default"
+              className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-xs sm:text-sm w-full sm:w-auto"
+            >
+              Upgrade to Pro
+            </Button>
+          </div>
+
+          {/* Greeting Section */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-full">
+                <Sun className="text-amber-500 dark:text-amber-400" size={24} />
+              </div>
+              <div>
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold text-gray-900 dark:text-white">
+                  Welcome to Segment Genie
+                </h1>
+                <p className="text-gray-600 dark:text-gray-400 text-xs sm:text-sm md:text-base">
+                  Your AI-powered market research assistant
+                </p>
+              </div>
             </div>
           </div>
-        </div>
 
-        {!showDetailedForm ? (
-          // Initial Idea Input Card
-          <Card className="shadow-lg border border-gray-200 dark:border-gray-800 hover:border-indigo-200 dark:hover:border-indigo-800 transition-all">
-            <CardContent className="p-8 space-y-6">
-              <div className="space-y-4">
-                <h2 className="text-xl font-medium text-gray-900 dark:text-white">
-                  What idea do you want to validate today?
-                </h2>
+          {!showDetailedForm ? (
+            // Initial Idea Input Card
+            <Card className="shadow-lg border border-gray-200 dark:border-gray-800 hover:border-indigo-200 dark:hover:border-indigo-800 transition-all">
+              <CardContent className="p-4 sm:p-6 md:p-8 space-y-4 sm:space-y-6">
+                <div className="space-y-4">
+                  <h2 className="text-lg sm:text-xl font-medium text-gray-900 dark:text-white">
+                    What idea do you want to validate today?
+                  </h2>
 
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {recentExamples.map((example, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setInitialIdea(example)}
-                      className="text-sm px-3 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                    >
-                      <Plus size={12} className="inline mr-1" />
-                      Try Example {index + 1}
-                    </button>
-                  ))}
-                </div>
-
-                <Textarea
-                  value={initialIdea}
-                  onChange={(e) => setInitialIdea(e.target.value)}
-                  placeholder="Describe your business idea or target audience in detail... For example: I want to create a mobile app that helps pet owners find and book pet sitters in their local area."
-                  className="min-h-[200px] w-full p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:border-indigo-300 dark:focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900 outline-none resize-none text-base"
-                />
-
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                    <History size={14} />
-                    <span>Your insights are saved automatically</span>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {recentExamples.map((example, index) => (
+                      <button
+                        key={index}
+                        onClick={() => handleExampleClick(example)}
+                        className="text-xs sm:text-sm px-2 sm:px-3 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                      >
+                        <Plus size={12} className="inline mr-1" />
+                        <span className="hidden sm:inline">Try Example</span> {index + 1}
+                      </button>
+                    ))}
                   </div>
-                  <Button
-                    onClick={handleInitialAnalysis}
-                    disabled={!initialIdea.trim() || isInitialLoading}
-                    className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white px-8 py-2 text-base"
-                  >
-                    {isInitialLoading ? (
-                      <>
-                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                        Analyzing...
-                      </>
-                    ) : (
-                      <>
-                        Analyze
-                        <ArrowRight size={16} className="ml-2" />
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ) : (
-          // Review and Confirm Card
-          <Card className="shadow-lg border border-gray-200 dark:border-gray-800 transition-all relative">
-            {isFinalLoading && (
-              <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center">
-                <div className="flex flex-col items-center space-y-4">
-                  <Loader2 className="h-12 w-12 animate-spin text-primary" />
-                  <p className="text-lg font-medium text-primary">Generating Customer Report...</p>
-                  <p className="text-sm text-muted-foreground">This may take a few moments</p>
-                </div>
-              </div>
-            )}
 
-            <CardContent className="p-8">
-              <div className="mb-6">
-                <Alert className="bg-primary/5 border-primary/20">
-                  <AlertDescription>
-                    We've analyzed your idea! Review and adjust the details below to generate your customer report.
-                  </AlertDescription>
-                </Alert>
-              </div>
+                  <div className="relative">
+                    <Textarea
+                      value={initialIdea}
+                      onChange={(e) => setInitialIdea(e.target.value)}
+                      placeholder="Describe your business idea or target audience in detail..."
+                      className="min-h-[150px] sm:min-h-[200px] w-full p-3 sm:p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:border-indigo-300 dark:focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900 outline-none resize-none text-sm sm:text-base"
+                    />
+                    <div className="absolute bottom-2 right-2 flex items-center gap-1 text-xs text-gray-400">
+                      <InfoIcon size={12} />
+                      <span className="hidden sm:inline">More detail = better results</span>
+                    </div>
+                  </div>
 
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onFinalSubmit)} className="space-y-8">
-                  <NewSegmentForm form={form} />
-
-                  <div className="flex items-center justify-between pt-6">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
+                    <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                      <History size={14} />
+                      <span>Your insights are saved automatically</span>
+                    </div>
                     <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setShowDetailedForm(false)}
-                      className="text-base"
+                      onClick={handleInitialAnalysis}
+                      disabled={!initialIdea.trim() || isInitialLoading}
+                      className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white px-4 sm:px-8 py-2 text-sm sm:text-base w-full sm:w-auto"
                     >
-                      <ArrowLeft className="mr-2 h-4 w-4" />
-                      Back to Editor
-                    </Button>
-
-                    <Button
-                      type="submit"
-                      disabled={isFinalLoading}
-                      className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white px-8 py-2 text-base"
-                    >
-                      {isFinalLoading ? (
+                      {isInitialLoading ? (
                         <>
-                          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                          Generating...
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Analyzing...
                         </>
                       ) : (
                         <>
-                          <Sparkles className="mr-2 h-5 w-5" />
-                          Generate Customer Report
+                          Analyze
+                          <ArrowRight size={16} className="ml-2" />
                         </>
                       )}
                     </Button>
                   </div>
-                </form>
-              </Form>
-            </CardContent>
-          </Card>
-        )}
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            // Review and Confirm Card
+            <Card className="shadow-lg border border-gray-200 dark:border-gray-800 transition-all relative overflow-hidden">
+              {isFinalLoading && (
+                <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center p-6">
+                  <div className="flex flex-col items-center space-y-6 max-w-md text-center">
+                    <Loader2 className="h-10 w-10 sm:h-12 sm:w-12 animate-spin text-primary" />
+                    <div>
+                      <p className="text-base sm:text-lg font-medium text-primary mb-1">
+                        Generating Customer Report...
+                      </p>
+                      <p className="text-xs sm:text-sm text-muted-foreground">This may take a few moments</p>
+                    </div>
+
+                    {/* Progress bar */}
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mt-2">
+                      <div
+                        className="bg-indigo-600 dark:bg-indigo-500 h-2.5 rounded-full transition-all duration-300"
+                        style={{ width: `${progress}%` }}
+                      ></div>
+                    </div>
+
+                    <div className="text-xs text-gray-500 dark:text-gray-400 italic mt-2">
+                      Analyzing market data and generating insights...
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <CardContent className="p-4 sm:p-6 md:p-8">
+                <div className="mb-4 sm:mb-6">
+                  <Alert className="bg-primary/5 border-primary/20">
+                    <AlertDescription className="text-xs sm:text-sm">
+                      We've analyzed your idea! Review and adjust the details below to generate your customer report.
+                    </AlertDescription>
+                  </Alert>
+                </div>
+
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onFinalSubmit)} className="space-y-6 sm:space-y-8">
+                    <NewSegmentForm form={form} />
+
+                    <div className="flex flex-col sm:flex-row items-center gap-3 sm:justify-between pt-4 sm:pt-6">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setShowDetailedForm(false)}
+                        className="text-xs sm:text-sm w-full sm:w-auto"
+                      >
+                        <ArrowLeft className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                        Back to Editor
+                      </Button>
+
+                      <Button
+                        type="submit"
+                        disabled={isFinalLoading}
+                        className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white px-4 sm:px-8 py-2 text-xs sm:text-sm w-full sm:w-auto"
+                      >
+                        {isFinalLoading ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Generating...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="mr-2 h-4 w-4" />
+                            Generate Customer Report
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </div>
     </>
   );

@@ -1,6 +1,6 @@
-import { Segment } from '@/api/segment';
+import { deleteSegment, Segment } from '@/api/segment';
 import { FolderSearch, HeartCrack, Hourglass, MoreHorizontal, StarOff, Trash2 } from 'lucide-react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,12 +17,51 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '../../components/ui/sidebar';
+import { useToast } from '@/hooks/use-toast';
+import { useAppDispatch } from '@/redux/hooks';
+import { setSegments } from '@/redux/slice/segment';
 
 export function NavSegments({ segments, isLoading }: { segments: Segment[]; isLoading: boolean }) {
   const { isMobile } = useSidebar();
   const location = useLocation();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const dispatch = useAppDispatch();
 
-  const handleDelete = () => {};
+  const handleDelete = async (segmentId: string, event: React.MouseEvent) => {
+    // Prevent the click from bubbling up to parent elements
+    event.stopPropagation();
+
+    try {
+      // Call the API to delete the segment
+      await deleteSegment(segmentId);
+
+      // Update the Redux store by filtering out the deleted segment
+      const updatedSegments = segments.filter((segment) => segment._id !== segmentId);
+      dispatch(setSegments(updatedSegments));
+
+      // Show success toast
+      toast({
+        title: 'Segment deleted',
+        description: 'The segment has been successfully deleted.',
+        variant: 'default',
+      });
+
+      // If we're currently viewing the deleted segment, navigate to the dashboard
+      if (location.pathname === `/segment/${segmentId}`) {
+        navigate('/');
+      }
+    } catch (error) {
+      console.error('Error deleting segment:', error);
+
+      // Show error toast
+      toast({
+        title: 'Error deleting segment',
+        description: 'There was a problem deleting the segment. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  };
 
   const renderEmpty = () => (
     <div className="flex flex-col items-center justify-center p-8 space-y-4">
@@ -59,7 +98,7 @@ export function NavSegments({ segments, isLoading }: { segments: Segment[]; isLo
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      <SidebarGroupLabel>Favorites 🚀</SidebarGroupLabel>
+      <SidebarGroupLabel>Segments 🚀</SidebarGroupLabel>
       {segments && segments.length > 0 ? (
         <SidebarMenu>
           {segments.map((item) => (
@@ -87,7 +126,7 @@ export function NavSegments({ segments, isLoading }: { segments: Segment[]; isLo
                     <span>Remove from Favorites</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleDelete}>
+                  <DropdownMenuItem onClick={(event) => handleDelete(item._id, event)}>
                     <Trash2 className="text-muted-foreground" />
                     <span>Delete</span>
                   </DropdownMenuItem>

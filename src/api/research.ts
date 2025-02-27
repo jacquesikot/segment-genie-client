@@ -4,9 +4,10 @@ import type { Segment, SegmentStatus } from './segment';
 import { z } from 'zod';
 
 const revenueSchema = z.object({
-  value: z.number().nullable().describe('Revenue value in its full number unit'),
+  value: z.number().nullable().describe('Revenue value in its number unit'),
   currency: z.string().nullable().describe('Currency code (e.g., USD, EUR)'),
   rawString: z.string().nullable().describe('Raw revenue string from source'),
+  unit: z.enum(['billion', 'million', 'thousand']),
   formattedValue: z.number().nullable().describe('Actual value with proper scale'),
   confidence: z
     .number()
@@ -522,6 +523,14 @@ const comparativeAnalysisSchema = z
   })
   .describe('Comprehensive comparative analysis of market and competition');
 
+export const recommendationSchema = z.object({
+  recommendation: z.string(),
+  rationale: z.string(),
+  priority: z.string(),
+  resourceRequirements: z.string().optional(),
+  risks: z.array(z.string()).optional(),
+});
+
 export const competitionSchema = z.object({
   metadata: z.object({
     analysisDate: z.string(),
@@ -535,7 +544,7 @@ export const competitionSchema = z.object({
   }),
   competitors: z.array(competitorDetailSchema),
   comparativeAnalysis: comparativeAnalysisSchema,
-  recommendations: z.object({}),
+  recommendations: z.array(recommendationSchema),
 });
 
 export type MarketSize = z.infer<typeof marketSizeSchema>;
