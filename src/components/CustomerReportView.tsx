@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { BarChart3, Brain, Building2, Clock, Menu, Target, Users2, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import MarketSizeView from './market-size-view';
+import CompetitionView from './competition-view';
 
 const SECTIONS = [
   {
@@ -137,11 +138,10 @@ const CustomerReportView: React.FC<Props> = ({ report, status }) => {
           {activeSection === 'industry-market' ? (
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             <MarketSizeView marketSize={report ? (report.marketSize as any) : undefined} status={status.marketSize} />
+          ) : activeSection === 'competition' ? (
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            <CompetitionView data={report ? (report.competitors as any) : undefined} status={status.competitors} />
           ) : (
-            // ) : activeSection === 'pain-points' ? (
-            //   <PainPointsView data={report ? report.painPoints : undefined} status={status.painPoints} />
-            // ) : activeSection === 'competition' ? (
-            //   <CompetitionView data={report ? report.competitors : undefined} status={status.competitors} />
             <ComingSoonSection title={SECTIONS.find((s) => s.id === activeSection)?.label || ''} />
           )}
         </div>
