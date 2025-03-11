@@ -55,7 +55,7 @@ const CompetitorView: React.FC<Props> = ({ data: competitorData, status }) => {
       : competitorData.competitors.filter((c: any) => c.category === filterCategory);
 
   return (
-    <div className="space-y-6 px-2 sm:px-4 md:px-6 lg:px-8">
+    <div className="space-y-6 px-2">
       <Card className="shadow-lg dark:bg-gray-900 border-0 overflow-hidden">
         <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 pb-4 sm:pb-6">
           <div className="flex flex-col gap-4">
