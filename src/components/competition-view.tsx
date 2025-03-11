@@ -146,8 +146,16 @@ const CompetitorView: React.FC<Props> = ({ data: competitorData, status }) => {
                         <h3 className="text-sm sm:text-base font-medium mb-2">Key Trends</h3>
                         <div className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded-lg text-xs sm:text-sm">
                           <p className="text-gray-600 dark:text-gray-400">
-                            {competitorData.comparativeAnalysis.marketOverview.keyTrends ||
-                              'Market dynamics information not available.'}
+                            {competitorData.comparativeAnalysis.marketOverview.keyTrends.map(
+                              (line: string, idx: number) => (
+                                <React.Fragment key={idx}>
+                                  <span className="text-gray-600 dark:text-gray-400">•</span> {line}
+                                  {idx < competitorData.comparativeAnalysis.marketOverview.keyTrends.length - 1 && (
+                                    <br />
+                                  )}
+                                </React.Fragment>
+                              )
+                            ) || 'Key trends information not available.'}
                           </p>
                         </div>
                       </div>
