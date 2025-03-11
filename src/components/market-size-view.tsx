@@ -1,31 +1,31 @@
 import { Status } from '@/api/segment';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { cva } from 'class-variance-authority';
 import {
-  Building2,
-  ExternalLink,
-  TrendingUp,
   AlertTriangle,
-  Clock,
-  BookOpen,
-  ArrowUpRight,
-  LineChart,
-  Users,
-  UserCheck,
-  Target,
-  FlaskConical,
-  Calendar,
-  BarChart4,
   ArrowDownUp,
-  ShieldAlert,
+  ArrowUpRight,
+  BarChart4,
+  BookOpen,
+  Building2,
+  Calendar,
+  Clock,
+  ExternalLink,
+  FlaskConical,
   Info,
+  LineChart,
+  ShieldAlert,
+  Target,
+  TrendingUp,
+  UserCheck,
+  Users,
 } from 'lucide-react';
 import SegmentLoader from './SegmentLoader';
-import { cva } from 'class-variance-authority';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 interface Industry {
   primaryIndustry: string;
@@ -49,8 +49,8 @@ interface MarketSize {
       title?: string;
       credibilityScore?: number;
       datePublished?: string | null;
-      publisher?: string; // Adding this as it exists in sample data
-      relevanceScore?: number; // Adding this as it exists in UI
+      publisher?: string;
+      relevanceScore?: number;
     }>;
   };
   marketAnalysis: {
@@ -96,7 +96,6 @@ interface Props {
   status: Status;
 }
 
-// Helper function to format currency
 const formatCurrency = (value: number, currency: string, unit: string) => {
   const formatter = new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -107,7 +106,6 @@ const formatCurrency = (value: number, currency: string, unit: string) => {
 
   let formattedValue = formatter.format(value);
 
-  // Add unit abbreviation
   switch (unit) {
     case 'trillion':
       formattedValue += 'T';
@@ -126,7 +124,6 @@ const formatCurrency = (value: number, currency: string, unit: string) => {
   return formattedValue;
 };
 
-// Helper function to determine status styles based on market maturity
 const getMaturityStyles = (maturity: string) => {
   switch (maturity) {
     case 'emerging':
@@ -162,7 +159,6 @@ const getMaturityStyles = (maturity: string) => {
   }
 };
 
-// Define a variant for market metric cards
 const marketCardVariants = cva('border shadow-sm hover:shadow-md transition-shadow dark:bg-gray-900 h-full', {
   variants: {
     type: {
@@ -190,17 +186,12 @@ const MarketSizeView = ({ marketSize, status }: Props) => {
   }
 
   const industry = marketSize.marketAnalysis.industry;
-
   const analysisDate = new Date(marketSize.metadata.analysisDate).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
   });
-
-  // Use industry maturity instead of market maturity when available
   const maturityStyles = getMaturityStyles(industry.industryMaturity || marketSize.metadata.marketMaturity);
-
-  // Build TAM/SAM/SOM Data
   const tam = marketSize.marketAnalysis.tam;
   const sam = marketSize.marketAnalysis.sam;
   const som = marketSize.marketAnalysis.som;
@@ -208,7 +199,7 @@ const MarketSizeView = ({ marketSize, status }: Props) => {
   return (
     <div className="space-y-8">
       {/* Market Overview Card */}
-      <Card className="border-l-4 border-l-blue-500 dark:border-l-blue-400 shadow-lg dark:bg-gray-900">
+      <Card className="shadow-lg dark:bg-gray-900">
         <CardHeader>
           <div className="flex flex-col md:flex-row justify-between gap-4">
             <div className="flex items-start gap-4">
@@ -487,7 +478,6 @@ const MarketMetricCard = ({
   timeToAchieve?: number;
   methodology: string;
 }) => {
-  // Define icons and colors based on type
   const getTypeStyles = () => {
     switch (type) {
       case 'tam':

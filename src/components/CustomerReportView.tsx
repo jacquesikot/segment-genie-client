@@ -7,6 +7,7 @@ import { BarChart3, Brain, Building2, Clock, Menu, Target, Users2, X } from 'luc
 import React, { useEffect, useState } from 'react';
 import MarketSizeView from './market-size-view';
 import CompetitionView from './competition-view';
+import PainPointsView from './pain-points-view';
 
 const SECTIONS = [
   {
@@ -141,6 +142,9 @@ const CustomerReportView: React.FC<Props> = ({ report, status }) => {
           ) : activeSection === 'competition' ? (
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             <CompetitionView data={report ? (report.competitors as any) : undefined} status={status.competitors} />
+          ) : activeSection === 'pain-points' ? (
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            <PainPointsView data={report ? (report.painPoints as any) : undefined} status={status.painPoints} />
           ) : (
             <ComingSoonSection title={SECTIONS.find((s) => s.id === activeSection)?.label || ''} />
           )}
