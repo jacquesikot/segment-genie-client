@@ -79,11 +79,11 @@ const ClusterChip = ({ cluster }: any) => (
     </div>
     <p className="text-sm text-muted-foreground mb-3">{cluster.description}</p>
     <div className="flex flex-wrap gap-2">
-      {cluster.relatedPainPoints.map((point: any) => (
+      {/* {cluster.relatedPainPoints.map((point: any) => (
         <Badge key={point} variant="outline" className="text-xs py-1 px-2 font-normal">
           {point}
         </Badge>
-      ))}
+      ))} */}
     </div>
   </div>
 );
