@@ -51,7 +51,13 @@ const CompetitorView: React.FC<Props> = ({ data: competitorData, status }) => {
 
   const filteredCompetitors =
     filterCategory === 'All'
-      ? competitorData.competitors
+      ? [...competitorData.competitors].sort((a, b) => {
+          const order = { direct: 0, indirect: 1, potential: 2 };
+          return (
+            order[a.category?.toLowerCase() as keyof typeof order] -
+            order[b.category?.toLowerCase() as keyof typeof order]
+          );
+        })
       : competitorData.competitors.filter((c: any) => c.category === filterCategory);
 
   return (
@@ -239,7 +245,7 @@ const CompetitorView: React.FC<Props> = ({ data: competitorData, status }) => {
                                 : 'bg-blue-100 text-blue-700 hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-400'
                             }`}
                           >
-                            {competitor.category}
+                            {competitor.category.charAt(0).toUpperCase() + competitor.category.slice(1).toLowerCase()}
                           </Badge>
                           <span className="font-semibold text-sm sm:text-base">{competitor.name}</span>
                         </div>
@@ -253,9 +259,10 @@ const CompetitorView: React.FC<Props> = ({ data: competitorData, status }) => {
                             href={competitor.website}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-blue-600 hover:text-blue-800 transition-colors p-1 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                            className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors px-2 py-1 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/30 flex items-center gap-1.5 text-xs border border-blue-200 dark:border-blue-800/50 shadow-sm"
                           >
-                            <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4" />
+                            <span>View product</span>
+                            <ExternalLink className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                           </a>
                         </div>
                       </div>
@@ -269,12 +276,10 @@ const CompetitorView: React.FC<Props> = ({ data: competitorData, status }) => {
                               Company Profile
                             </h4>
                             <div className="text-xs sm:text-sm space-y-2 sm:space-y-3">
-                              {/* {competitor.companyProfile.foundedYear && ( */}
                               <CompanyProfileItem
                                 label="Founded"
                                 value={competitor.companyProfile.foundedYear || 'N/A'}
                               />
-                              {/* )} */}
                               <CompanyProfileItem
                                 label="HQ"
                                 value={competitor.companyProfile.headquartersLocation || 'Not specified'}
