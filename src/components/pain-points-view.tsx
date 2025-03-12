@@ -341,7 +341,7 @@ const PainPointsView = ({ data, status }: Props) => {
                 tooltip="Measure of how diverse the sources are across different platforms"
               />
               <MetricCard
-                title="Validation Score"
+                title="Confidence Score"
                 value={`${(metadata.validationScore * 100).toFixed(0)}%`}
                 icon={<Flame className="w-5 h-5 text-orange-500" />}
                 tooltip="Confidence level in the accuracy and reliability of the data"

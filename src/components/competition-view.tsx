@@ -49,16 +49,18 @@ const CompetitorView: React.FC<Props> = ({ data: competitorData, status }) => {
     day: 'numeric',
   });
 
+  const finalCompetitors = competitorData.competitors.filter((c) => c.name);
+
   const filteredCompetitors =
     filterCategory === 'All'
-      ? [...competitorData.competitors].sort((a, b) => {
+      ? [...finalCompetitors].sort((a, b) => {
           const order = { direct: 0, indirect: 1, potential: 2 };
           return (
             order[a.category?.toLowerCase() as keyof typeof order] -
             order[b.category?.toLowerCase() as keyof typeof order]
           );
         })
-      : competitorData.competitors.filter((c: any) => c.category === filterCategory);
+      : finalCompetitors.filter((c: any) => c.category === filterCategory);
 
   return (
     <div className="space-y-6 px-2">
