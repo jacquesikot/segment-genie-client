@@ -170,9 +170,15 @@ const CompetitorView: React.FC<Props> = ({ data: competitorData, status }) => {
                                   {
                                     label: 'Competitors',
                                     data: [
-                                      competitorData.competitors.filter((c: any) => c.category === 'Direct').length,
-                                      competitorData.competitors.filter((c: any) => c.category === 'Indirect').length,
-                                      competitorData.competitors.filter((c: any) => c.category === 'Potential').length,
+                                      competitorData.competitors.filter(
+                                        (c: any) => c.category.toLowerCase() === 'direct'
+                                      ).length,
+                                      competitorData.competitors.filter(
+                                        (c: any) => c.category.toLowerCase() === 'indirect'
+                                      ).length,
+                                      competitorData.competitors.filter(
+                                        (c: any) => c.category.toLowerCase() === 'potential'
+                                      ).length,
                                     ],
                                     backgroundColor: ['#F87171', '#FBBF24', '#60A5FA'],
                                     borderRadius: 4,
@@ -224,11 +230,11 @@ const CompetitorView: React.FC<Props> = ({ data: competitorData, status }) => {
                       <div className="flex flex-col sm:flex-row sm:justify-between w-full items-start sm:items-center gap-2">
                         <div className="flex items-center gap-2 sm:gap-3">
                           <Badge
-                            variant={competitor.category === 'Direct' ? 'default' : 'secondary'}
+                            variant={competitor.category.toLowerCase() === 'direct' ? 'default' : 'secondary'}
                             className={`text-xs sm:text-sm ${
-                              competitor.category === 'Direct'
+                              competitor.category.toLowerCase() === 'direct'
                                 ? 'bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400'
-                                : competitor.category === 'Indirect'
+                                : competitor.category.toLowerCase() === 'indirect'
                                 ? 'bg-amber-100 text-amber-700 hover:bg-amber-200 dark:bg-amber-900/30 dark:text-amber-400'
                                 : 'bg-blue-100 text-blue-700 hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-400'
                             }`}
@@ -263,10 +269,12 @@ const CompetitorView: React.FC<Props> = ({ data: competitorData, status }) => {
                               Company Profile
                             </h4>
                             <div className="text-xs sm:text-sm space-y-2 sm:space-y-3">
+                              {/* {competitor.companyProfile.foundedYear && ( */}
                               <CompanyProfileItem
                                 label="Founded"
                                 value={competitor.companyProfile.foundedYear || 'N/A'}
                               />
+                              {/* )} */}
                               <CompanyProfileItem
                                 label="HQ"
                                 value={competitor.companyProfile.headquartersLocation || 'Not specified'}
