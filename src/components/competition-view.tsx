@@ -261,7 +261,7 @@ const CompetitorView: React.FC<Props> = ({ data: competitorData, status }) => {
                             href={competitor.website}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors px-2 py-1 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/30 flex items-center gap-1.5 text-xs border border-blue-200 dark:border-blue-800/50 shadow-sm"
+                            className="mr-2 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors px-2 py-1 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/30 flex items-center gap-1.5 text-xs border border-blue-200 dark:border-blue-800/50 shadow-sm"
                           >
                             <span>View product</span>
                             <ExternalLink className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
