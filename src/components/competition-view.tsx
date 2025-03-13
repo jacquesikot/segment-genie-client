@@ -60,7 +60,7 @@ const CompetitorView: React.FC<Props> = ({ data: competitorData, status }) => {
             order[b.category?.toLowerCase() as keyof typeof order]
           );
         })
-      : finalCompetitors.filter((c: any) => c.category === filterCategory);
+      : finalCompetitors.filter((c: any) => c.category.toLowerCase() === filterCategory.toLowerCase());
 
   return (
     <div className="space-y-6 px-2">
