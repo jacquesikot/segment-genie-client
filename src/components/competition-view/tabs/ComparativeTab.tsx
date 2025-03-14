@@ -1,6 +1,6 @@
-import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { ChevronRight } from 'lucide-react';
+import React from 'react';
 
 interface FeatureComparisonItem {
   feature: string;
@@ -23,31 +23,49 @@ interface ComparativeTabProps {
   };
 }
 
+const getImportanceColor = (importance: string) => {
+  const lowerImportance = importance.toLowerCase();
+  if (lowerImportance.includes('high') || lowerImportance.includes('critical')) {
+    return 'text-red-800 dark:text-red-300';
+  } else if (lowerImportance.includes('medium')) {
+    return 'text-amber-800 dark:text-amber-300';
+  } else {
+    return 'text-blue-800 dark:text-blue-300';
+  }
+};
+
 const ComparativeTab: React.FC<ComparativeTabProps> = ({ comparativeAnalysis }) => {
   return (
-    <div className="space-y-4 sm:space-y-6">
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg sm:text-xl">Feature Comparison</CardTitle>
+    <div className="space-y-6">
+      <Card className="overflow-hidden border-none shadow-md">
+        <CardHeader className="bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 pb-3">
+          <CardTitle className="text-xl font-semibold flex items-center gap-2">
+            <span className="inline-block w-1.5 h-6 bg-indigo-500 rounded-full mr-1"></span>
+            Feature Comparison
+          </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0">
           <div className="overflow-x-auto">
             {/* Mobile view (card-based layout) */}
-            <div className="md:hidden space-y-4">
+            <div className="md:hidden space-y-4 p-4">
               {comparativeAnalysis.featureComparison.map((feature: FeatureComparisonItem, idx: number) => (
-                <div key={idx} className="border rounded-lg p-3 shadow-sm bg-white dark:bg-gray-950">
-                  <div className="flex flex-col mb-2">
-                    <h4 className="font-semibold text-sm">{feature.feature}</h4>
-                    <h4 className="text-xs mt-1">{feature.importance}</h4>
+                <div key={idx} className="border rounded-lg overflow-hidden shadow-sm">
+                  <div className="bg-slate-50 dark:bg-slate-900/50 p-3 border-b">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
+                      <h4 className="font-semibold text-sm">{feature.feature}</h4>
+                      <h4 className={`text-xs py-0.5 ${getImportanceColor(feature.importance)}`}>
+                        {feature.importance}
+                      </h4>
+                    </div>
                   </div>
-                  <div className="space-y-2 mt-3">
+                  <div className="p-3 space-y-3">
                     {feature.competitors.map((comp, i: number) => (
-                      <div key={i} className="bg-gray-50 dark:bg-gray-900/50 p-2 rounded-md">
-                        <div className="flex flex-col">
-                          <span className="font-medium text-xs">{comp.name}</span>
-                          <span className="text-xs italic mt-1">{comp.implementation}</span>
+                      <div key={i} className="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-md">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 mb-1">
+                          <span className="font-medium text-sm">{comp.name}</span>
+                          <span className="text-xs py-0.5">{comp.implementation}</span>
                         </div>
-                        <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{comp.notes}</p>
+                        <p className="text-xs text-slate-600 dark:text-slate-400">{comp.notes}</p>
                       </div>
                     ))}
                   </div>
@@ -56,55 +74,98 @@ const ComparativeTab: React.FC<ComparativeTabProps> = ({ comparativeAnalysis }) 
             </div>
 
             {/* Desktop view (table layout) */}
-            <table className="w-full text-xs sm:text-sm hidden md:table">
-              <thead>
-                <tr className="border-b">
-                  <th className="p-2 text-left">Feature</th>
-                  <th className="p-2 text-left">Importance</th>
-                  <th className="p-2 text-left">Competitors</th>
-                </tr>
-              </thead>
-              <tbody>
-                {comparativeAnalysis.featureComparison.map((feature: FeatureComparisonItem, idx: number) => (
-                  <tr key={idx} className="border-b">
-                    <td className="p-2">{feature.feature}</td>
-                    <td className="p-2">{feature.importance}</td>
-                    <td className="p-2">
-                      {feature.competitors.map((comp, i: number) => (
-                        <div key={i}>
-                          <strong>{comp.name}</strong>: {comp.implementation} ({comp.notes})
-                        </div>
-                      ))}
-                    </td>
+            <div className="hidden md:block">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-slate-50 dark:bg-slate-900/50">
+                    <th className="p-4 text-left font-medium text-slate-700 dark:text-slate-300 w-1/4">Feature</th>
+                    <th className="p-4 text-left font-medium text-slate-700 dark:text-slate-300 w-1/6">Importance</th>
+                    <th className="p-4 text-left font-medium text-slate-700 dark:text-slate-300">
+                      Competitor Implementation
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {comparativeAnalysis.featureComparison.map((feature: FeatureComparisonItem, idx: number) => (
+                    <tr
+                      key={idx}
+                      className="border-b hover:bg-slate-50/50 dark:hover:bg-slate-900/30 transition-colors"
+                    >
+                      <td className="p-4 align-top font-medium">{feature.feature}</td>
+                      <td className="p-4 align-top">
+                        <h4 className={`text-xs py-0.5 ${getImportanceColor(feature.importance)}`}>
+                          {feature.importance}
+                        </h4>
+                      </td>
+                      <td className="p-4">
+                        <div className="space-y-3">
+                          {feature.competitors.map((comp, i: number) => (
+                            <div key={i} className="p-3 bg-slate-50 dark:bg-slate-900/50 rounded-md">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-medium">{comp.name}</span>
+                                <span className="text-xs px-2 py-0.5 bg-slate-200 dark:bg-slate-700 rounded-full">
+                                  {comp.implementation}
+                                </span>
+                              </div>
+                              <p className="text-sm text-slate-600 dark:text-slate-400">{comp.notes}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </CardContent>
       </Card>
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg sm:text-xl">Opportunity Spaces</CardTitle>
+
+      <Card className="overflow-hidden border-none shadow-md">
+        <CardHeader className="bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 pb-3">
+          <CardTitle className="text-xl font-semibold flex items-center gap-2">
+            <span className="inline-block w-1.5 h-6 bg-green-500 rounded-full mr-1"></span>
+            Opportunity Spaces
+          </CardTitle>
         </CardHeader>
-        <CardContent>
-          <Accordion type="multiple">
+        <CardContent className="p-4">
+          <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
             {comparativeAnalysis.opportunitySpaces.map((space: OpportunitySpaceItem, idx: number) => (
-              <AccordionItem key={idx} value={`space-${idx}`}>
-                <AccordionTrigger className="text-sm sm:text-base">{space.description}</AccordionTrigger>
-                <AccordionContent className="text-xs sm:text-sm mt-2">
-                  <p>Potential Size: {space.potentialSize}</p>
-                  <p>Entry Difficulty: {space.entryDifficulty}</p>
-                  <p>Time to Market: {space.timeToMarket}</p>
-                  <ul className="list-disc pl-4">
-                    {space.unservedNeeds.map((need: string, i: number) => (
-                      <li key={i}>{need}</li>
-                    ))}
-                  </ul>
-                </AccordionContent>
-              </AccordionItem>
+              <Card key={idx} className="border shadow-sm overflow-hidden">
+                <CardHeader className="p-4 pb-2 bg-slate-50 dark:bg-slate-900/50">
+                  <CardTitle className="text-base font-medium">{space.description}</CardTitle>
+                </CardHeader>
+                <CardContent className="p-4 pt-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-4">
+                    <div className="p-2 bg-slate-50 dark:bg-slate-900/30 rounded-md">
+                      <div className="text-xs text-slate-500 dark:text-slate-400">Potential Size</div>
+                      <div className="font-medium text-sm mt-1">{space.potentialSize}</div>
+                    </div>
+                    <div className="p-2 bg-slate-50 dark:bg-slate-900/30 rounded-md">
+                      <div className="text-xs text-slate-500 dark:text-slate-400">Entry Difficulty</div>
+                      <div className="font-medium text-sm mt-1">{space.entryDifficulty}</div>
+                    </div>
+                    <div className="p-2 bg-slate-50 dark:bg-slate-900/30 rounded-md">
+                      <div className="text-xs text-slate-500 dark:text-slate-400">Time to Market</div>
+                      <div className="font-medium text-sm mt-1">{space.timeToMarket}</div>
+                    </div>
+                  </div>
+
+                  <div className="mt-3">
+                    <h4 className="text-sm font-medium mb-2">Unserved Needs:</h4>
+                    <ul className="space-y-1.5">
+                      {space.unservedNeeds.map((need: string, i: number) => (
+                        <li key={i} className="flex items-start gap-2 text-sm">
+                          <ChevronRight className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                          <span>{need}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
-          </Accordion>
+          </div>
         </CardContent>
       </Card>
     </div>
