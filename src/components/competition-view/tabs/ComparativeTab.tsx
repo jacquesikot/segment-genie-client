@@ -2,8 +2,25 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
+interface FeatureComparisonItem {
+  feature: string;
+  importance: string;
+  competitors: { name: string; implementation: string; notes: string }[];
+}
+
+interface OpportunitySpaceItem {
+  description: string;
+  potentialSize: string;
+  entryDifficulty: string;
+  timeToMarket: string;
+  unservedNeeds: string[];
+}
+
 interface ComparativeTabProps {
-  comparativeAnalysis: any;
+  comparativeAnalysis: {
+    featureComparison: FeatureComparisonItem[];
+    opportunitySpaces: OpportunitySpaceItem[];
+  };
 }
 
 const ComparativeTab: React.FC<ComparativeTabProps> = ({ comparativeAnalysis }) => {
@@ -17,14 +34,14 @@ const ComparativeTab: React.FC<ComparativeTabProps> = ({ comparativeAnalysis }) 
           <div className="overflow-x-auto">
             {/* Mobile view (card-based layout) */}
             <div className="md:hidden space-y-4">
-              {comparativeAnalysis.featureComparison.map((feature: any, idx: number) => (
+              {comparativeAnalysis.featureComparison.map((feature: FeatureComparisonItem, idx: number) => (
                 <div key={idx} className="border rounded-lg p-3 shadow-sm bg-white dark:bg-gray-950">
                   <div className="flex flex-col mb-2">
                     <h4 className="font-semibold text-sm">{feature.feature}</h4>
                     <h4 className="text-xs mt-1">{feature.importance}</h4>
                   </div>
                   <div className="space-y-2 mt-3">
-                    {feature.competitors.map((comp: any, i: number) => (
+                    {feature.competitors.map((comp, i: number) => (
                       <div key={i} className="bg-gray-50 dark:bg-gray-900/50 p-2 rounded-md">
                         <div className="flex flex-col">
                           <span className="font-medium text-xs">{comp.name}</span>
@@ -48,12 +65,12 @@ const ComparativeTab: React.FC<ComparativeTabProps> = ({ comparativeAnalysis }) 
                 </tr>
               </thead>
               <tbody>
-                {comparativeAnalysis.featureComparison.map((feature: any, idx: number) => (
+                {comparativeAnalysis.featureComparison.map((feature: FeatureComparisonItem, idx: number) => (
                   <tr key={idx} className="border-b">
                     <td className="p-2">{feature.feature}</td>
                     <td className="p-2">{feature.importance}</td>
                     <td className="p-2">
-                      {feature.competitors.map((comp: any, i: number) => (
+                      {feature.competitors.map((comp, i: number) => (
                         <div key={i}>
                           <strong>{comp.name}</strong>: {comp.implementation} ({comp.notes})
                         </div>
@@ -72,7 +89,7 @@ const ComparativeTab: React.FC<ComparativeTabProps> = ({ comparativeAnalysis }) 
         </CardHeader>
         <CardContent>
           <Accordion type="multiple">
-            {comparativeAnalysis.opportunitySpaces.map((space: any, idx: number) => (
+            {comparativeAnalysis.opportunitySpaces.map((space: OpportunitySpaceItem, idx: number) => (
               <AccordionItem key={idx} value={`space-${idx}`}>
                 <AccordionTrigger className="text-sm sm:text-base">{space.description}</AccordionTrigger>
                 <AccordionContent className="text-xs sm:text-sm mt-2">

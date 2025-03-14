@@ -15,10 +15,10 @@ import {
 import { Users } from 'lucide-react';
 import React, { useState } from 'react';
 import SegmentLoader from '../SegmentLoader';
-import OverviewTab from './tabs/OverviewTab';
-import CompetitorsTab from './tabs/CompetitorsTab';
+import OverviewTab, { CompetitorData } from './tabs/OverviewTab';
+import CompetitorsTab, { Competitor } from './tabs/CompetitorsTab';
 import ComparativeTab from './tabs/ComparativeTab';
-import RecommendationsTab from './tabs/RecommendationsTab';
+import RecommendationsTab, { Recommendation } from './tabs/RecommendationsTab';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, ChartTooltip, Legend);
 
@@ -99,12 +99,12 @@ const CompetitionView: React.FC<Props> = ({ data: competitorData, status }) => {
             </TabsList>
 
             <TabsContent value="overview" className="mt-10">
-              <OverviewTab competitorData={competitorData} analysisDate={analysisDate} />
+              <OverviewTab competitorData={competitorData as CompetitorData} analysisDate={analysisDate} />
             </TabsContent>
 
             <TabsContent value="competitors" className="mt-10">
               <CompetitorsTab
-                competitors={filteredCompetitors}
+                competitors={filteredCompetitors as unknown as Competitor[]}
                 filterCategory={filterCategory}
                 setFilterCategory={setFilterCategory}
               />
@@ -115,7 +115,7 @@ const CompetitionView: React.FC<Props> = ({ data: competitorData, status }) => {
             </TabsContent>
 
             <TabsContent value="recommendations" className="mt-10">
-              <RecommendationsTab recommendations={competitorData.recommendations} />
+              <RecommendationsTab recommendations={competitorData.recommendations as unknown as Recommendation[]} />
             </TabsContent>
           </Tabs>
         </CardContent>

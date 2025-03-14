@@ -2,7 +2,14 @@ import React from 'react';
 import { CompanyProfileItem } from '../common/MetricItems';
 
 interface CompanyProfileProps {
-  companyProfile: any;
+  companyProfile: {
+    foundedYear: string | number;
+    headquartersLocation: string;
+    employeeCount: string | number;
+    fundingStatus: string;
+    lastFundingAmount: string | number;
+    keyExecutives: string[];
+  };
 }
 
 const CompanyProfile: React.FC<CompanyProfileProps> = ({ companyProfile }) => {
@@ -13,9 +20,9 @@ const CompanyProfile: React.FC<CompanyProfileProps> = ({ companyProfile }) => {
         Company Profile
       </h4>
       <div className="text-xs sm:text-sm space-y-2 sm:space-y-3">
-        <CompanyProfileItem label="Founded" value={companyProfile.foundedYear || 'N/A'} />
+        <CompanyProfileItem label="Founded" value={companyProfile.foundedYear?.toString() || 'N/A'} />
         <CompanyProfileItem label="HQ" value={companyProfile.headquartersLocation || 'Not specified'} />
-        <CompanyProfileItem label="Employees" value={companyProfile.employeeCount || 'Not specified'} />
+        <CompanyProfileItem label="Employees" value={companyProfile.employeeCount?.toString() || 'Not specified'} />
         <CompanyProfileItem
           label="Funding"
           value={`${companyProfile.fundingStatus || 'Not available'} (${companyProfile.lastFundingAmount || 'N/A'})`}

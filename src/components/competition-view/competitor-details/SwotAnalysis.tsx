@@ -1,8 +1,19 @@
 import React from 'react';
 import { Bar } from 'react-chartjs-2';
 
+interface SwotItem {
+  point: string;
+  impact: string;
+  evidence: string;
+}
+
 interface SwotAnalysisProps {
-  swotAnalysis: any;
+  swotAnalysis: {
+    strengths: SwotItem[];
+    weaknesses: SwotItem[];
+    opportunities: SwotItem[];
+    threats: SwotItem[];
+  };
 }
 
 const SwotAnalysis: React.FC<SwotAnalysisProps> = ({ swotAnalysis }) => {
@@ -20,7 +31,7 @@ const SwotAnalysis: React.FC<SwotAnalysisProps> = ({ swotAnalysis }) => {
           </h5>
           <div className="max-h-32 sm:max-h-40 overflow-y-auto pr-2 custom-scrollbar">
             <ul className="list-disc pl-4 text-xs space-y-1">
-              {swotAnalysis.strengths.map((item: any, i: number) => (
+              {swotAnalysis.strengths.map((item: SwotItem, i: number) => (
                 <li key={i} className="text-green-700 dark:text-green-400">
                   <span className="font-medium">{item.point}</span>
                   <div className="text-[10px] sm:text-xs text-green-600/80 dark:text-green-400/80 mt-0.5">
@@ -38,7 +49,7 @@ const SwotAnalysis: React.FC<SwotAnalysisProps> = ({ swotAnalysis }) => {
           </h5>
           <div className="max-h-32 sm:max-h-40 overflow-y-auto pr-2 custom-scrollbar">
             <ul className="list-disc pl-4 text-xs space-y-1">
-              {swotAnalysis.weaknesses.map((item: any, i: number) => (
+              {swotAnalysis.weaknesses.map((item: SwotItem, i: number) => (
                 <li key={i} className="text-red-700 dark:text-red-400">
                   <span className="font-medium">{item.point}</span>
                   <div className="text-[10px] sm:text-xs text-red-600/80 dark:text-red-400/80 mt-0.5">
@@ -56,7 +67,7 @@ const SwotAnalysis: React.FC<SwotAnalysisProps> = ({ swotAnalysis }) => {
           </h5>
           <div className="max-h-32 sm:max-h-40 overflow-y-auto pr-2 custom-scrollbar">
             <ul className="list-disc pl-4 text-xs space-y-1">
-              {swotAnalysis.opportunities.map((item: any, i: number) => (
+              {swotAnalysis.opportunities.map((item: SwotItem, i: number) => (
                 <li key={i} className="text-blue-700 dark:text-blue-400">
                   <span className="font-medium">{item.point}</span>
                   <div className="text-[10px] sm:text-xs text-blue-600/80 dark:text-blue-400/80 mt-0.5">
@@ -74,7 +85,7 @@ const SwotAnalysis: React.FC<SwotAnalysisProps> = ({ swotAnalysis }) => {
           </h5>
           <div className="max-h-32 sm:max-h-40 overflow-y-auto pr-2 custom-scrollbar">
             <ul className="list-disc pl-4 text-xs space-y-1">
-              {swotAnalysis.threats.map((item: any, i: number) => (
+              {swotAnalysis.threats.map((item: SwotItem, i: number) => (
                 <li key={i} className="text-amber-700 dark:text-amber-400">
                   <span className="font-medium">{item.point}</span>
                   <div className="text-[10px] sm:text-xs text-amber-600/80 dark:text-amber-400/80 mt-0.5">

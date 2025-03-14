@@ -3,8 +3,29 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Bar } from 'react-chartjs-2';
 import ConfidenceIndicator from '../common/ConfidenceIndicator';
 
+interface Competitor {
+  category: string;
+}
+
+export interface CompetitorData {
+  metadata: {
+    totalCompetitors: number;
+    confidenceScore: number;
+    dataFreshness: {
+      averageAge: string;
+    };
+  };
+  comparativeAnalysis: {
+    marketOverview: {
+      entryBarriers: string[];
+      keyTrends: string[];
+    };
+  };
+  competitors: Competitor[];
+}
+
 interface OverviewTabProps {
-  competitorData: any;
+  competitorData: CompetitorData;
   analysisDate: string;
 }
 
@@ -80,11 +101,14 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ competitorData, analysisDate 
                         {
                           label: 'Competitors',
                           data: [
-                            competitorData.competitors.filter((c: any) => c.category.toLowerCase() === 'direct').length,
-                            competitorData.competitors.filter((c: any) => c.category.toLowerCase() === 'indirect')
+                            competitorData.competitors.filter((c: Competitor) => c.category.toLowerCase() === 'direct')
                               .length,
-                            competitorData.competitors.filter((c: any) => c.category.toLowerCase() === 'potential')
-                              .length,
+                            competitorData.competitors.filter(
+                              (c: Competitor) => c.category.toLowerCase() === 'indirect'
+                            ).length,
+                            competitorData.competitors.filter(
+                              (c: Competitor) => c.category.toLowerCase() === 'potential'
+                            ).length,
                           ],
                           backgroundColor: ['#F87171', '#FBBF24', '#60A5FA'],
                           borderRadius: 4,

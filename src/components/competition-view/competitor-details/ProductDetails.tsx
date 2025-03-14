@@ -2,7 +2,12 @@ import React from 'react';
 import { ProductDetailSection } from '../common/MetricItems';
 
 interface ProductDetailsProps {
-  productDetails: any;
+  productDetails: {
+    mainProducts: string[];
+    keyFeatures: string[];
+    uniqueSellingPoints: string[];
+    technologiesUsed: string[];
+  };
 }
 
 const ProductDetails: React.FC<ProductDetailsProps> = ({ productDetails }) => {

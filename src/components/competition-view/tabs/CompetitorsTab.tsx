@@ -12,8 +12,78 @@ import SwotAnalysis from '../competitor-details/SwotAnalysis';
 import { PricingItem } from '../common/MetricItems';
 import CustomerThemeSection from '../common/CustomerThemeSection';
 
+interface CompanyProfile {
+  foundedYear: number;
+  headquartersLocation: string;
+  employeeCount: number;
+  fundingStatus: string;
+  lastFundingAmount: number;
+  keyExecutives: string[];
+}
+
+interface MarketPosition {
+  targetMarkets: string[];
+  geographicPresence: string[];
+  marketShare: number;
+  growthRate: number;
+}
+
+interface ProductDetails {
+  mainProducts: string[];
+  keyFeatures: string[];
+  uniqueSellingPoints: string[];
+  technologiesUsed: string[];
+}
+
+interface SwotItem {
+  point: string;
+  impact: string;
+  evidence: string;
+}
+
+interface SwotAnalysis {
+  strengths: SwotItem[];
+  weaknesses: SwotItem[];
+  opportunities: SwotItem[];
+  threats: SwotItem[];
+}
+
+export interface Competitor {
+  name: string;
+  category: string;
+  website: string;
+  analysisConfidence: number;
+  companyProfile: CompanyProfile;
+  marketPosition: MarketPosition;
+  productDetails: ProductDetails;
+  swotAnalysis: SwotAnalysis;
+  pricingStrategy: {
+    model: string;
+    pricePoints: string[];
+    comparativeValue: string;
+  };
+  customerInsights: {
+    satisfaction: {
+      overallScore: number;
+      positiveThemes: string[];
+      negativeThemes: string[];
+    };
+    painPoints: string[];
+    switchingCosts: string;
+  };
+  recentDevelopments: {
+    date: string;
+    development: string;
+    significance: string;
+  }[];
+  sources: {
+    url: string;
+    relevance: number;
+  }[];
+}
+
 interface CompetitorsTabProps {
-  competitors: any[];
+  competitors: Competitor[];
   filterCategory: string;
   setFilterCategory: (value: string) => void;
 }
@@ -35,7 +105,7 @@ const CompetitorsTab: React.FC<CompetitorsTabProps> = ({ competitors, filterCate
         </Select>
       </div>
       <Accordion type="multiple" className="w-full space-y-3 sm:space-y-4">
-        {competitors.map((competitor: any, idx: number) => (
+        {competitors.map((competitor, idx: number) => (
           <AccordionItem
             key={idx}
             value={`competitor-${idx}`}
@@ -181,7 +251,7 @@ const CompetitorsTab: React.FC<CompetitorsTabProps> = ({ competitors, filterCate
                     </h4>
                     <div className="text-xs sm:text-sm space-y-3 sm:space-y-4">
                       <div className="relative pl-4 sm:pl-6 border-l-2 border-gray-200 dark:border-gray-700 space-y-4 sm:space-y-6">
-                        {competitor.recentDevelopments.map((dev: any, i: number) => (
+                        {competitor.recentDevelopments.map((dev, i: number) => (
                           <div key={i} className="relative">
                             <div className="absolute -left-[19px] sm:-left-[25px] w-3 sm:w-4 h-3 sm:h-4 rounded-full bg-blue-500"></div>
                             <p className="font-medium text-gray-800 dark:text-gray-200 text-xs sm:text-sm">
@@ -205,7 +275,7 @@ const CompetitorsTab: React.FC<CompetitorsTabProps> = ({ competitors, filterCate
                     Sources
                   </h4>
                   <div className="grid gap-2">
-                    {competitor.sources.map((source: any, i: number) => (
+                    {competitor.sources.map((source, i: number) => (
                       <a
                         key={i}
                         href={source.url}

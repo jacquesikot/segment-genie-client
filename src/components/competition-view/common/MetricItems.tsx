@@ -1,5 +1,3 @@
-import React from 'react';
-
 export const CompanyProfileItem = ({ label, value }: { label: string; value: string }) => (
   <div className="flex flex-col sm:flex-row sm:items-baseline">
     <span className="font-medium text-gray-700 dark:text-gray-300 w-full sm:w-20 text-xs sm:text-sm">{label}:</span>

@@ -2,7 +2,12 @@ import React from 'react';
 import { MarketPositionItem } from '../common/MetricItems';
 
 interface MarketPositionProps {
-  marketPosition: any;
+  marketPosition: {
+    targetMarkets: string[];
+    geographicPresence: string[];
+    marketShare?: string | number;
+    growthRate?: string | number;
+  };
 }
 
 const MarketPosition: React.FC<MarketPositionProps> = ({ marketPosition }) => {
@@ -15,8 +20,8 @@ const MarketPosition: React.FC<MarketPositionProps> = ({ marketPosition }) => {
       <div className="text-xs sm:text-sm space-y-2 sm:space-y-3">
         <MarketPositionItem label="Target Markets" value={marketPosition.targetMarkets.join(', ')} />
         <MarketPositionItem label="Geographic Presence" value={marketPosition.geographicPresence.join(', ')} />
-        <MarketPositionItem label="Market Share" value={marketPosition.marketShare || 'Not available'} />
-        <MarketPositionItem label="Growth Rate" value={marketPosition.growthRate || 'Not available'} />
+        <MarketPositionItem label="Market Share" value={marketPosition.marketShare?.toString() || 'Not available'} />
+        <MarketPositionItem label="Growth Rate" value={marketPosition.growthRate?.toString() || 'Not available'} />
       </div>
     </div>
   );

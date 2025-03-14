@@ -2,14 +2,25 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
+export interface Recommendation {
+  recommendation: string;
+  priority: 'high' | 'medium' | 'low';
+  rationale: string;
+  resourceRequirements: string;
+  timeline?: string;
+  risks: string[];
+  benefits?: string[];
+  competitiveAdvantage?: string;
+}
+
 interface RecommendationsTabProps {
-  recommendations: any[];
+  recommendations: Recommendation[];
 }
 
 const RecommendationsTab: React.FC<RecommendationsTabProps> = ({ recommendations }) => {
   return (
     <div className="grid gap-4 sm:gap-6">
-      {recommendations.map((rec: any, idx: number) => (
+      {recommendations.map((rec, idx: number) => (
         <Card
           key={idx}
           className="overflow-hidden border-l-4 transition-all hover:shadow-md"
