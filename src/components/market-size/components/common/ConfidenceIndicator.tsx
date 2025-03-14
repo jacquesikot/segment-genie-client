@@ -8,11 +8,13 @@ export const ConfidenceIndicator = ({ confidence, tooltip }: { confidence: numbe
         <div className="flex items-center gap-2">
           <div className="relative w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
             <div
-              className="absolute h-full bg-blue-600 dark:bg-blue-500 transition-all duration-500"
+              className="absolute h-full bg-indigo-600 dark:bg-indigo-500 transition-all duration-500"
               style={{ width: `${confidence * 100}%` }}
             />
           </div>
-          <span className="text-sm font-medium text-blue-600 dark:text-blue-400">{(confidence * 100).toFixed(0)}%</span>
+          <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">
+            {(confidence * 100).toFixed(0)}%
+          </span>
         </div>
       </div>
     </TooltipTrigger>

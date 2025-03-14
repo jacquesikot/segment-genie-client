@@ -1,4 +1,3 @@
-import React from 'react';
 import { MarketSize } from '../types';
 import MarketMetricCard from './MarketMetricCard';
 

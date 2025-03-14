@@ -1,24 +1,23 @@
-import React from 'react';
+import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
 import {
   AlertTriangle,
+  ArrowDownUp,
   BarChart4,
   Building2,
   Clock,
   FlaskConical,
   Info,
   LineChart,
-  TrendingUp,
-  ArrowDownUp,
   Target,
+  TrendingUp,
 } from 'lucide-react';
+import { MarketSize } from '../types';
+import { getMaturityStyles } from '../utils';
 import { ConfidenceIndicator } from './common/ConfidenceIndicator';
 import { MetricCard } from './common/MetricCard';
 import { MetricItem } from './common/MetricItem';
-import { getMaturityStyles } from '../utils';
-import { MarketSize } from '../types';
 
 interface MarketOverviewProps {
   marketSize: MarketSize;
@@ -57,8 +56,8 @@ const MarketOverview = ({ marketSize }: MarketOverviewProps) => {
       <CardHeader>
         <div className="flex flex-col md:flex-row justify-between gap-4">
           <div className="flex items-start gap-4">
-            <div className="bg-blue-100 dark:bg-blue-950/50 p-3 rounded-lg">
-              <Building2 className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+            <div className="bg-indigo-100 dark:bg-indigo-950/50 p-3 rounded-lg">
+              <Building2 className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
             </div>
             <div>
               <CardTitle className="text-2xl dark:text-white">Market Analysis</CardTitle>

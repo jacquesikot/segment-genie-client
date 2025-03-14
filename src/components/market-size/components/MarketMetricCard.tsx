@@ -1,25 +1,24 @@
-import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { cva } from 'class-variance-authority';
 import {
-  TrendingUp,
-  Clock,
-  ShieldAlert,
-  Users,
   AlertTriangle,
   ArrowUpRight,
   BookOpen,
+  Clock,
+  ShieldAlert,
   Target,
+  TrendingUp,
   UserCheck,
+  Users,
 } from 'lucide-react';
 import { formatCurrency, getMarketTypeStyles } from '../utils';
 
 const marketCardVariants = cva('border shadow-sm hover:shadow-md transition-shadow dark:bg-gray-900 h-full', {
   variants: {
     type: {
-      tam: 'border-l-4 border-l-blue-500 dark:border-l-blue-400',
+      tam: 'border-l-4 border-l-indigo-500 dark:border-l-indigo-400',
       sam: 'border-l-4 border-l-purple-500 dark:border-l-purple-400',
       som: 'border-l-4 border-l-green-500 dark:border-l-green-400',
     },

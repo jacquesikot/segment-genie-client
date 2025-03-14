@@ -1,8 +1,7 @@
-import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Building2, Calendar, ExternalLink } from 'lucide-react';
-import { ScorePill } from './common/ScorePill';
 import { Source } from '../types';
+import { ScorePill } from './common/ScorePill';
 
 interface DataSourcesSectionProps {
   sources: Source[];
@@ -40,10 +39,10 @@ const SourceCard = ({ source }: { source: Source }) => {
       href={source.url}
       target="_blank"
       rel="noopener noreferrer"
-      className="group flex justify-between items-start p-4 rounded-lg border dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/10 transition-colors dark:bg-gray-800/50"
+      className="group flex justify-between items-start p-4 rounded-lg border dark:border-gray-700 hover:border-indigo-500 dark:hover:border-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/10 transition-colors dark:bg-gray-800/50"
     >
       <div className="space-y-1">
-        <div className="font-medium group-hover:text-blue-600 dark:text-gray-200 dark:group-hover:text-blue-400 transition-colors flex items-center gap-2">
+        <div className="font-medium group-hover:text-indigo-600 dark:text-gray-200 dark:group-hover:text-indigo-400 transition-colors flex items-center gap-2">
           {source.title || 'Unknown Source'}
           <ExternalLink className="inline w-4 h-4 opacity-70" />
         </div>

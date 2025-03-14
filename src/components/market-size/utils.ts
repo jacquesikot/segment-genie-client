@@ -37,10 +37,10 @@ export const getMaturityStyles = (maturity: string) => {
       };
     case 'growing':
       return {
-        color: 'text-blue-600 dark:text-blue-400',
-        bgColor: 'bg-blue-100 dark:bg-blue-950/30',
+        color: 'text-indigo-600 dark:text-indigo-400',
+        bgColor: 'bg-indigo-100 dark:bg-indigo-950/30',
         icon: 'TrendingUp',
-        iconColor: 'text-blue-600 dark:text-blue-400',
+        iconColor: 'text-indigo-600 dark:text-indigo-400',
       };
     case 'mature':
       return {
@@ -71,10 +71,10 @@ export const getMarketTypeStyles = (type: 'tam' | 'sam' | 'som') => {
     case 'tam':
       return {
         icon: 'Target',
-        color: 'text-blue-600 dark:text-blue-400',
-        bgColor: 'bg-blue-100 dark:bg-blue-950/30',
-        progressColor: 'bg-blue-600 dark:bg-blue-500',
-        progressBgColor: 'bg-blue-100 dark:bg-blue-950/30',
+        color: 'text-indigo-600 dark:text-indigo-400',
+        bgColor: 'bg-indigo-100 dark:bg-indigo-950/30',
+        progressColor: 'bg-indigo-600 dark:bg-indigo-500',
+        progressBgColor: 'bg-indigo-100 dark:bg-indigo-950/30',
       };
     case 'sam':
       return {
