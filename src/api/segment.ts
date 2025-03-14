@@ -14,6 +14,7 @@ export interface SegmentStatus {
   marketSize: Status;
   painPoints: Status;
   competitors: Status;
+  marketTrends: Status;
 }
 
 export interface Segment {

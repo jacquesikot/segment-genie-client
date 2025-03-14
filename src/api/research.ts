@@ -547,15 +547,162 @@ export const competitionSchema = z.object({
   recommendations: z.array(recommendationSchema),
 });
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const marketTrendsSchema = z.object({
+  metadata: z.object({
+    analysisDate: z.string(),
+    confidenceScore: z.number(),
+    dataFreshness: z
+      .object({
+        mostRecent: z.string(),
+        oldest: z.string(),
+        averageAge: z.number().or(z.string()),
+      })
+      .optional(),
+    sourceDiversity: z.number().optional(),
+    totalSourcesAnalyzed: z.number().optional(),
+    sources: z
+      .array(
+        z.object({
+          url: z.string(),
+          title: z.string().nullable(),
+          type: z.string(),
+          publicationDate: z.string(),
+          credibilityScore: z.number(),
+          relevanceScore: z.number(),
+        })
+      )
+      .optional(),
+  }),
+  marketOverview: z
+    .object({
+      currentState: z.string(),
+      dominantTrends: z.array(z.string()),
+      disruptionPotential: z.number(),
+      adoptionCycle: z.string(),
+      keyMetrics: z.record(z.string()).optional(),
+    })
+    .optional(),
+  currentTrends: z
+    .array(
+      z.object({
+        trendName: z.string(),
+        description: z.string(),
+        maturityStage: z.string(),
+        prevalence: z.number(),
+        relevance: z.number(),
+        impactAreas: z.array(z.string()),
+        supportingEvidence: z.array(z.string()),
+        competitorAdoption: z.array(
+          z.object({
+            competitor: z.string(),
+            adoptionLevel: z.string(),
+            details: z.string(),
+          })
+        ),
+      })
+    )
+    .optional(),
+  emergingOpportunities: z
+    .array(
+      z.object({
+        opportunityName: z.string(),
+        description: z.string(),
+        timeframe: z.object({
+          emergenceExpected: z.string(),
+          estimatedMonths: z.number(),
+        }),
+        potentialImpact: z.number(),
+        targetSegments: z.array(z.string()),
+        barrierToEntry: z.number(),
+        firstMoverAdvantage: z.number(),
+        supportingEvidence: z.array(z.string()),
+      })
+    )
+    .optional(),
+  threatsAndChallenges: z
+    .array(
+      z.object({
+        threatName: z.string(),
+        description: z.string(),
+        severity: z.number(),
+        likelihood: z.number(),
+        timeframe: z.string(),
+        impactAreas: z.array(z.string()),
+        mitigationStrategies: z.array(z.string()),
+        affectedCompetitors: z.array(z.string()),
+      })
+    )
+    .optional(),
+  influencingFactors: z
+    .array(
+      z.object({
+        factorName: z.string(),
+        factorType: z.string(),
+        description: z.string(),
+        impact: z.string(),
+        directionality: z.string(),
+        permanence: z.string(),
+        supportingEvidence: z.array(z.string()),
+      })
+    )
+    .optional(),
+  trendIntersections: z
+    .array(
+      z.object({
+        trends: z.array(z.string()),
+        description: z.string(),
+        significance: z.string(),
+        opportunityScore: z.number(),
+      })
+    )
+    .optional(),
+  competitiveTrendAdoption: z
+    .object({
+      overview: z.string(),
+      trendLeaders: z.array(
+        z.object({
+          trend: z.string(),
+          leaders: z.array(z.string()),
+        })
+      ),
+      laggards: z.array(
+        z.object({
+          trend: z.string(),
+          laggards: z.array(z.string()),
+        })
+      ),
+      whiteSpaces: z.array(z.string()),
+    })
+    .optional(),
+  strategicRecommendations: z
+    .array(
+      z.object({
+        recommendation: z.string(),
+        rationale: z.string(),
+        trendConnection: z.array(z.string()),
+        implementationDifficulty: z.number(),
+        priorityLevel: z.string(),
+        timeframe: z.string(),
+        resourceRequirements: z.string(),
+        expectedOutcome: z.string(),
+        risks: z.array(z.string()),
+      })
+    )
+    .optional(),
+});
+
 export type MarketSize = z.infer<typeof marketSizeSchema>;
 export type ValidIndustry = z.infer<typeof industryValidationSchema>;
 export type PainPoints = z.infer<typeof painPointsSchema>;
 export type Competitors = z.infer<typeof competitionSchema>;
+export type MarketTrends = z.infer<typeof marketTrendsSchema>;
 export interface ResearchReport {
   validIndustry: ValidIndustry;
   marketSize: MarketSize;
   painPoints: PainPoints;
   competitors: Competitors;
+  marketTrends: MarketTrends;
 }
 
 export const startNewResearch = async (data: NewResearch): Promise<NewResearchResponse> => {

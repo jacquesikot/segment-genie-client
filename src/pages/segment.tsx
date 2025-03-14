@@ -1,6 +1,6 @@
 import { ResearchReport, WSEvent } from '@/api/research';
 import { getSegment, SegmentStatus } from '@/api/segment';
-import CustomerReportView from '@/components/CustomerReportView';
+import CustomerReportView from '@/components/customer-report/CustomerReportView';
 import PageHeader from '@/components/page-header';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
@@ -45,6 +45,12 @@ export default function Segment() {
       data: null,
     },
     competitors: {
+      progress: 0,
+      message: 'Fetching Segment...',
+      isComplete: false,
+      data: null,
+    },
+    marketTrends: {
       progress: 0,
       message: 'Fetching Segment...',
       isComplete: false,
