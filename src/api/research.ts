@@ -593,13 +593,6 @@ const marketTrendsSchema = z.object({
         relevance: z.number(),
         impactAreas: z.array(z.string()),
         supportingEvidence: z.array(z.string()),
-        competitorAdoption: z.array(
-          z.object({
-            competitor: z.string(),
-            adoptionLevel: z.string(),
-            details: z.string(),
-          })
-        ),
       })
     )
     .optional(),
@@ -656,24 +649,6 @@ const marketTrendsSchema = z.object({
         opportunityScore: z.number(),
       })
     )
-    .optional(),
-  competitiveTrendAdoption: z
-    .object({
-      overview: z.string(),
-      trendLeaders: z.array(
-        z.object({
-          trend: z.string(),
-          leaders: z.array(z.string()),
-        })
-      ),
-      laggards: z.array(
-        z.object({
-          trend: z.string(),
-          laggards: z.array(z.string()),
-        })
-      ),
-      whiteSpaces: z.array(z.string()),
-    })
     .optional(),
   strategicRecommendations: z
     .array(

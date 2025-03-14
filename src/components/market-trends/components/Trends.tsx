@@ -120,32 +120,6 @@ const Trends = ({ data }: TrendsProps) => {
                         ))}
                       </ul>
                     </div>
-
-                    <div className="bg-emerald-50/50 dark:bg-emerald-900/10 rounded-lg p-4 md:col-span-2 lg:col-span-1">
-                      <h4 className="text-xs font-medium mb-3 text-emerald-800 dark:text-emerald-300 uppercase tracking-wider">
-                        Competitor Adoption
-                      </h4>
-                      <div className="space-y-3">
-                        {trend.competitorAdoption.map((comp, i) => (
-                          <div key={i} className="text-xs flex items-start">
-                            <Badge
-                              className={`mr-2 flex-shrink-0 ${
-                                comp.adoptionLevel === 'full'
-                                  ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                                  : comp.adoptionLevel === 'partial'
-                                  ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400'
-                                  : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400'
-                              }`}
-                            >
-                              {comp.adoptionLevel}
-                            </Badge>
-                            <div>
-                              <span className="font-medium">{comp.competitor}:</span> {comp.details}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
                   </div>
                 )}
               </CardContent>
