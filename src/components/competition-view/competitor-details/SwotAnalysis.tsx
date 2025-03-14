@@ -112,7 +112,7 @@ const SwotAnalysis: React.FC<SwotAnalysisProps> = ({ swotAnalysis }) => {
                     swotAnalysis.opportunities.length,
                     swotAnalysis.threats.length,
                   ],
-                  backgroundColor: ['#34D399', '#F87171', '#60A5FA', '#FBBF24'],
+                  backgroundColor: ['#34D399', '#F87171', '#818CF8', '#FBBF24'],
                   borderRadius: 4,
                 },
               ],

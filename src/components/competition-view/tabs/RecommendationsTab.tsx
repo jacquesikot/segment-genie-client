@@ -43,7 +43,7 @@ const RecommendationsTab: React.FC<RecommendationsTabProps> = ({ recommendations
                     ? 'bg-red-50 text-red-600 border-red-100 dark:bg-red-900/10 dark:text-red-300 dark:border-red-800/20'
                     : rec.priority === 'medium'
                     ? 'bg-amber-50 text-amber-600 border-amber-100 dark:bg-amber-900/10 dark:text-amber-300 dark:border-amber-800/20'
-                    : 'bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-900/10 dark:text-blue-300 dark:border-blue-800/20'
+                    : 'bg-indigo-50 text-indigo-600 border-indigo-100 dark:bg-indigo-900/10 dark:text-indigo-300 dark:border-indigo-800/20'
                 }`}
               >
                 {rec.priority.charAt(0).toUpperCase() + rec.priority.slice(1)} Priority
@@ -103,11 +103,11 @@ const RecommendationsTab: React.FC<RecommendationsTabProps> = ({ recommendations
             </div>
 
             {rec.competitiveAdvantage && (
-              <div className="mt-4 bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800/20 p-2 sm:p-3 rounded-lg">
-                <h4 className="text-xs sm:text-sm font-medium text-blue-600 dark:text-blue-300 mb-1">
+              <div className="mt-4 bg-indigo-50 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-800/20 p-2 sm:p-3 rounded-lg">
+                <h4 className="text-xs sm:text-sm font-medium text-indigo-600 dark:text-indigo-300 mb-1">
                   Competitive Advantage
                 </h4>
-                <p className="text-xs sm:text-sm text-blue-600 dark:text-blue-300">{rec.competitiveAdvantage}</p>
+                <p className="text-xs sm:text-sm text-indigo-600 dark:text-indigo-300">{rec.competitiveAdvantage}</p>
               </div>
             )}
           </CardContent>

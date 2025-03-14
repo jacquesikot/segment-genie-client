@@ -61,13 +61,13 @@ const CompetitionView: React.FC<Props> = ({ data: competitorData, status }) => {
       : finalCompetitors.filter((c: any) => c.category.toLowerCase() === filterCategory.toLowerCase());
 
   return (
-    <div className="space-y-6 px-2">
+    <div className="space-y-6 pb-20">
       <Card className="shadow-lg dark:bg-gray-900 border-0 overflow-hidden">
         <CardHeader>
           <div className="flex flex-col md:flex-row justify-between gap-4">
             <div className="flex items-start gap-4">
-              <div className="bg-blue-100 dark:bg-blue-950/50 p-3 rounded-lg flex-shrink-0">
-                <Users className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+              <div className="bg-indigo-100 dark:bg-indigo-950/50 p-3 rounded-lg flex-shrink-0">
+                <Users className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
               </div>
               <div className="min-w-0">
                 <CardTitle className="text-2xl dark:text-white break-words">Competitor Research</CardTitle>

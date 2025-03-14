@@ -121,7 +121,7 @@ const CompetitorsTab: React.FC<CompetitorsTabProps> = ({ competitors, filterCate
                         ? 'bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400'
                         : competitor.category.toLowerCase() === 'indirect'
                         ? 'bg-amber-100 text-amber-700 hover:bg-amber-200 dark:bg-amber-900/30 dark:text-amber-400'
-                        : 'bg-blue-100 text-blue-700 hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-400'
+                        : 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-400'
                     }`}
                   >
                     {competitor.category.charAt(0).toUpperCase() + competitor.category.slice(1).toLowerCase()}
@@ -138,7 +138,7 @@ const CompetitorsTab: React.FC<CompetitorsTabProps> = ({ competitors, filterCate
                     href={competitor.website}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mr-2 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors px-2 py-1 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/30 flex items-center gap-1.5 text-xs border border-blue-200 dark:border-blue-800/50 shadow-sm"
+                    className="mr-2 text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors px-2 py-1 rounded-md hover:bg-indigo-50 dark:hover:bg-indigo-900/30 flex items-center gap-1.5 text-xs border border-indigo-200 dark:border-indigo-800/50 shadow-sm"
                   >
                     <span>View product</span>
                     <ExternalLink className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
@@ -253,7 +253,7 @@ const CompetitorsTab: React.FC<CompetitorsTabProps> = ({ competitors, filterCate
                       <div className="relative pl-4 sm:pl-6 border-l-2 border-gray-200 dark:border-gray-700 space-y-4 sm:space-y-6">
                         {competitor.recentDevelopments.map((dev, i: number) => (
                           <div key={i} className="relative">
-                            <div className="absolute -left-[19px] sm:-left-[25px] w-3 sm:w-4 h-3 sm:h-4 rounded-full bg-blue-500"></div>
+                            <div className="absolute -left-[19px] sm:-left-[25px] w-3 sm:w-4 h-3 sm:h-4 rounded-full bg-indigo-500"></div>
                             <p className="font-medium text-gray-800 dark:text-gray-200 text-xs sm:text-sm">
                               {new Date(dev.date).toLocaleDateString('en-US', {
                                 year: 'numeric',
@@ -281,9 +281,9 @@ const CompetitorsTab: React.FC<CompetitorsTabProps> = ({ competitors, filterCate
                         href={source.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center p-2 sm:p-3 rounded-lg border hover:bg-blue-50 dark:hover:bg-blue-950/10 transition-colors"
+                        className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center p-2 sm:p-3 rounded-lg border hover:bg-indigo-50 dark:hover:bg-indigo-950/10 transition-colors"
                       >
-                        <span className="text-blue-600 dark:text-blue-400 break-all sm:truncate sm:max-w-[70%] text-xs sm:text-sm">
+                        <span className="text-indigo-600 dark:text-indigo-400 break-all sm:truncate sm:max-w-[70%] text-xs sm:text-sm">
                           {source.url}
                         </span>
                         <Badge

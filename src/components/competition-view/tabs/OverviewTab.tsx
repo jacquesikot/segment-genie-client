@@ -110,7 +110,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ competitorData, analysisDate 
                               (c: Competitor) => c.category.toLowerCase() === 'potential'
                             ).length,
                           ],
-                          backgroundColor: ['#F87171', '#FBBF24', '#60A5FA'],
+                          backgroundColor: ['#F87171', '#FBBF24', '#818CF8'],
                           borderRadius: 4,
                         },
                       ],
