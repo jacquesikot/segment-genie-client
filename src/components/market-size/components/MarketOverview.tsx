@@ -52,24 +52,24 @@ const MarketOverview = ({ marketSize }: MarketOverviewProps) => {
   };
 
   return (
-    <Card className="shadow-lg dark:bg-gray-900">
+    <Card className="shadow-lg dark:bg-gray-900 max-w-full overflow-hidden">
       <CardHeader>
         <div className="flex flex-col md:flex-row justify-between gap-4">
           <div className="flex items-start gap-4">
-            <div className="bg-indigo-100 dark:bg-indigo-950/50 p-3 rounded-lg">
+            <div className="bg-indigo-100 dark:bg-indigo-950/50 p-3 rounded-lg flex-shrink-0">
               <Building2 className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
             </div>
-            <div>
-              <CardTitle className="text-2xl dark:text-white">Market Analysis</CardTitle>
-              <CardDescription className="mt-2 dark:text-gray-300">
+            <div className="min-w-0">
+              <CardTitle className="text-2xl dark:text-white break-words">Market Analysis</CardTitle>
+              <CardDescription className="mt-2 dark:text-gray-300 break-words">
                 {industry.primaryIndustry} · Last updated: {analysisDate}
               </CardDescription>
             </div>
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
-            <div className={`flex items-center gap-2 px-3 py-1.5`}>
+            <div className="flex items-center gap-2 px-3 py-1.5">
               {renderMaturityIcon()}
-              <span className={`text-sm font-medium capitalize ${maturityInfo.color}`}>
+              <span className={`text-sm font-medium capitalize ${maturityInfo.color} break-words`}>
                 {industry.industryMaturity || marketSize.metadata.marketMaturity} Market
               </span>
             </div>
@@ -80,12 +80,18 @@ const MarketOverview = ({ marketSize }: MarketOverviewProps) => {
           </div>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="overflow-x-auto">
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="mb-4 w-full sm:w-auto">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="industry">Industry</TabsTrigger>
-            <TabsTrigger value="limitations">Data Limitations</TabsTrigger>
+          <TabsList className="mb-6 w-full grid grid-cols-3 gap-1">
+            <TabsTrigger value="overview" className="text-xs sm:text-sm">
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="industry" className="text-xs sm:text-sm">
+              Industry
+            </TabsTrigger>
+            <TabsTrigger value="limitations" className="text-xs sm:text-sm">
+              Limitations
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-4">
@@ -105,18 +111,20 @@ const MarketOverview = ({ marketSize }: MarketOverviewProps) => {
           </TabsContent>
 
           <TabsContent value="industry">
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <h3 className="font-semibold text-lg dark:text-white">Industry Classification</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4 min-w-0">
+                <h3 className="font-semibold text-lg dark:text-white break-words">Industry Classification</h3>
 
                 <div>
-                  <h4 className="text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Sub-Industries</h4>
+                  <h4 className="text-sm font-medium mb-2 text-gray-700 dark:text-gray-300 break-words">
+                    Sub-Industries
+                  </h4>
                   <div className="flex flex-wrap gap-2 mb-4">
                     {industry.subIndustries.map((subIndustry, index) => (
                       <Badge
                         key={index}
                         variant="outline"
-                        className="px-3 py-1 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"
+                        className="px-3 py-1 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200 break-words"
                       >
                         {subIndustry}
                       </Badge>
@@ -125,13 +133,15 @@ const MarketOverview = ({ marketSize }: MarketOverviewProps) => {
                 </div>
 
                 <div>
-                  <h4 className="text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Related Industries</h4>
+                  <h4 className="text-sm font-medium mb-2 text-gray-700 dark:text-gray-300 break-words">
+                    Related Industries
+                  </h4>
                   <div className="flex flex-wrap gap-2">
                     {industry.relatedIndustries.map((relatedIndustry, index) => (
                       <Badge
                         key={index}
                         variant="secondary"
-                        className="px-3 py-1 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                        className="px-3 py-1 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 break-words"
                       >
                         {relatedIndustry}
                       </Badge>
@@ -139,14 +149,16 @@ const MarketOverview = ({ marketSize }: MarketOverviewProps) => {
                   </div>
                 </div>
               </div>
-              <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg border dark:border-gray-700">
-                <h4 className="font-semibold mb-4 dark:text-white">Industry Analysis</h4>
+              <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg border dark:border-gray-700 min-w-0">
+                <h4 className="font-semibold mb-4 dark:text-white break-words">Industry Analysis</h4>
                 <div className="space-y-4">
                   <div>
-                    <h5 className="text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Key Trends</h5>
+                    <h5 className="text-sm font-medium mb-2 text-gray-700 dark:text-gray-300 break-words">
+                      Key Trends
+                    </h5>
                     <ul className="space-y-1 pl-4 text-sm text-muted-foreground dark:text-gray-400">
                       {industry.keyTrends.map((trend, index) => (
-                        <li key={index} className="list-disc">
+                        <li key={index} className="list-disc break-words">
                           {trend}
                         </li>
                       ))}
@@ -154,10 +166,12 @@ const MarketOverview = ({ marketSize }: MarketOverviewProps) => {
                   </div>
 
                   <div>
-                    <h5 className="text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Regulatory Factors</h5>
+                    <h5 className="text-sm font-medium mb-2 text-gray-700 dark:text-gray-300 break-words">
+                      Regulatory Factors
+                    </h5>
                     <ul className="space-y-1 pl-4 text-sm text-muted-foreground dark:text-gray-400">
                       {industry.regulatoryFactors.map((factor, index) => (
-                        <li key={index} className="list-disc">
+                        <li key={index} className="list-disc break-words">
                           {factor}
                         </li>
                       ))}
@@ -177,10 +191,10 @@ const MarketOverview = ({ marketSize }: MarketOverviewProps) => {
           <TabsContent value="limitations">
             <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 rounded-lg p-4">
               <div className="flex items-start gap-3 mb-3">
-                <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5" />
-                <div>
-                  <h3 className="font-medium text-amber-800 dark:text-amber-300">Data Limitations</h3>
-                  <p className="text-sm text-amber-700 dark:text-amber-400 mt-1">
+                <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+                <div className="min-w-0">
+                  <h3 className="font-medium text-amber-800 dark:text-amber-300 break-words">Data Limitations</h3>
+                  <p className="text-sm text-amber-700 dark:text-amber-400 mt-1 break-words">
                     Consider these factors when using the market analysis
                   </p>
                 </div>
@@ -188,7 +202,7 @@ const MarketOverview = ({ marketSize }: MarketOverviewProps) => {
 
               <ul className="space-y-2 pl-9">
                 {marketSize.metadata.dataQuality.limitations.map((limitation, index) => (
-                  <li key={index} className="text-sm text-amber-700 dark:text-amber-400 list-disc">
+                  <li key={index} className="text-sm text-amber-700 dark:text-amber-400 list-disc break-words">
                     {limitation}
                   </li>
                 ))}

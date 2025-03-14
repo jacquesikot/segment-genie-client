@@ -10,7 +10,7 @@ interface DesktopNavigationProps {
 
 const DesktopNavigation: React.FC<DesktopNavigationProps> = ({ activeSection, onSectionChange }) => {
   return (
-    <div className="hidden md:flex flex-col p-4 border-b bg-background/95 backdrop-blur-sm flex-shrink-0">
+    <div className="hidden md:flex flex-col p-4 bg-background/95 backdrop-blur-sm flex-shrink-0">
       <h1 className="text-2xl font-bold mb-4">Market Analysis Report</h1>
       <div className="flex space-x-1 overflow-x-auto pb-2">
         {SECTIONS.map((section) => {

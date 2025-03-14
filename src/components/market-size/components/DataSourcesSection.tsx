@@ -39,12 +39,21 @@ const SourceCard = ({ source }: { source: Source }) => {
       href={source.url}
       target="_blank"
       rel="noopener noreferrer"
-      className="group flex justify-between items-start p-4 rounded-lg border dark:border-gray-700 hover:border-indigo-500 dark:hover:border-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/10 transition-colors dark:bg-gray-800/50"
+      className="group flex flex-col sm:flex-row sm:justify-between items-start p-4 rounded-lg border dark:border-gray-700 hover:border-indigo-500 dark:hover:border-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/10 transition-colors dark:bg-gray-800/50"
     >
-      <div className="space-y-1">
+      {/* Mobile scores - shown only on small screens */}
+      <div className="flex justify-between items-center w-full mb-2 sm:hidden">
+        <div className="flex gap-2">
+          {source.credibilityScore !== undefined && <ScorePill value={source.credibilityScore} label="Cred" />}
+          {source.relevanceScore !== undefined && <ScorePill value={source.relevanceScore} label="Rel" />}
+        </div>
+        <ExternalLink className="w-4 h-4 opacity-70" />
+      </div>
+
+      <div className="space-y-1 w-full">
         <div className="font-medium group-hover:text-indigo-600 dark:text-gray-200 dark:group-hover:text-indigo-400 transition-colors flex items-center gap-2">
           {source.title || 'Unknown Source'}
-          <ExternalLink className="inline w-4 h-4 opacity-70" />
+          <ExternalLink className="w-4 h-4 opacity-70 sm:inline hidden" />
         </div>
         <div className="text-sm text-muted-foreground dark:text-gray-400 flex flex-wrap gap-x-4 gap-y-1">
           {source.publisher && (
@@ -59,7 +68,9 @@ const SourceCard = ({ source }: { source: Source }) => {
           </span>
         </div>
       </div>
-      <div className="flex gap-2">
+
+      {/* Desktop scores - hidden on small screens */}
+      <div className="hidden sm:flex gap-2 w-full justify-end">
         {source.credibilityScore !== undefined && <ScorePill value={source.credibilityScore} label="Cred" />}
         {source.relevanceScore !== undefined && <ScorePill value={source.relevanceScore} label="Rel" />}
       </div>

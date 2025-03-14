@@ -24,14 +24,9 @@ const MarketSizeView = ({ marketSize, status }: Props) => {
   }
 
   return (
-    <div className="space-y-8">
-      {/* Market Overview Card */}
+    <div className="space-y-8 pb-20">
       <MarketOverview marketSize={marketSize} />
-
-      {/* Market Size Visualization */}
       <MarketMetricsSection marketSize={marketSize} />
-
-      {/* Data Sources Section */}
       <DataSourcesSection sources={marketSize.metadata.sources} />
     </div>
   );
