@@ -3,7 +3,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { ResearchReport } from '@/api/research';
 import { SegmentStatus } from '@/api/segment';
 import MarketSizeView from '../market-size/MarketSizeView';
-import CompetitionView from '../competition-view';
+import CompetitionView from '../competition-view/CompetitionView';
 import PainPointsView from '../pain-points-view';
 import MarketTrendsView from '../market-trends/MarketTrendsView';
 import { SECTIONS } from './constants';
@@ -70,7 +70,7 @@ const CustomerReportView: React.FC<CustomerReportViewProps> = ({ report, status 
 
         {/* Main Content Area */}
         <div className="flex-1 overflow-hidden">
-          <div className="h-full overflow-auto p-4 md:p-6">{renderContent()}</div>
+          <div className="h-full overflow-auto p-4 md:p-4">{renderContent()}</div>
         </div>
 
         {/* Mobile Navigation */}
