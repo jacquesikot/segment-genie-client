@@ -34,8 +34,8 @@ const PainPointsView = ({ data, status }: Props) => {
       <Card className="shadow-lg dark:bg-gray-900 border-0 overflow-hidden">
         <CardHeader>
           <div className="flex items-start gap-4">
-            <div className="bg-purple-100 dark:bg-purple-950/50 p-3 rounded-lg flex-shrink-0">
-              <Brain className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+            <div className="bg-indigo-100 dark:bg-indigo-950/50 p-3 rounded-lg flex-shrink-0">
+              <Brain className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
             </div>
             <div className="min-w-0">
               <CardTitle className="text-2xl dark:text-white break-words">Pain Points Analysis</CardTitle>

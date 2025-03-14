@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { MarketTrends } from '@/api/research';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,20 +11,20 @@ interface StrategyProps {
 
 const Strategy = ({ data }: StrategyProps) => {
   return (
-    <div className="space-y-4 sm:space-y-6">
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
-            <Zap className="w-5 h-5 text-blue-500" />
+    <div className="space-y-6">
+      <div className="shadow-md dark:bg-gray-900 border-0 overflow-hidden">
+        <div className="pb-2 border-gray-100 dark:border-gray-800">
+          <div className="text-lg flex items-center gap-2">
+            <Zap className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
             Strategic Recommendations
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
+          </div>
+        </div>
+        <div className="pt-4">
+          <div className="space-y-6">
             {data.strategicRecommendations?.map((rec, index) => (
               <Card
                 key={index}
-                className="overflow-hidden border-l-4 transition-all hover:shadow-md"
+                className="overflow-hidden border-l-4 transition-all hover:shadow-lg group"
                 style={{
                   borderLeftColor:
                     rec.priorityLevel === 'critical'
@@ -35,12 +36,12 @@ const Strategy = ({ data }: StrategyProps) => {
                       : 'rgb(16, 185, 129)',
                 }}
               >
-                <CardHeader className="pb-2 sm:pb-4">
-                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-                    <CardTitle className="text-base sm:text-lg">{rec.recommendation}</CardTitle>
+                <CardHeader className="pb-2 sm:pb-4 bg-gray-50/50 dark:bg-gray-800/20 transition-colors group-hover:bg-gray-50 dark:group-hover:bg-gray-800/30">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
+                    <CardTitle className="text-base sm:text-lg font-semibold">{rec.recommendation}</CardTitle>
                     <Badge
                       variant="outline"
-                      className={`text-xs px-2 py-0.5 ${
+                      className={`text-xs px-2.5 py-0.5 whitespace-nowrap ${
                         rec.priorityLevel === 'critical'
                           ? 'bg-red-50 text-red-600 border-red-100 dark:bg-red-900/10 dark:text-red-300 dark:border-red-800/20'
                           : rec.priorityLevel === 'high'
@@ -53,18 +54,24 @@ const Strategy = ({ data }: StrategyProps) => {
                       {rec.priorityLevel.charAt(0).toUpperCase() + rec.priorityLevel.slice(1)} Priority
                     </Badge>
                   </div>
-                  <p className="text-xs sm:text-sm mt-2 text-gray-700 dark:text-gray-300">{rec.rationale}</p>
+                  <p className="text-xs sm:text-sm mt-2 text-gray-700 dark:text-gray-300 leading-relaxed">
+                    {rec.rationale}
+                  </p>
                 </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-3">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="space-y-4">
                       <div>
-                        <h4 className="text-xs sm:text-sm font-medium text-gray-800 dark:text-gray-200 mb-1">
+                        <h4 className="text-xs sm:text-sm font-medium text-gray-800 dark:text-gray-200 mb-2 flex items-center">
+                          <span className="inline-block w-2 h-2 rounded-full bg-blue-500 mr-2"></span>
                           Connected Trends
                         </h4>
-                        <div className="flex flex-wrap gap-1">
+                        <div className="flex flex-wrap gap-1.5">
                           {rec.trendConnection.map((trend, i) => (
-                            <Badge key={i} className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
+                            <Badge
+                              key={i}
+                              className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 transition-all hover:bg-blue-200 dark:hover:bg-blue-900/40"
+                            >
                               {trend}
                             </Badge>
                           ))}
@@ -72,21 +79,35 @@ const Strategy = ({ data }: StrategyProps) => {
                       </div>
 
                       <div>
-                        <h4 className="text-xs sm:text-sm font-medium text-gray-800 dark:text-gray-200 mb-1">
+                        <h4 className="text-xs sm:text-sm font-medium text-gray-800 dark:text-gray-200 mb-2 flex items-center">
+                          <span className="inline-block w-2 h-2 rounded-full bg-purple-500 mr-2"></span>
                           Implementation Difficulty
                         </h4>
-                        <div className="flex items-center gap-2">
-                          <Progress value={rec.implementationDifficulty * 10} className="h-1.5 flex-1" />
-                          <span className="text-xs font-medium">{rec.implementationDifficulty}/10</span>
+                        <div className="flex items-center gap-3">
+                          <Progress
+                            value={rec.implementationDifficulty * 10}
+                            className="h-2 flex-1 rounded-full"
+                            style={
+                              {
+                                background: 'rgba(124, 58, 237, 0.1)',
+                                '--progress-background':
+                                  'linear-gradient(to right, rgb(124, 58, 237), rgb(139, 92, 246))',
+                              } as any
+                            }
+                          />
+                          <span className="text-xs font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 px-2 py-0.5 rounded-full">
+                            {rec.implementationDifficulty}/10
+                          </span>
                         </div>
                       </div>
 
                       <div>
-                        <h4 className="text-xs sm:text-sm font-medium text-gray-800 dark:text-gray-200 mb-1">
+                        <h4 className="text-xs sm:text-sm font-medium text-gray-800 dark:text-gray-200 mb-2 flex items-center">
+                          <span className="inline-block w-2 h-2 rounded-full bg-amber-500 mr-2"></span>
                           Timeline
                         </h4>
                         <Badge
-                          className={`capitalize ${
+                          className={`capitalize px-3 py-1 ${
                             rec.timeframe === 'short-term'
                               ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
                               : rec.timeframe === 'mid-term'
@@ -99,33 +120,38 @@ const Strategy = ({ data }: StrategyProps) => {
                       </div>
 
                       <div>
-                        <h4 className="text-xs sm:text-sm font-medium text-gray-800 dark:text-gray-200 mb-1">
+                        <h4 className="text-xs sm:text-sm font-medium text-gray-800 dark:text-gray-200 mb-2 flex items-center">
+                          <span className="inline-block w-2 h-2 rounded-full bg-indigo-500 mr-2"></span>
                           Resource Requirements
                         </h4>
-                        <p className="text-xs text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-900/50 p-2 rounded-md">
+                        <p className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-900/50 p-3 rounded-md border border-gray-100 dark:border-gray-800/50 leading-relaxed">
                           {rec.resourceRequirements}
                         </p>
                       </div>
                     </div>
 
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                       <div>
-                        <h4 className="text-xs sm:text-sm font-medium text-gray-800 dark:text-gray-200 mb-1">
+                        <h4 className="text-xs sm:text-sm font-medium text-gray-800 dark:text-gray-200 mb-2 flex items-center">
+                          <span className="inline-block w-2 h-2 rounded-full bg-green-500 mr-2"></span>
                           Expected Outcome
                         </h4>
-                        <p className="text-xs text-gray-700 dark:text-gray-300 bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800/30 p-2 rounded-md">
+                        <p className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800/30 p-3 rounded-md leading-relaxed">
                           {rec.expectedOutcome}
                         </p>
                       </div>
 
                       <div>
-                        <h4 className="text-xs sm:text-sm font-medium text-gray-800 dark:text-gray-200 mb-1">
+                        <h4 className="text-xs sm:text-sm font-medium text-gray-800 dark:text-gray-200 mb-2 flex items-center">
+                          <span className="inline-block w-2 h-2 rounded-full bg-red-500 mr-2"></span>
                           Potential Risks
                         </h4>
-                        <div className="bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800/30 p-2 rounded-md">
-                          <ul className="list-disc pl-4 text-xs text-red-700 dark:text-red-400 space-y-1">
+                        <div className="bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800/30 p-3 rounded-md">
+                          <ul className="list-disc pl-4 text-xs sm:text-sm text-red-700 dark:text-red-400 space-y-1.5">
                             {rec.risks.map((risk, i) => (
-                              <li key={i}>{risk}</li>
+                              <li key={i} className="leading-relaxed">
+                                {risk}
+                              </li>
                             ))}
                           </ul>
                         </div>
@@ -136,23 +162,26 @@ const Strategy = ({ data }: StrategyProps) => {
               </Card>
             ))}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Influencing Factors */}
       {data.influencingFactors && (
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
-              <Globe className="w-5 h-5 text-blue-500" />
+        <div className="shadow-md dark:bg-gray-900 border-0 overflow-hidden">
+          <div className="pb-2 border-gray-100 dark:border-gray-800">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Globe className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
               Influencing Factors
             </CardTitle>
-          </CardHeader>
-          <CardContent>
+          </div>
+          <div className="pt-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {data.influencingFactors.map((factor, index) => (
-                <div key={index} className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded-lg">
-                  <div className="flex items-start gap-2">
+                <div
+                  key={index}
+                  className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-lg border border-gray-100 dark:border-gray-800/50 transition-all hover:shadow-md hover:border-gray-200 dark:hover:border-gray-700"
+                >
+                  <div className="flex flex-col sm:flex-row items-start gap-2">
                     <Badge
                       className={`capitalize mt-0.5 ${
                         factor.factorType === 'technological'
@@ -172,8 +201,10 @@ const Strategy = ({ data }: StrategyProps) => {
                     </Badge>
                     <h3 className="font-medium text-sm">{factor.factorName}</h3>
                   </div>
-                  <p className="text-xs text-gray-700 dark:text-gray-300 mt-2">{factor.description}</p>
-                  <div className="flex gap-2 mt-2">
+                  <p className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 mt-2 leading-relaxed">
+                    {factor.description}
+                  </p>
+                  <div className="flex gap-2 mt-3">
                     <Badge
                       variant="outline"
                       className={`text-xs ${
@@ -193,8 +224,8 @@ const Strategy = ({ data }: StrategyProps) => {
                 </div>
               ))}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
     </div>
   );
