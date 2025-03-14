@@ -6,7 +6,7 @@ import { SegmentStatus } from '@/api/segment';
 import MarketSizeView from '../market-size/MarketSizeView';
 import CompetitionView from '../competition-view/CompetitionView';
 import PainPointsView from '../pain-points-view/PainPointsView';
-import MarketTrendsView from '../market-trends/MarketTrendsView';
+// import MarketTrendsView from '../market-trends/MarketTrendsView';
 import { SECTIONS } from './constants';
 import ComingSoonSection from './components/ComingSoonSection';
 import MobileMenu from './components/MobileMenu';
@@ -47,22 +47,22 @@ const CustomerReportView: React.FC<CustomerReportViewProps> = ({ report, status 
         return <CompetitionView data={report ? (report.competitors as any) : undefined} status={status.competitors} />;
       case 'pain-points':
         return <PainPointsView data={report ? (report.painPoints as any) : undefined} status={status.painPoints} />;
-      case 'trends':
-        return (
-          <MarketTrendsView
-            data={report ? (report.marketTrends as any) : undefined}
-            status={
-              status && status.marketTrends
-                ? (status.marketTrends as any)
-                : {
-                    progress: 0,
-                    message: 'No data available',
-                    isComplete: false,
-                    error: 'No data available',
-                  }
-            }
-          />
-        );
+      // case 'trends':
+      //   return (
+      //     <MarketTrendsView
+      //       data={report ? (report.marketTrends as any) : undefined}
+      //       status={
+      //         status && status.marketTrends
+      //           ? (status.marketTrends as any)
+      //           : {
+      //               progress: 0,
+      //               message: 'No data available',
+      //               isComplete: false,
+      //               error: 'No data available',
+      //             }
+      //       }
+      //     />
+      //   );
       default:
         return <ComingSoonSection title={SECTIONS.find((s) => s.id === activeSection)?.label || ''} />;
     }
