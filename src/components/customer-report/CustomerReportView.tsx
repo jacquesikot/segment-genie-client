@@ -5,7 +5,7 @@ import { ResearchReport } from '@/api/research';
 import { SegmentStatus } from '@/api/segment';
 import MarketSizeView from '../market-size/MarketSizeView';
 import CompetitionView from '../competition-view/CompetitionView';
-import PainPointsView from '../pain-points-view';
+import PainPointsView from '../pain-points-view/PainPointsView';
 import MarketTrendsView from '../market-trends/MarketTrendsView';
 import { SECTIONS } from './constants';
 import ComingSoonSection from './components/ComingSoonSection';

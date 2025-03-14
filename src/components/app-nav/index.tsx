@@ -1,5 +1,5 @@
 import { Segment } from '@/api/segment';
-import { Command, Home, Layers } from 'lucide-react';
+import { Home, Layers } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import {
   Sidebar as CNSidebar,
@@ -48,12 +48,12 @@ function AppNav({ segments, isLoading, ...props }: Props) {
           <SidebarMenuItem className="flex items-center justify-between">
             <SidebarMenuButton size="lg" asChild>
               <a href="/" className="flex items-center space-x-2">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                {/* <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                   <Command className="size-4" />
-                </div>
+                </div> */}
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">SegmentGenie</span>
-                  <span className="truncate text-xs">Customer Insights</span>
+                  <span className="truncate text-xs">Product validation</span>
                 </div>
               </a>
             </SidebarMenuButton>
