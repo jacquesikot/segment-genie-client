@@ -673,7 +673,6 @@ export type PainPoints = z.infer<typeof painPointsSchema>;
 export type Competitors = z.infer<typeof competitionSchema>;
 export type MarketTrends = z.infer<typeof marketTrendsSchema>;
 export interface ResearchReport {
-  validIndustry: ValidIndustry;
   marketSize: MarketSize;
   painPoints: PainPoints;
   competitors: Competitors;

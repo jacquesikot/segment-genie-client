@@ -1,18 +1,17 @@
-import { useAuth } from '@clerk/clerk-react';
-import { BadgeCheck, ChevronsUpDown, CreditCard, LogOut, Sparkles } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import { keys, storage } from '@/lib/storage';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/sidebar';
+import { keys, storage } from '@/lib/storage';
+import { useAuth } from '@clerk/clerk-react';
+import { ChevronsUpDown, LogOut } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 type User = {
   fullName: string;
@@ -75,7 +74,7 @@ export function NavUser() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuGroup>
+            {/* <DropdownMenuGroup>
               <DropdownMenuItem>
                 <Sparkles /> Upgrade to Pro
               </DropdownMenuItem>
@@ -89,7 +88,7 @@ export function NavUser() {
                 <CreditCard /> Billing
               </DropdownMenuItem>
             </DropdownMenuGroup>
-            <DropdownMenuSeparator />
+            <DropdownMenuSeparator /> */}
             <DropdownMenuItem onClick={handleLogout} className="text-red-500">
               <LogOut /> Log out
             </DropdownMenuItem>

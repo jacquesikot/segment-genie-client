@@ -1,11 +1,13 @@
 import { deleteSegment, Segment } from '@/api/segment';
-import { FolderSearch, HeartCrack, Hourglass, MoreHorizontal, StarOff, Trash2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { useAppDispatch } from '@/redux/hooks';
+import { setSegments } from '@/redux/slice/segment';
+import { FolderSearch, HeartCrack, Hourglass, MoreHorizontal, Trash2 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../../components/ui/dropdown-menu';
 import {
@@ -17,9 +19,6 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '../../components/ui/sidebar';
-import { useToast } from '@/hooks/use-toast';
-import { useAppDispatch } from '@/redux/hooks';
-import { setSegments } from '@/redux/slice/segment';
 
 export function NavSegments({ segments, isLoading }: { segments: Segment[]; isLoading: boolean }) {
   const { isMobile } = useSidebar();
@@ -72,8 +71,8 @@ export function NavSegments({ segments, isLoading }: { segments: Segment[]; isLo
         </div>
       </div>
       <div className="space-y-2 text-center">
-        <h3 className="font-semibold text-foreground">No Favorites Yet</h3>
-        <p className="text-sm text-muted-foreground">Start adding segments to your favorites</p>
+        <h3 className="font-semibold text-foreground">No Segments Yet</h3>
+        <p className="text-sm text-muted-foreground">Start adding segments to your dashboard</p>
       </div>
     </div>
   );
@@ -98,7 +97,7 @@ export function NavSegments({ segments, isLoading }: { segments: Segment[]; isLo
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      <SidebarGroupLabel>Segments 🚀</SidebarGroupLabel>
+      <SidebarGroupLabel>Recent segments 🚀</SidebarGroupLabel>
       {segments && segments.length > 0 ? (
         <SidebarMenu>
           {segments.map((item) => (
@@ -121,11 +120,11 @@ export function NavSegments({ segments, isLoading }: { segments: Segment[]; isLo
                   side={isMobile ? 'bottom' : 'right'}
                   align={isMobile ? 'end' : 'start'}
                 >
-                  <DropdownMenuItem>
+                  {/* <DropdownMenuItem>
                     <StarOff className="text-muted-foreground" />
                     <span>Remove from Favorites</span>
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator />
+                  <DropdownMenuSeparator /> */}
                   <DropdownMenuItem onClick={(event) => handleDelete(item._id, event)}>
                     <Trash2 className="text-muted-foreground" />
                     <span>Delete</span>
