@@ -57,6 +57,15 @@ export interface Competitor {
   marketPosition: MarketPosition;
   productDetails: ProductDetails;
   swotAnalysis: SwotAnalysis;
+  forums: {
+    name: string;
+    url: string;
+  }[];
+  socialMedia: {
+    platform: string;
+    username: string;
+    url: string;
+  }[];
   pricingStrategy: {
     model: string;
     pricePoints: string[];
@@ -217,6 +226,88 @@ const CompetitorsTab: React.FC<CompetitorsTabProps> = ({ competitors, filterCate
                     </div>
                   </div>
                 </div>
+
+                {/* New sections for Forums and Social Media */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
+                  {/* Forums Section */}
+                  {competitor.forums && Array.isArray(competitor.forums) && competitor.forums.length > 0 && (
+                    <div className="bg-gray-50 dark:bg-gray-900/50 p-3 sm:p-4 rounded-lg">
+                      <h4 className="font-semibold mb-2 sm:mb-3 text-base sm:text-lg flex items-center gap-2">
+                        <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                        Active Forums
+                      </h4>
+                      <div className="space-y-2 max-h-[250px] overflow-y-auto pr-1 custom-scrollbar">
+                        {competitor.forums.map((forum, i) => (
+                          <a
+                            key={i}
+                            href={forum?.url || '#'}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center justify-between p-2 rounded-md border border-gray-200 dark:border-gray-700 hover:bg-indigo-50 dark:hover:bg-indigo-950/10 transition-colors group"
+                          >
+                            <span className="text-xs sm:text-sm text-gray-800 dark:text-gray-200 truncate max-w-[80%]">
+                              {forum?.name || 'Unknown Forum'}
+                            </span>
+                            <ExternalLink className="w-3.5 h-3.5 text-gray-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors" />
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Social Media Section */}
+                  {competitor.socialMedia &&
+                    Array.isArray(competitor.socialMedia) &&
+                    competitor.socialMedia.length > 0 && (
+                      <div className="bg-gray-50 dark:bg-gray-900/50 p-3 sm:p-4 rounded-lg">
+                        <h4 className="font-semibold mb-2 sm:mb-3 text-base sm:text-lg flex items-center gap-2">
+                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                          Social Media Presence
+                        </h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {competitor.socialMedia.map((social, i) => (
+                            <a
+                              key={i}
+                              href={social?.url || '#'}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-2 p-2 rounded-md border border-gray-200 dark:border-gray-700 hover:bg-indigo-50 dark:hover:bg-indigo-950/10 transition-colors group"
+                            >
+                              <div
+                                className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                                  social?.platform?.toLowerCase() === 'instagram'
+                                    ? 'bg-gradient-to-tr from-purple-500 to-pink-500'
+                                    : social?.platform?.toLowerCase() === 'facebook'
+                                    ? 'bg-blue-600'
+                                    : social?.platform?.toLowerCase() === 'twitter'
+                                    ? 'bg-sky-500'
+                                    : social?.platform?.toLowerCase() === 'linkedin'
+                                    ? 'bg-blue-700'
+                                    : social?.platform?.toLowerCase() === 'youtube'
+                                    ? 'bg-red-600'
+                                    : 'bg-gray-500'
+                                }`}
+                              >
+                                <span className="text-white text-xs font-bold">
+                                  {social?.platform ? social.platform.charAt(0).toUpperCase() : '?'}
+                                </span>
+                              </div>
+                              <div className="flex flex-col overflow-hidden">
+                                <span className="text-xs font-medium text-gray-800 dark:text-gray-200">
+                                  {social?.platform || 'Unknown Platform'}
+                                </span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                  {social?.username ? `@${social.username}` : 'Unknown Username'}
+                                </span>
+                              </div>
+                              <ExternalLink className="w-3 h-3 text-gray-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors ml-auto" />
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                </div>
+
                 <div className="bg-gray-50 dark:bg-gray-900/50 p-3 sm:p-4 rounded-lg">
                   <h4 className="font-semibold mb-2 sm:mb-3 text-base sm:text-lg flex items-center gap-2">
                     <div className="w-2 h-2 bg-red-500 rounded-full"></div>
