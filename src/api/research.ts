@@ -587,6 +587,7 @@ const marketTrendsSchema = z.object({
     .array(
       z.object({
         trendName: z.string(),
+        category: z.string(),
         description: z.string(),
         maturityStage: z.string(),
         prevalence: z.number(),
@@ -610,43 +611,6 @@ const marketTrendsSchema = z.object({
         barrierToEntry: z.number(),
         firstMoverAdvantage: z.number(),
         supportingEvidence: z.array(z.string()),
-      })
-    )
-    .optional(),
-  threatsAndChallenges: z
-    .array(
-      z.object({
-        threatName: z.string(),
-        description: z.string(),
-        severity: z.number(),
-        likelihood: z.number(),
-        timeframe: z.string(),
-        impactAreas: z.array(z.string()),
-        mitigationStrategies: z.array(z.string()),
-        affectedCompetitors: z.array(z.string()),
-      })
-    )
-    .optional(),
-  influencingFactors: z
-    .array(
-      z.object({
-        factorName: z.string(),
-        factorType: z.string(),
-        description: z.string(),
-        impact: z.string(),
-        directionality: z.string(),
-        permanence: z.string(),
-        supportingEvidence: z.array(z.string()),
-      })
-    )
-    .optional(),
-  trendIntersections: z
-    .array(
-      z.object({
-        trends: z.array(z.string()),
-        description: z.string(),
-        significance: z.string(),
-        opportunityScore: z.number(),
       })
     )
     .optional(),

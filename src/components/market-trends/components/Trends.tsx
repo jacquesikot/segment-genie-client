@@ -2,7 +2,7 @@ import { MarketTrends } from '@/api/research';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { RefreshCw, ChevronDown, TrendingUp, Zap, Target } from 'lucide-react';
+import { ChevronDown, Target, TrendingUp, Zap } from 'lucide-react';
 import { useState } from 'react';
 
 interface TrendsProps {
@@ -17,7 +17,7 @@ const Trends = ({ data }: TrendsProps) => {
   const filteredTrends =
     selectedCategory === 'All'
       ? data.currentTrends
-      : data.currentTrends?.filter((trend) => trend.trendName.toLowerCase().includes(selectedCategory.toLowerCase()));
+      : data.currentTrends?.filter((trend) => trend.category.toLowerCase() === selectedCategory.toLowerCase());
 
   const toggleCardExpansion = (index: number) => {
     setExpandedCards((prev) => (prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]));
@@ -35,11 +35,9 @@ const Trends = ({ data }: TrendsProps) => {
             <SelectValue placeholder="Filter Category" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="All">All Trends</SelectItem>
-            <SelectItem value="AI">AI & ML</SelectItem>
-            <SelectItem value="Data">Data</SelectItem>
-            <SelectItem value="Privacy">Privacy & Security</SelectItem>
-            <SelectItem value="Micro">MicroSaaS</SelectItem>
+            <SelectItem value="All">All</SelectItem>
+            <SelectItem value="Market">Market Trends</SelectItem>
+            <SelectItem value="Investment">Investment</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -127,44 +125,6 @@ const Trends = ({ data }: TrendsProps) => {
           );
         })}
       </div>
-
-      {/* Trend Intersections */}
-      <Card className="shadow-md dark:bg-gray-900/80 backdrop-blur-sm border-0 overflow-hidden rounded-xl">
-        <div className="pb-4 pt-5 px-1">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <RefreshCw className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-            Trend Intersections
-          </CardTitle>
-        </div>
-        <div className="px-1 pb-5">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {data.trendIntersections?.map((intersection, index) => (
-              <div
-                key={index}
-                className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 
-                  border border-purple-100 dark:border-purple-800/30 rounded-lg p-4 hover:shadow-md transition-shadow"
-              >
-                <div className="flex flex-wrap gap-2 mb-3">
-                  {intersection.trends.map((trend, i) => (
-                    <Badge key={i} className="bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300">
-                      {trend}
-                    </Badge>
-                  ))}
-                </div>
-                <p className="text-sm text-gray-700 dark:text-gray-300 mb-3 leading-relaxed">
-                  {intersection.description}
-                </p>
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-xs mt-2">
-                  <span className="text-gray-600 dark:text-gray-400 italic">{intersection.significance}</span>
-                  <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
-                    Opportunity: {intersection.opportunityScore}/10
-                  </Badge>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </Card>
     </div>
   );
 };

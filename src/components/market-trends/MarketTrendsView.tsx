@@ -15,9 +15,10 @@ import { useState, useEffect } from 'react';
 interface Props {
   data: MarketTrends;
   status: Status;
+  onRetry: () => void;
 }
 
-const MarketTrendsView = ({ data, status }: Props) => {
+const MarketTrendsView = ({ data, status, onRetry }: Props) => {
   const [activeTab, setActiveTab] = useState('overview');
   const [, setIsMobile] = useState(false);
 
@@ -45,6 +46,7 @@ const MarketTrendsView = ({ data, status }: Props) => {
         isComplete={status.isComplete}
         error={status.progress < 0 ? status.message : undefined}
         title="Market Trends"
+        onRetry={onRetry}
       />
     );
   }
