@@ -3,7 +3,7 @@ import { MarketTrends } from '@/api/research';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Globe, Zap } from 'lucide-react';
+import { Zap } from 'lucide-react';
 
 interface StrategyProps {
   data: MarketTrends;
@@ -164,69 +164,6 @@ const Strategy = ({ data }: StrategyProps) => {
           </div>
         </div>
       </div>
-
-      {/* Influencing Factors */}
-      {data.influencingFactors && (
-        <div className="shadow-md dark:bg-gray-900 border-0 overflow-hidden">
-          <div className="pb-2 border-gray-100 dark:border-gray-800">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Globe className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-              Influencing Factors
-            </CardTitle>
-          </div>
-          <div className="pt-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {data.influencingFactors.map((factor, index) => (
-                <div
-                  key={index}
-                  className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-lg border border-gray-100 dark:border-gray-800/50 transition-all hover:shadow-md hover:border-gray-200 dark:hover:border-gray-700"
-                >
-                  <div className="flex flex-col sm:flex-row items-start gap-2">
-                    <Badge
-                      className={`capitalize mt-0.5 ${
-                        factor.factorType === 'technological'
-                          ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
-                          : factor.factorType === 'economic'
-                          ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                          : factor.factorType === 'social'
-                          ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400'
-                          : factor.factorType === 'political'
-                          ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
-                          : factor.factorType === 'environmental'
-                          ? 'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-400'
-                          : 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400'
-                      }`}
-                    >
-                      {factor.factorType}
-                    </Badge>
-                    <h3 className="font-medium text-sm">{factor.factorName}</h3>
-                  </div>
-                  <p className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 mt-2 leading-relaxed">
-                    {factor.description}
-                  </p>
-                  <div className="flex gap-2 mt-3">
-                    <Badge
-                      variant="outline"
-                      className={`text-xs ${
-                        factor.directionality === 'positive'
-                          ? 'text-green-700 dark:text-green-400'
-                          : factor.directionality === 'negative'
-                          ? 'text-red-700 dark:text-red-400'
-                          : 'text-amber-700 dark:text-amber-400'
-                      }`}
-                    >
-                      {factor.directionality}
-                    </Badge>
-                    <Badge variant="outline" className="text-xs">
-                      {factor.permanence}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
