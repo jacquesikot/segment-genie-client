@@ -12,14 +12,16 @@ import ComingSoonSection from './components/ComingSoonSection';
 import MobileMenu from './components/MobileMenu';
 import DesktopNavigation from './components/DesktopNavigation';
 import MobileNavigation from './components/MobileNavigation';
+import axios from 'axios';
 
 interface CustomerReportViewProps {
   report?: ResearchReport;
   status: SegmentStatus;
+  segmentId: string;
 }
 
-const CustomerReportView: React.FC<CustomerReportViewProps> = ({ report, status }) => {
-  const [activeSection, setActiveSection] = useState('industry-market');
+const CustomerReportView: React.FC<CustomerReportViewProps> = ({ report, status, segmentId }) => {
+  const [activeSection, setActiveSection] = useState('marketSize');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -39,15 +41,31 @@ const CustomerReportView: React.FC<CustomerReportViewProps> = ({ report, status 
 
   const renderContent = () => {
     switch (activeSection) {
-      case 'industry-market':
+      case 'marketSize':
         return (
-          <MarketSizeView marketSize={report ? (report.marketSize as any) : undefined} status={status.marketSize} />
+          <MarketSizeView
+            marketSize={report ? (report.marketSize as any) : undefined}
+            status={status.marketSize}
+            onRetry={handleRetry}
+          />
         );
-      case 'competition':
-        return <CompetitionView data={report ? (report.competitors as any) : undefined} status={status.competitors} />;
-      case 'pain-points':
-        return <PainPointsView data={report ? (report.painPoints as any) : undefined} status={status.painPoints} />;
-      // case 'trends':
+      case 'competitors':
+        return (
+          <CompetitionView
+            data={report ? (report.competitors as any) : undefined}
+            status={status.competitors}
+            onRetry={handleRetry}
+          />
+        );
+      case 'painPoints':
+        return (
+          <PainPointsView
+            data={report ? (report.painPoints as any) : undefined}
+            status={status.painPoints}
+            onRetry={handleRetry}
+          />
+        );
+      // case 'marketTrends':
       //   return (
       //     <MarketTrendsView
       //       data={report ? (report.marketTrends as any) : undefined}
@@ -66,6 +84,10 @@ const CustomerReportView: React.FC<CustomerReportViewProps> = ({ report, status 
       default:
         return <ComingSoonSection title={SECTIONS.find((s) => s.id === activeSection)?.label || ''} />;
     }
+  };
+
+  const handleRetry = async () => {
+    await axios.post(`${import.meta.env.VITE_API_URL}/research/retry/${segmentId}/${activeSection}`);
   };
 
   return (

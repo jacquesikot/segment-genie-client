@@ -8,9 +8,10 @@ import { MarketSize } from './types';
 interface Props {
   marketSize?: MarketSize;
   status: Status;
+  onRetry?: () => void;
 }
 
-const MarketSizeView = ({ marketSize, status }: Props) => {
+const MarketSizeView = ({ marketSize, status, onRetry }: Props) => {
   if (!marketSize) {
     return (
       <SegmentLoader
@@ -19,6 +20,7 @@ const MarketSizeView = ({ marketSize, status }: Props) => {
         isComplete={status.isComplete}
         title="Market size"
         error={status.progress < 0 ? status.message : undefined}
+        onRetry={onRetry}
       />
     );
   }

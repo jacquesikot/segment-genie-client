@@ -2,25 +2,25 @@ import { BarChart3, Brain, Building2, Check, Target } from 'lucide-react';
 
 export const SECTIONS = [
   {
-    id: 'industry-market',
-    label: 'Industry & Market Size',
+    id: 'marketSize',
+    label: 'Market Size',
     icon: Building2,
     description: 'Market segmentation and size analysis',
   },
   {
-    id: 'competition',
-    label: 'Competition',
+    id: 'competitors',
+    label: 'Competitors',
     icon: Target,
     description: 'Competitive landscape analysis',
   },
   {
-    id: 'pain-points',
+    id: 'painPoints',
     label: 'Pain Points',
     icon: Brain,
     description: 'Customer challenges and needs',
   },
   {
-    id: 'trends',
+    id: 'marketTrends',
     label: 'Market Trends',
     icon: BarChart3,
     description: 'Industry trends and forecasts',

@@ -11,9 +11,10 @@ import PainPointCard from './components/PainPointCard';
 interface Props {
   data?: PainPoints;
   status: Status;
+  onRetry?: () => void;
 }
 
-const PainPointsView = ({ data, status }: Props) => {
+const PainPointsView = ({ data, status, onRetry }: Props) => {
   if (!data) {
     return (
       <SegmentLoader
@@ -22,6 +23,7 @@ const PainPointsView = ({ data, status }: Props) => {
         isComplete={status.isComplete}
         error={status.progress < 0 ? status.message : undefined}
         title="Pain points"
+        onRetry={onRetry}
       />
     );
   }

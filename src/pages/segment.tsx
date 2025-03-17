@@ -143,7 +143,7 @@ export default function Segment() {
     <>
       <PageHeader />
       <div className="flex flex-1 flex-col gap-4 p-4 pt-5 overflow-hidden">
-        <CustomerReportView report={segmentData} status={status} />
+        <CustomerReportView report={segmentData} status={status} segmentId={id as string} />
       </div>
     </>
   );

@@ -24,9 +24,10 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, ChartTooltip, Le
 interface Props {
   data?: Competitors;
   status: Status;
+  onRetry?: () => void;
 }
 
-const CompetitionView: React.FC<Props> = ({ data: competitorData, status }) => {
+const CompetitionView: React.FC<Props> = ({ data: competitorData, status, onRetry }) => {
   const [filterCategory, setFilterCategory] = useState<string>('All');
 
   if (!competitorData) {
@@ -37,6 +38,7 @@ const CompetitionView: React.FC<Props> = ({ data: competitorData, status }) => {
         statusText={status.message}
         isComplete={status.isComplete}
         error={status.progress < 0 ? status.message : undefined}
+        onRetry={onRetry}
       />
     );
   }
