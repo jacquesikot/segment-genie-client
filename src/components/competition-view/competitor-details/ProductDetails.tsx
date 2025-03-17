@@ -20,7 +20,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ productDetails }) => {
       <div className="text-xs sm:text-sm space-y-3 sm:space-y-4">
         <ProductDetailSection title="Main Products" items={productDetails.mainProducts} />
         <ProductDetailSection title="Key Features" items={productDetails.keyFeatures} />
-        <ProductDetailSection title="USPs" items={productDetails.uniqueSellingPoints} />
+        <ProductDetailSection title="Unique Selling Points" items={productDetails.uniqueSellingPoints} />
         {productDetails.technologiesUsed.length > 0 && (
           <div>
             <span className="font-medium text-gray-700 dark:text-gray-300">Technologies:</span>{' '}
