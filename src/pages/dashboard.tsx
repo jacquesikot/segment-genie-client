@@ -128,6 +128,7 @@ export default function Dashboard() {
           customerProfile: {
             segment: values.segment,
             painPoints: values.painPoints,
+            demographics: values.demographics,
           },
           solutionOverview: {
             problemToSolve: values.problem,
