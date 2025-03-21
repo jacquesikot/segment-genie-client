@@ -1,19 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect, useState } from 'react';
-import { TooltipProvider } from '@/components/ui/tooltip';
 import { ResearchReport } from '@/api/research';
 import { SegmentStatus } from '@/api/segment';
-import MarketSizeView from '../market-size/MarketSizeView';
-import CompetitionView from '../competition-view/CompetitionView';
-import PainPointsView from '../pain-points-view/PainPointsView';
-import { SECTIONS } from './constants';
-import ComingSoonSection from './components/ComingSoonSection';
-import MobileMenu from './components/MobileMenu';
-import DesktopNavigation from './components/DesktopNavigation';
-import MobileNavigation from './components/MobileNavigation';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import { useAnalytics } from '@/hooks/use-analytics';
 import axios from 'axios';
+import React, { useEffect, useRef, useState } from 'react';
+import CompetitionView from '../competition-view/CompetitionView';
+import MarketSizeView from '../market-size/MarketSizeView';
 import MarketTrendsView from '../market-trends/MarketTrendsView';
-
+import PainPointsView from '../pain-points-view/PainPointsView';
+import ComingSoonSection from './components/ComingSoonSection';
+import DesktopNavigation from './components/DesktopNavigation';
+import MobileMenu from './components/MobileMenu';
+import MobileNavigation from './components/MobileNavigation';
+import { SECTIONS } from './constants';
 interface CustomerReportViewProps {
   report?: ResearchReport;
   status: SegmentStatus;
@@ -22,8 +22,11 @@ interface CustomerReportViewProps {
 
 const CustomerReportView: React.FC<CustomerReportViewProps> = ({ report, status, segmentId }) => {
   const [activeSection, setActiveSection] = useState('marketSize');
+  const activeSectionRef = useRef('marketSize');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const previousActiveSectionRef = useRef<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const analytics = useAnalytics();
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -32,10 +35,39 @@ const CustomerReportView: React.FC<CustomerReportViewProps> = ({ report, status,
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  useEffect(() => {
+    analytics.trackEvent(analytics.Event.SEGMENT_VIEWED, {
+      segmentId,
+    });
+
+    return () => {
+      analytics.trackEvent(
+        analytics.Event.SEGMENT_REPORT_TAB_CHANGED,
+        {
+          activeReportTab: '',
+          previousReportTab: activeSectionRef.current,
+        },
+        true
+      );
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
 
   const handleSectionChange = (sectionId: string) => {
+    previousActiveSectionRef.current = activeSection;
     setActiveSection(sectionId);
+    activeSectionRef.current = sectionId;
+
+    analytics.trackEvent(
+      analytics.Event.SEGMENT_REPORT_TAB_CHANGED,
+      {
+        activeReportTab: sectionId,
+        previousReportTab: previousActiveSectionRef.current,
+      },
+      true
+    );
     if (isMobile) setIsMobileMenuOpen(false);
   };
 

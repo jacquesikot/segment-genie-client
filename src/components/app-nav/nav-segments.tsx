@@ -19,6 +19,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '../../components/ui/sidebar';
+import { useAnalytics } from '@/hooks/use-analytics';
 
 export function NavSegments({ segments, isLoading }: { segments: Segment[]; isLoading: boolean }) {
   const { isMobile } = useSidebar();
@@ -26,6 +27,7 @@ export function NavSegments({ segments, isLoading }: { segments: Segment[]; isLo
   const navigate = useNavigate();
   const { toast } = useToast();
   const dispatch = useAppDispatch();
+  const analytics = useAnalytics();
 
   const handleDelete = async (segmentId: string, event: React.MouseEvent) => {
     // Prevent the click from bubbling up to parent elements
@@ -44,6 +46,11 @@ export function NavSegments({ segments, isLoading }: { segments: Segment[]; isLo
         title: 'Segment deleted',
         description: 'The segment has been successfully deleted.',
         variant: 'default',
+      });
+
+      analytics.trackEvent(analytics.Event.SEGMENT_DELETED, {
+        segmentId,
+        deletedFrom: 'recentSegmentsNav',
       });
 
       // If we're currently viewing the deleted segment, navigate to the dashboard
@@ -103,7 +110,17 @@ export function NavSegments({ segments, isLoading }: { segments: Segment[]; isLo
           {segments.map((item) => (
             <SidebarMenuItem key={item._id}>
               <SidebarMenuButton asChild isActive={`/segment/${item._id}` === location.pathname}>
-                <a href={`/segment/${item._id}`} title={item.title}>
+                <a
+                  href={`/segment/${item._id}`}
+                  title={item.title}
+                  onClick={() => {
+                    analytics.trackEvent(analytics.Event.NAVIGATION_CLICK, {
+                      path: `/segment/${item._id}`,
+                      from: 'recentSegmentsNav',
+                      action: 'view_segment',
+                    });
+                  }}
+                >
                   <FolderSearch />
                   <span>{item.title}</span>
                 </a>

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { getResearchInput, startNewResearch } from '@/api/research';
 import { NewSegmentForm } from '@/components/NewSegmentForm';
 import PageHeader from '@/components/page-header';
@@ -6,21 +7,24 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Form } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
+import { useAnalytics } from '@/hooks/use-analytics';
 import { useToast } from '@/hooks/use-toast';
 import { useAppDispatch } from '@/redux/hooks';
 import { addNewSegment } from '@/redux/slice/segment';
 import { useUser } from '@clerk/clerk-react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowLeft, ArrowRight, History, Loader2, Plus, Sparkles, Sun, InfoIcon } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { ArrowLeft, ArrowRight, History, InfoIcon, Loader2, Plus, Sparkles, Sun } from 'lucide-react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const researchInputForm = z.object({
   title: z.string().min(2, { message: 'Title must be at least 2 characters' }),
   segment: z.string().min(2, { message: 'Segment must be at least 2 characters.' }),
   painPoints: z.string().min(5, { message: 'Pain Points must be at least 5 characters.' }),
+  demographics: z.string().min(5, { message: 'Demographics must be at least 5 characters.' }),
   problem: z.string().min(5, { message: 'Problem must be at least 5 characters.' }),
   solution: z.string().min(5, { message: 'Solution must be at least 5 characters.' }),
   features: z.string().min(5, { message: 'Features must be at least 5 characters.' }),
@@ -39,21 +43,21 @@ const recentExamples = [
 export default function Dashboard() {
   const { toast } = useToast();
   const dispatch = useAppDispatch();
+  const analytics = useAnalytics();
   const { user } = useUser();
   const navigate = useNavigate();
   const [initialIdea, setInitialIdea] = useState('');
   const [isInitialLoading, setIsInitialLoading] = useState(false);
   const [showDetailedForm, setShowDetailedForm] = useState(false);
   const [isFinalLoading, setIsFinalLoading] = useState(false);
-  const [progress, setProgress] = useState(0);
 
-  // Form instance with validation
   const form = useForm({
     resolver: zodResolver(researchInputForm),
     defaultValues: {
       title: '',
       segment: '',
       painPoints: '',
+      demographics: '',
       problem: '',
       solution: '',
       features: '',
@@ -63,22 +67,6 @@ export default function Dashboard() {
     },
   });
 
-  // Simulate loading progress for better UX
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (isFinalLoading) {
-      interval = setInterval(() => {
-        setProgress((prev) => {
-          const newProgress = prev + Math.random() * 10;
-          return newProgress > 95 ? 95 : newProgress;
-        });
-      }, 600);
-    } else {
-      setProgress(0);
-    }
-    return () => clearInterval(interval);
-  }, [isFinalLoading]);
-
   const handleInitialAnalysis = async () => {
     if (!initialIdea.trim()) {
       toast({
@@ -86,24 +74,35 @@ export default function Dashboard() {
         title: 'Idea required',
         description: 'Please describe your business idea to continue.',
       });
+      analytics.trackEvent(analytics.Event.FORM_VALIDATION_ERROR, {
+        message: 'Invalid business idea',
+      });
       return;
     }
 
     setIsInitialLoading(true);
     try {
-      // Simulate API call
+      analytics.trackEvent(analytics.Event.INITIAL_SEGMENT_ANALYSIS_STARTED, {
+        initialIdea,
+      });
       const response = await getResearchInput(initialIdea);
       form.reset(response);
 
-      // Smooth transition to detailed form
       window.scrollTo({ top: 0, behavior: 'smooth' });
       setShowDetailedForm(true);
-    } catch (error) {
+      analytics.trackEvent(analytics.Event.INITIAL_SEGMENT_ANALYSIS_COMPLETED, {
+        segmentDetail: response,
+      });
+    } catch (error: any) {
       console.error('Error:', error);
       toast({
         variant: 'destructive',
         title: 'Analysis failed',
         description: 'Unable to analyze your idea. Please try again later.',
+      });
+      analytics.trackEvent(analytics.Event.API_ERROR, {
+        message: 'Error fetching research input',
+        error,
       });
     } finally {
       setIsInitialLoading(false);
@@ -112,16 +111,18 @@ export default function Dashboard() {
 
   const handleExampleClick = (example: string) => {
     setInitialIdea(example);
-    // Focus on textarea after selecting example
     const textarea = document.querySelector('textarea');
     if (textarea) textarea.focus();
+    analytics.trackEvent(analytics.Event.RESEARCH_EXAMPLE_CLICKED, { example });
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onFinalSubmit = async (values: any) => {
     setIsFinalLoading(true);
     try {
-      const research = await startNewResearch({
+      analytics.trackEvent(analytics.Event.SEGMENT_ANALYSIS_STARTED, {
+        segmentDetail: values,
+      });
+      const researchData = {
         title: values.title,
         userId: user?.id || '',
         input: {
@@ -141,7 +142,8 @@ export default function Dashboard() {
             channels: values.channels,
           },
         },
-      });
+      };
+      const research = await startNewResearch(researchData);
 
       form.reset();
       dispatch(addNewSegment(research.data.segment));
@@ -151,18 +153,23 @@ export default function Dashboard() {
         title: 'Success!',
         description: 'Your customer report has been generated.',
       });
-
-      await navigate(`/segments`);
-    } catch (err) {
-      console.error('Error:', err);
+      analytics.trackEvent(analytics.Event.SEGMENT_ANALYSIS_PENDING, {
+        segmentAnalysis: research.data.segment,
+      });
+      await navigate('/segments');
+    } catch (error: any) {
+      console.error('Error:', error);
       toast({
         variant: 'destructive',
         title: 'Uh oh! Something went wrong.',
         description: 'There was a problem generating your report. Please try again.',
       });
+      analytics.trackEvent(analytics.Event.API_ERROR, {
+        message: 'Error generating segment report',
+        error,
+      });
     } finally {
       setIsFinalLoading(false);
-      setProgress(0);
     }
   };
 
@@ -172,7 +179,7 @@ export default function Dashboard() {
       <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-6xl">
         <div className="flex flex-col space-y-6 py-6">
           {/* Premium Banner */}
-          <div className="bg-gradient-to-r from-indigo-500/10 to-purple-500/10 dark:from-indigo-500/20 dark:to-purple-500/20 rounded-lg p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+          {/* <div className="bg-gradient-to-r from-indigo-500/10 to-purple-500/10 dark:from-indigo-500/20 dark:to-purple-500/20 rounded-lg p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2 text-xs sm:text-sm text-indigo-700 dark:text-indigo-300">
               <Sparkles size={16} className="text-indigo-500 flex-shrink-0" />
               <span>Unlock advanced features with Segment Genie Pro</span>
@@ -183,7 +190,7 @@ export default function Dashboard() {
             >
               Upgrade to Pro
             </Button>
-          </div>
+          </div> */}
 
           {/* Greeting Section */}
           <div className="space-y-2">
@@ -196,7 +203,7 @@ export default function Dashboard() {
                   Welcome to Segment Genie
                 </h1>
                 <p className="text-gray-600 dark:text-gray-400 text-xs sm:text-sm md:text-base">
-                  Your AI-powered market research assistant
+                  Your AI-powered product and market research assistant
                 </p>
               </div>
             </div>
@@ -277,14 +284,6 @@ export default function Dashboard() {
                       <p className="text-xs sm:text-sm text-muted-foreground">This may take a few moments</p>
                     </div>
 
-                    {/* Progress bar */}
-                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mt-2">
-                      <div
-                        className="bg-indigo-600 dark:bg-indigo-500 h-2.5 rounded-full transition-all duration-300"
-                        style={{ width: `${progress}%` }}
-                      ></div>
-                    </div>
-
                     <div className="text-xs text-gray-500 dark:text-gray-400 italic mt-2">
                       Analyzing market data and generating insights...
                     </div>
@@ -302,7 +301,17 @@ export default function Dashboard() {
                 </div>
 
                 <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onFinalSubmit)} className="space-y-6 sm:space-y-8">
+                  <form
+                    onBlur={async (e) => {
+                      const target = e.target as unknown as HTMLInputElement;
+                      analytics.trackEvent(analytics.Event.SEGMENT_INITIAL_ANALYSIS_DATA_CHANGED, {
+                        field: target.name,
+                        value: target.value,
+                      });
+                    }}
+                    onSubmit={form.handleSubmit(onFinalSubmit)}
+                    className="space-y-6 sm:space-y-8"
+                  >
                     <NewSegmentForm form={form} />
 
                     <div className="flex flex-col sm:flex-row items-center gap-3 sm:justify-between pt-4 sm:pt-6">

@@ -1,11 +1,47 @@
-# React + TypeScript + Vite
+# SegmentGenie Client
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+SegmentGenie is a powerful market segmentation and customer analysis tool built with React, TypeScript, and Vite. This application helps businesses identify and analyze customer segments to optimize their marketing and product strategies.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Segment creation and analysis
+- Customer demographics visualization
+- Market size estimation
+- Detailed segment reports
+- User authentication via Supabase
+
+## Development Setup
+
+This project uses Vite for fast development and optimized production builds.
+
+### Prerequisites
+
+- Node.js 18.x or higher
+- npm 9.x or higher
+
+### Installation
+
+```bash
+# Install dependencies
+npm install
+
+# Start the development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+```
+
+## Analytics
+
+SegmentGenie uses Mixpanel to track user interactions and application performance. For implementation details and best practices, see the [Analytics Guide](./src/docs/analytics-guide.md).
+
+## Documentation
+
+- [Analytics Guide](./src/docs/analytics-guide.md) - How to implement and use analytics tracking
 
 ## Expanding the ESLint configuration
 
@@ -22,7 +58,7 @@ export default tseslint.config({
       tsconfigRootDir: import.meta.dirname,
     },
   },
-})
+});
 ```
 
 - Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
@@ -31,7 +67,7 @@ export default tseslint.config({
 
 ```js
 // eslint.config.js
-import react from 'eslint-plugin-react'
+import react from 'eslint-plugin-react';
 
 export default tseslint.config({
   // Set the react version
@@ -46,5 +82,5 @@ export default tseslint.config({
     ...react.configs.recommended.rules,
     ...react.configs['jsx-runtime'].rules,
   },
-})
+});
 ```

@@ -6,6 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useAnalytics } from '@/hooks/use-analytics';
 import { researchInputForm } from '@/pages/dashboard';
 import { BarChart3, Info, Lightbulb, Users } from 'lucide-react';
 import { useState } from 'react';
@@ -32,7 +33,14 @@ interface Props {
 
 export function NewSegmentForm({ form }: Props) {
   const [activeSection, setActiveSection] = useState('customer');
+  const analytics = useAnalytics();
 
+  const handleTabChange = async (value: string) => {
+    setActiveSection(value);
+    analytics.trackEvent(analytics.Event.SEGMENT_INITIAL_ANALYSIS_TAB_CHANGED, {
+      tab: value,
+    });
+  };
   return (
     <div>
       {/* Quick Overview & Tabs Navigation */}
@@ -42,7 +50,7 @@ export function NewSegmentForm({ form }: Props) {
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Segment Details</h2>
           </div>
 
-          <Tabs defaultValue="all" value={activeSection} onValueChange={setActiveSection} className="mb-4">
+          <Tabs defaultValue="all" value={activeSection} onValueChange={handleTabChange} className="mb-4">
             <TabsList className="grid grid-cols-3 mb-2">
               <TabsTrigger value="customer" className="text-xs sm:text-sm">
                 Customer

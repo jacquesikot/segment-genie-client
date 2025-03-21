@@ -3,6 +3,7 @@ import PageHeader from '@/components/page-header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAnalytics } from '@/hooks/use-analytics';
 import { keys, storage } from '@/lib/storage';
 import { useQuery } from '@tanstack/react-query';
 import { AlertCircle, BarChart, CheckCircle2, CircleAlert, Clock, Loader2, Plus, Sparkles } from 'lucide-react';
@@ -57,6 +58,7 @@ const LoadingState = () => {
 
 const SegmentCard = ({ segment }: { segment: Segment }) => {
   const navigate = useNavigate();
+  const analytics = useAnalytics();
 
   const getStatusIcon = () => {
     if (segment.status.marketSize.isComplete) {
@@ -68,9 +70,18 @@ const SegmentCard = ({ segment }: { segment: Segment }) => {
     }
   };
 
+  const handleCardClick = () => {
+    analytics.trackEvent(analytics.Event.NAVIGATION_CLICK, {
+      path: `/segment/${segment._id}`,
+      from: 'segments',
+      action: 'view_segment',
+    });
+    navigate(`/segment/${segment._id}`);
+  };
+
   return (
     <Card
-      onClick={() => navigate(`/segment/${segment._id}`)}
+      onClick={handleCardClick}
       className="cursor-pointer hover:shadow-lg transition-all hover:border-primary/50 group"
     >
       <CardHeader className="space-y-1">
@@ -140,12 +151,22 @@ const EmptyState = () => {
 
 const SegmentsPage = () => {
   const navigate = useNavigate();
+  const analytics = useAnalytics();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const user: any = storage.getItem(keys.USER);
   const { data: segments, isLoading } = useQuery({
     queryKey: ['segments'],
     queryFn: () => getUserSegments(user!.id),
   });
+
+  const handleNewSegmentClick = () => {
+    analytics.trackEvent(analytics.Event.NAVIGATION_CLICK, {
+      path: '/',
+      from: 'segments',
+      action: 'new_segment',
+    });
+    navigate('/');
+  };
 
   return (
     <>
@@ -157,7 +178,7 @@ const SegmentsPage = () => {
               <h1 className="text-3xl font-semibold">Your Segments</h1>
               <p className="text-muted-foreground">View and manage your market segment analyses</p>
             </div>
-            <Button onClick={() => navigate('/')} className="bg-primary hover:bg-primary/90" disabled={isLoading}>
+            <Button onClick={handleNewSegmentClick} className="bg-primary hover:bg-primary/90" disabled={isLoading}>
               {isLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
