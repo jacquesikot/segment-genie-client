@@ -1,5 +1,5 @@
 import { AnalyticsEvent, identifyUser, trackEvent as trackMixPanelEvent } from '@/utils/mixpanel';
-import { useUser } from '@clerk/clerk-react';
+import { useAuth } from '@/lib/auth-context';
 import { useEffect } from 'react';
 
 // Define a type for analytics properties
@@ -9,15 +9,15 @@ type AnalyticsProperties = Record<
 >;
 
 export const useAnalytics = () => {
-  const { user } = useUser();
+  const { user } = useAuth();
 
   // Identify user when they log in
   useEffect(() => {
     if (user) {
       identifyUser(user.id, {
-        firstName: user.firstName || undefined,
-        lastName: user.lastName || undefined,
-        email: user.primaryEmailAddress?.emailAddress,
+        firstName: user.user_metadata.first_name || undefined,
+        lastName: user.user_metadata.last_name || undefined,
+        email: user.email || undefined,
         plan: 'free',
       });
     }

@@ -11,7 +11,7 @@ import { useAnalytics } from '@/hooks/use-analytics';
 import { useToast } from '@/hooks/use-toast';
 import { useAppDispatch } from '@/redux/hooks';
 import { addNewSegment } from '@/redux/slice/segment';
-import { useUser } from '@clerk/clerk-react';
+import { useAuth } from '@/lib/auth-context';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft, ArrowRight, History, InfoIcon, Loader2, Plus, Sparkles, Sun } from 'lucide-react';
 import { useState } from 'react';
@@ -44,7 +44,7 @@ export default function Dashboard() {
   const { toast } = useToast();
   const dispatch = useAppDispatch();
   const analytics = useAnalytics();
-  const { user } = useUser();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [initialIdea, setInitialIdea] = useState('');
   const [isInitialLoading, setIsInitialLoading] = useState(false);

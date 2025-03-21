@@ -1,4 +1,3 @@
-import { ClerkProvider, SignIn, SignUp } from '@clerk/clerk-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
 import { Suspense } from 'react';
@@ -9,21 +8,21 @@ import AppLayout from './components/app-layout.js';
 import { ThemeProvider } from './components/theme-provider.js';
 import { Toaster } from './components/ui/toaster.js';
 import './index.css';
+import { AuthProvider } from './lib/auth-context.js';
 import ProtectedRoute from './lib/protected-route.js';
+import AuthCallback from './pages/auth-callback.js';
 import Dashboard from './pages/dashboard.js';
 import { ErrorPage } from './pages/error.js';
+import ForgotPassword from './pages/forgot-password.js';
 import { NotFound } from './pages/not-found.js';
+import ResetPassword from './pages/reset-password.js';
 import Segment from './pages/segment.js';
 import Segments from './pages/segments.js';
+import SignIn from './pages/sign-in.tsx';
+import SignUp from './pages/sign-up.tsx';
 import { store } from './redux/store';
 
 const queryClient = new QueryClient();
-
-const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
-
-if (!PUBLISHABLE_KEY) {
-  throw new Error('Add your Clerk Publishable Key to the .env.local file');
-}
 
 export const LoadingSpinner: React.FC = () => {
   return (
@@ -37,11 +36,23 @@ export const LoadingSpinner: React.FC = () => {
 const router = createBrowserRouter([
   {
     path: '/sign-in',
-    element: <SignIn routing="path" path="/sign-in" />,
+    element: <SignIn />,
   },
   {
     path: '/sign-up',
-    element: <SignUp routing="path" path="/sign-up" />,
+    element: <SignUp />,
+  },
+  {
+    path: '/forgot-password',
+    element: <ForgotPassword />,
+  },
+  {
+    path: '/reset-password',
+    element: <ResetPassword />,
+  },
+  {
+    path: '/auth/callback',
+    element: <AuthCallback />,
   },
   {
     path: '*',
@@ -85,7 +96,7 @@ const router = createBrowserRouter([
 const rootElement = document.getElementById('root');
 if (rootElement) {
   ReactDOM.createRoot(rootElement).render(
-    <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
+    <AuthProvider>
       <Provider store={store}>
         <QueryClientProvider client={queryClient}>
           <ThemeProvider storageKey="vite-ui-theme">
@@ -94,7 +105,7 @@ if (rootElement) {
           </ThemeProvider>
         </QueryClientProvider>
       </Provider>
-    </ClerkProvider>
+    </AuthProvider>
   );
 } else {
   console.error('Root element not found');

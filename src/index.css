@@ -19,8 +19,6 @@
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
 }
@@ -139,8 +137,6 @@ button:focus-visible {
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-
-
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -148,4 +144,10 @@ button:focus-visible {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Only apply flex centering to specific elements that need it, not the entire body */
+.center-content {
+  display: flex;
+  place-items: center;
 }
