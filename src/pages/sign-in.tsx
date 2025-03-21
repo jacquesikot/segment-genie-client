@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/auth-context';
 import { useAnalytics } from '../hooks/use-analytics';
+import { Input } from '@/components/ui/input';
 
 export default function SignIn() {
   const [email, setEmail] = useState('');
@@ -51,19 +52,19 @@ export default function SignIn() {
   };
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-white">
+    <div className="flex flex-col md:flex-row min-h-screen bg-white dark:bg-gray-950">
       {/* Left Panel - Login Form */}
       <div className="flex flex-col w-full md:w-1/2 p-4 md:p-12 lg:p-16 justify-center">
         <div className="w-full sm:max-w-md mx-auto">
           <div className="mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">Welcome back</h1>
-            <p className="text-gray-600">
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-50 mb-3">Welcome back</h1>
+            <p className="text-gray-600 dark:text-gray-400">
               Sign in to SegmentGenie to continue validating your ideas with AI-powered research.
             </p>
           </div>
 
           {error && (
-            <div className="bg-red-50 text-red-600 p-4 rounded-lg mb-6 flex items-center shadow-sm animate-shake">
+            <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-300 p-4 rounded-lg mb-6 flex items-center shadow-sm animate-shake">
               <svg
                 className="w-5 h-5 mr-2 flex-shrink-0"
                 fill="currentColor"
@@ -82,12 +83,17 @@ export default function SignIn() {
 
           <form onSubmit={handleSignIn} className="space-y-5">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Email
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg
+                    className="h-5 w-5 text-gray-400 dark:text-gray-500"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -96,25 +102,30 @@ export default function SignIn() {
                     />
                   </svg>
                 </div>
-                <input
+                <Input
                   id="email"
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10 w-full py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-black"
+                  className="pl-10 py-6"
                   placeholder="you@example.com"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Password
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg
+                    className="h-5 w-5 text-gray-400 dark:text-gray-500"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -123,18 +134,21 @@ export default function SignIn() {
                     />
                   </svg>
                 </div>
-                <input
+                <Input
                   id="password"
                   type="password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 w-full py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-black"
+                  className="pl-10 py-6"
                   placeholder="••••••••"
                 />
               </div>
               <div className="flex justify-end mt-2">
-                <Link to="/forgot-password" className="text-sm text-indigo-600 hover:text-indigo-800">
+                <Link
+                  to="/forgot-password"
+                  className="text-sm text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300"
+                >
                   Forgot password?
                 </Link>
               </div>
@@ -177,16 +191,16 @@ export default function SignIn() {
 
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
+              <div className="w-full border-t border-gray-300 dark:border-gray-700"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">Or continue with</span>
+              <span className="px-2 bg-white dark:bg-gray-950 text-gray-500 dark:text-gray-400">Or continue with</span>
             </div>
           </div>
 
           <button
             onClick={handleGoogleSignIn}
-            className="w-full py-3 bg-white border border-gray-300 rounded-lg flex items-center justify-center hover:bg-gray-50 transition-colors shadow-sm text-gray-700"
+            className="w-full py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm text-gray-700 dark:text-gray-300"
           >
             <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
               <g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)">
@@ -211,9 +225,12 @@ export default function SignIn() {
             Sign in with Google
           </button>
 
-          <p className="text-center text-sm mt-8 text-gray-600">
+          <p className="text-center text-sm mt-8 text-gray-600 dark:text-gray-400">
             Don't have an account?{' '}
-            <Link to="/sign-up" className="text-indigo-600 hover:text-indigo-800 font-medium">
+            <Link
+              to="/sign-up"
+              className="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 font-medium"
+            >
               Sign up
             </Link>
           </p>
