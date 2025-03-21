@@ -31,6 +31,8 @@ type AuthContextType = {
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+// Get the site URL, ensuring it doesn't default to localhost in production
+const SITE_URL = typeof window !== 'undefined' ? window.location.origin : 'https://segmentgenie.vercel.app';
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
@@ -91,7 +93,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${SITE_URL}/auth/callback`,
         queryParams: {
           // Add a flag to metadata to identify if this is a new user for analytics
           // This will be available in user_metadata after redirect
@@ -111,7 +113,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const resetPassword = async (email: string) => {
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: `${SITE_URL}/reset-password`,
       });
       return { error };
     } catch (error) {
