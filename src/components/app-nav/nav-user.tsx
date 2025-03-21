@@ -9,14 +9,23 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/sidebar';
 import { useAuth } from '@/lib/auth-context';
+import { useAnalytics } from '@/hooks/use-analytics';
 import { ChevronsUpDown, LogOut } from 'lucide-react';
 
 export function NavUser() {
   const { isMobile } = useSidebar();
   const { signOut } = useAuth();
   const auth = useAuth(); // Rename to avoid confusion
+  const analytics = useAnalytics();
 
   const handleLogout = async () => {
+    // Track user sign out before signing out
+    if (auth.user) {
+      analytics.trackEvent(analytics.Event.USER_SIGNED_OUT, {
+        userId: auth.user.id,
+      });
+    }
+
     await signOut();
   };
 

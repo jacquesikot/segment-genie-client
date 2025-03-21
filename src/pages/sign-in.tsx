@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/auth-context';
+import { useAnalytics } from '../hooks/use-analytics';
 
 export default function SignIn() {
   const [email, setEmail] = useState('');
@@ -9,6 +10,7 @@ export default function SignIn() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { signIn, signInWithGoogle } = useAuth();
+  const analytics = useAnalytics();
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -16,11 +18,18 @@ export default function SignIn() {
     setError(null);
 
     try {
-      const { error } = await signIn(email, password);
+      const { error, user } = await signIn(email, password);
       if (error) {
         setError(error.message);
         return;
       }
+
+      // Track successful sign in
+      analytics.trackEvent(analytics.Event.USER_SIGNED_IN, {
+        method: 'email',
+        userId: user?.id,
+      });
+
       navigate('/');
     } catch (err) {
       setError('An unexpected error occurred');
@@ -33,6 +42,8 @@ export default function SignIn() {
   const handleGoogleSignIn = async () => {
     try {
       await signInWithGoogle();
+      // Note: The actual tracking for Google sign-in will happen in auth-context
+      // since the redirect flow doesn't return directly to this component
     } catch (err) {
       setError('Error with Google sign in');
       console.error(err);

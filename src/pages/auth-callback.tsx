@@ -2,9 +2,11 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { LoadingSpinner } from '../main';
+import { useAnalytics } from '../hooks/use-analytics';
 
 export default function AuthCallback() {
   const navigate = useNavigate();
+  const analytics = useAnalytics();
 
   useEffect(() => {
     // Exchange the code for a session
@@ -19,6 +21,22 @@ export default function AuthCallback() {
 
         // If session exists, redirect to home page
         if (data.session) {
+          // Determine if this is a new user or existing user by checking metadata
+          const isNewUser = data.session.user?.user_metadata?.isNewUser;
+
+          // Track the appropriate event
+          if (isNewUser) {
+            analytics.trackEvent(analytics.Event.USER_SIGNED_UP, {
+              method: 'google',
+              userId: data.session.user.id,
+            });
+          } else {
+            analytics.trackEvent(analytics.Event.USER_SIGNED_IN, {
+              method: 'google',
+              userId: data.session.user.id,
+            });
+          }
+
           navigate('/', { replace: true });
         }
       } catch (error) {
@@ -28,7 +46,7 @@ export default function AuthCallback() {
     };
 
     handleAuthCallback();
-  }, [navigate]);
+  }, [navigate, analytics]);
 
   return <LoadingSpinner />;
 }

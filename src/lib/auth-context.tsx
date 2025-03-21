@@ -84,15 +84,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signInWithGoogle = async () => {
+    // Get current user data first to check if they already exist
+    const { data: currentSession } = await supabase.auth.getSession();
+    const isNewUser = !currentSession.session?.user;
+
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: `${window.location.origin}/auth/callback`,
+        queryParams: {
+          // Add a flag to metadata to identify if this is a new user for analytics
+          // This will be available in user_metadata after redirect
+          isNewUser: isNewUser ? 'true' : 'false',
+        },
       },
     });
   };
 
   const signOut = async () => {
+    // Note: We're not explicitly tracking the event here because
+    // the component that calls signOut (NavUser) is responsible for tracking
+    // This avoids duplicate events when logout is triggered from the UI
     await supabase.auth.signOut();
   };
 

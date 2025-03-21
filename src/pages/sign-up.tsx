@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../lib/auth-context';
+import { useAnalytics } from '../hooks/use-analytics';
 
 export default function SignUp() {
   const [email, setEmail] = useState('');
@@ -9,6 +10,7 @@ export default function SignUp() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const { signUp, signInWithGoogle } = useAuth();
+  const analytics = useAnalytics();
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,12 +19,19 @@ export default function SignUp() {
     setSuccess(false);
 
     try {
-      const { error } = await signUp(email, password);
+      const { error, user } = await signUp(email, password);
 
       if (error) {
         setError(error.message);
         return;
       }
+
+      // Track successful sign up
+      analytics.trackEvent(analytics.Event.USER_SIGNED_UP, {
+        method: 'email',
+        userId: user?.id,
+      });
+
       setSuccess(true);
       return;
     } catch (err) {
@@ -36,6 +45,8 @@ export default function SignUp() {
   const handleGoogleSignIn = async () => {
     try {
       await signInWithGoogle();
+      // Note: The actual tracking for Google sign-in will happen in auth-context
+      // since the redirect flow doesn't return directly to this component
     } catch (err) {
       setError('Error with Google sign in');
       console.error(err);
