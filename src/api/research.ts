@@ -1,4 +1,4 @@
-import { researchInputForm } from '@/pages/dashboard';
+import { researchInputForm } from '@/pages/schemas';
 import client from './client';
 import type { Segment, SegmentStatus } from './segment';
 import { z } from 'zod';
