@@ -22,7 +22,7 @@ export default function AuthCallback() {
         // If session exists, redirect to home page
         if (data.session) {
           // Determine if this is a new user or existing user by checking metadata
-          const isNewUser = data.session.user?.user_metadata?.isNewUser;
+          const isNewUser = data.session.user.created_at === data.session.user.last_sign_in_at;
 
           // Track the appropriate event
           if (isNewUser) {
