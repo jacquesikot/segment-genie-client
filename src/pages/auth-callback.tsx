@@ -21,9 +21,13 @@ export default function AuthCallback() {
 
         // If session exists, redirect to home page
         if (data.session) {
-          console.log('🚀 ~ handleAuthCallback ~ data:', data.session.user);
           // Determine if this is a new user or existing user by checking metadata
-          const isNewUser = data.session.user.created_at === data.session.user.last_sign_in_at;
+          const createdAt = new Date(data.session.user.created_at || '');
+          const lastSignInAt = new Date(data.session.user.last_sign_in_at || '');
+
+          // If last_sign_in_at is very close to created_at (within a few seconds), it's a new user
+          // Otherwise, it's a returning user with last_sign_in_at > created_at
+          const isNewUser = Math.abs(lastSignInAt.getTime() - createdAt.getTime()) < 5000;
 
           // Track the appropriate event
           if (isNewUser) {
