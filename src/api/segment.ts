@@ -20,6 +20,7 @@ export interface SegmentStatus {
 export interface Segment {
   _id: string;
   userId: string;
+  query?: string;
   title: string;
   status: SegmentStatus;
   input: ResearchInput;

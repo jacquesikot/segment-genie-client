@@ -29,6 +29,7 @@ export enum AnalyticsEvent {
   SEGMENT_ANALYSIS_COMPLETED = 'segment_analysis_completed',
   SEGMENT_ANALYSIS_ERROR = 'segment_analysis_error',
   SEGMENT_REPORT_TAB_CHANGED = 'segment_report_tab_changed',
+  SEGMENT_REPORT_RERUN = 'segment_report_rerun',
 
   // Interaction events
   BUTTON_CLICKED = 'button_clicked',

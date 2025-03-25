@@ -1,15 +1,17 @@
 import React from 'react';
-import { X } from 'lucide-react';
+import { RefreshCw, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { SECTIONS } from '../../customer-report/constants';
+import { Button } from '@/components/ui/button';
 
 interface MobileMenuProps {
   activeSection: string;
   onSectionChange: (sectionId: string) => void;
   onClose: () => void;
+  onRerunReport: () => void;
 }
 
-const MobileMenu: React.FC<MobileMenuProps> = ({ activeSection, onSectionChange, onClose }) => {
+const MobileMenu: React.FC<MobileMenuProps> = ({ activeSection, onSectionChange, onClose, onRerunReport }) => {
   return (
     <div className="fixed inset-0 z-50 bg-background/95 flex flex-col p-4">
       <div className="flex justify-between items-center mb-6">
@@ -18,7 +20,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ activeSection, onSectionChange,
           <X className="w-5 h-5" />
         </button>
       </div>
-      <div className="space-y-2">
+      <div className="space-y-2 flex-1">
         {SECTIONS.map((section) => {
           const Icon = section.icon;
           const isActive = activeSection === section.id;
@@ -39,6 +41,18 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ activeSection, onSectionChange,
             </button>
           );
         })}
+      </div>
+      
+      {/* Re-run button at the bottom */}
+      <div className="pt-4 mt-2 border-t">
+        <Button 
+          onClick={onRerunReport}
+          variant="outline" 
+          className="w-full flex items-center justify-center gap-2"
+        >
+          <RefreshCw className="w-4 h-4" />
+          <span>Re-run Report</span>
+        </Button>
       </div>
     </div>
   );

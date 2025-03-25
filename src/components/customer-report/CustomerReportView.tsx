@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ResearchReport } from '@/api/research';
-import { SegmentStatus } from '@/api/segment';
+import { rerunResearch, ResearchReport } from '@/api/research';
+import { Segment, SegmentStatus } from '@/api/segment';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { useAnalytics } from '@/hooks/use-analytics';
 import axios from 'axios';
@@ -13,19 +13,26 @@ import ComingSoonSection from './components/ComingSoonSection';
 import DesktopNavigation from './components/DesktopNavigation';
 import MobileMenu from './components/MobileMenu';
 import MobileNavigation from './components/MobileNavigation';
+import RerunModal from './components/RerunModal';
 import { SECTIONS } from './constants';
+import { z } from 'zod';
+import { researchInputForm } from '@/pages/schemas';
 interface CustomerReportViewProps {
   report?: ResearchReport;
   status: SegmentStatus;
   segmentId: string;
+  segment?: Segment;
+  refetchSegment: () => void;
 }
 
-const CustomerReportView: React.FC<CustomerReportViewProps> = ({ report, status, segmentId }) => {
+const CustomerReportView: React.FC<CustomerReportViewProps> = ({ report, status, segmentId, segment, refetchSegment }) => {
   const [activeSection, setActiveSection] = useState('marketSize');
   const activeSectionRef = useRef('marketSize');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const previousActiveSectionRef = useRef<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [isRerunModalOpen, setIsRerunModalOpen] = useState(false);
+  const [isRerunLoading, setIsRerunLoading] = useState(false);
   const analytics = useAnalytics();
 
   useEffect(() => {
@@ -123,16 +130,71 @@ const CustomerReportView: React.FC<CustomerReportViewProps> = ({ report, status,
     await axios.post(`${import.meta.env.VITE_API_URL}/research/retry/${segmentId}/${activeSection}`);
   };
 
+  const handleRerunReport = () => {
+    setIsRerunModalOpen(true);
+  };
+
+  const handleRerunConfirm = async (values: z.infer<typeof researchInputForm>) => {
+    setIsRerunLoading(true);
+    await rerunResearch(segmentId, {
+      title: segment?.title || '',
+      userId: segment?.userId || '',
+      query: segment?.query || '',
+      input: {
+        customerProfile: {
+          segment: values.segment,
+          demographics: values.demographics,
+          painPoints: values.painPoints,
+        },
+        solutionOverview: {
+          problemToSolve: values.problem,
+          solutionOffered: values.solution,
+          uniqueFeatures: values.features,
+        },
+        marketContext: {
+          industry: values.industry,
+          competitors: values.competitors,
+          channels: values.channels,
+        },
+      },
+    });
+    refetchSegment();
+    analytics.trackEvent(
+      analytics.Event.SEGMENT_REPORT_RERUN,
+      {
+        segmentId,
+        newInput: values,
+      },
+      true
+    );
+    
+    setIsRerunLoading(false);
+    setIsRerunModalOpen(false);
+  };
+
+  const handleCloseRerunModal = () => {
+    setIsRerunModalOpen(false);
+  };
+
   return (
     <TooltipProvider>
       <div className="flex flex-col flex-1 bg-background/50 overflow-hidden">
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <MobileMenu activeSection={activeSection} onSectionChange={handleSectionChange} onClose={toggleMobileMenu} />
+          <MobileMenu 
+            activeSection={activeSection} 
+            onSectionChange={handleSectionChange} 
+            onClose={toggleMobileMenu}
+            onRerunReport={handleRerunReport}
+          />
         )}
 
         {/* Desktop Navigation */}
-        <DesktopNavigation activeSection={activeSection} onSectionChange={handleSectionChange} />
+        <DesktopNavigation 
+          activeSection={activeSection} 
+          onSectionChange={handleSectionChange}
+          onRerunReport={handleRerunReport}
+        />
 
         {/* Main Content Area */}
         <div className="flex-1 overflow-hidden">
@@ -144,6 +206,16 @@ const CustomerReportView: React.FC<CustomerReportViewProps> = ({ report, status,
           activeSection={activeSection}
           onSectionChange={handleSectionChange}
           onOpenMenu={toggleMobileMenu}
+          onRerunReport={handleRerunReport}
+        />
+
+        {/* Rerun Modal */}
+        <RerunModal 
+          isOpen={isRerunModalOpen}
+          onClose={handleCloseRerunModal}
+          onConfirm={handleRerunConfirm}
+          segment={segment}
+          isLoading={isRerunLoading}
         />
       </div>
     </TooltipProvider>

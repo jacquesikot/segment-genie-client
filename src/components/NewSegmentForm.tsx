@@ -29,9 +29,10 @@ interface Props {
   form: UseFormReturn<z.infer<typeof researchInputForm>, any, undefined>;
   onSubmit?: () => void;
   isLoading?: boolean;
+  isRerunModal?: boolean;
 }
 
-export function NewSegmentForm({ form }: Props) {
+export function NewSegmentForm({ form, isRerunModal = false }: Props) {
   const [activeSection, setActiveSection] = useState('customer');
   const analytics = useAnalytics();
 
@@ -46,9 +47,13 @@ export function NewSegmentForm({ form }: Props) {
       {/* Quick Overview & Tabs Navigation */}
       <Card className="shadow-sm border-0 bg-transparent">
         <CardContent className="p-0">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Segment Details</h2>
-          </div>
+          {
+            !isRerunModal && (
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Segment Details</h2>
+              </div>
+            )
+          }
 
           <Tabs defaultValue="all" value={activeSection} onValueChange={handleTabChange} className="mb-4">
             <TabsList className="grid grid-cols-3 mb-2">
@@ -64,7 +69,9 @@ export function NewSegmentForm({ form }: Props) {
             </TabsList>
 
             {/* Improved Title Input */}
-            <div className="relative">
+           {
+            !isRerunModal && (
+              <div className="relative">
               <FormField
                 control={form.control}
                 name="title"
@@ -83,6 +90,8 @@ export function NewSegmentForm({ form }: Props) {
                 )}
               />
             </div>
+            )
+           }
           </Tabs>
         </CardContent>
       </Card>
@@ -114,6 +123,25 @@ export function NewSegmentForm({ form }: Props) {
                           </div>
                           <FormControl>
                             <Input className="text-sm" placeholder="e.g., Freelancers, solopreneurs" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="demographics"
+                      render={({ field }) => (
+                        <FormItem>
+                          <div className="flex items-center gap-1 mb-1">
+                            <FormLabel className="text-xs text-gray-600 dark:text-gray-400">Demographics</FormLabel>
+                            <FormTooltip content="Describe your target customer demographics (age, location, etc.)">
+                              <Info className="h-3 w-3 text-muted-foreground" />
+                            </FormTooltip>
+                          </div>
+                          <FormControl>
+                            <Input className="text-sm" placeholder="e.g., 25-40 years old, urban areas" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>

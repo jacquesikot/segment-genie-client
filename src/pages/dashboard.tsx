@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { getResearchInput, startNewResearch } from '@/api/research';
+import { getResearchInput, NewResearch, startNewResearch } from '@/api/research';
 import { NewSegmentForm } from '@/components/NewSegmentForm';
 import PageHeader from '@/components/page-header';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -108,9 +108,10 @@ export default function Dashboard() {
       analytics.trackEvent(analytics.Event.SEGMENT_ANALYSIS_STARTED, {
         segmentDetail: values,
       });
-      const researchData = {
+      const researchData: NewResearch = {
         title: values.title,
         userId: user?.id || '',
+        query: initialIdea,
         input: {
           customerProfile: {
             segment: values.segment,

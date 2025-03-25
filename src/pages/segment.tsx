@@ -80,7 +80,7 @@ export default function Segment() {
     },
   });
 
-  const { data: segment } = useQuery({
+  const { data: segment, refetch } = useQuery({
     queryKey: ['segment', id],
     queryFn: () => getSegment(id as string),
     enabled: !!id,
@@ -143,7 +143,7 @@ export default function Segment() {
     <>
       <PageHeader />
       <div className="flex flex-1 flex-col gap-4 p-4 pt-5 overflow-hidden">
-        <CustomerReportView report={segmentData} status={status} segmentId={id as string} />
+        <CustomerReportView report={segmentData} status={status} segmentId={id as string} segment={segment} refetchSegment={refetch}/>
       </div>
     </>
   );

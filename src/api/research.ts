@@ -128,6 +128,7 @@ export interface ResearchInput {
 export interface NewResearch {
   title: string;
   userId: string;
+  query: string;
   input: ResearchInput;
 }
 
@@ -651,4 +652,9 @@ export const startNewResearch = async (data: NewResearch): Promise<NewResearchRe
 export const getResearchInput = async (query: string): Promise<z.infer<typeof researchInputForm>> => {
   const res = await client.post('/research/input', { query });
   return res.data.data;
+};
+
+export const rerunResearch = async (segmentId: string, data: NewResearch): Promise<NewResearchResponse> => {
+  const res = await client.post(`/research/rerun/${segmentId}`, data);
+  return res.data;
 };
