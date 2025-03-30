@@ -17,6 +17,8 @@ import RerunModal from './components/RerunModal';
 import { SECTIONS } from './constants';
 import { z } from 'zod';
 import { researchInputForm } from '@/pages/schemas';
+import ChatModal from './components/ChatModal';
+
 interface CustomerReportViewProps {
   report?: ResearchReport;
   status: SegmentStatus;
@@ -25,7 +27,13 @@ interface CustomerReportViewProps {
   refetchSegment: () => void;
 }
 
-const CustomerReportView: React.FC<CustomerReportViewProps> = ({ report, status, segmentId, segment, refetchSegment }) => {
+const CustomerReportView: React.FC<CustomerReportViewProps> = ({
+  report,
+  status,
+  segmentId,
+  segment,
+  refetchSegment,
+}) => {
   const [activeSection, setActiveSection] = useState('marketSize');
   const activeSectionRef = useRef('marketSize');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -33,6 +41,7 @@ const CustomerReportView: React.FC<CustomerReportViewProps> = ({ report, status,
   const [isMobile, setIsMobile] = useState(false);
   const [isRerunModalOpen, setIsRerunModalOpen] = useState(false);
   const [isRerunLoading, setIsRerunLoading] = useState(false);
+  const [isChatModalOpen, setIsChatModalOpen] = useState(false);
   const analytics = useAnalytics();
 
   useEffect(() => {
@@ -167,7 +176,7 @@ const CustomerReportView: React.FC<CustomerReportViewProps> = ({ report, status,
       },
       true
     );
-    
+
     setIsRerunLoading(false);
     setIsRerunModalOpen(false);
   };
@@ -176,24 +185,42 @@ const CustomerReportView: React.FC<CustomerReportViewProps> = ({ report, status,
     setIsRerunModalOpen(false);
   };
 
+  const handleOpenChat = () => {
+    setIsChatModalOpen(true);
+    analytics.trackEvent(
+      analytics.Event.SEGMENT_CHAT_OPENED,
+      {
+        segmentId,
+        currentSection: activeSection,
+      },
+      true
+    );
+  };
+
+  const handleCloseChat = () => {
+    setIsChatModalOpen(false);
+  };
+
   return (
     <TooltipProvider>
-      <div className="flex flex-col flex-1 bg-background/50 overflow-hidden">
+      <div className="flex flex-col flex-1 bg-background/50 overflow-hidden transition-all duration-300">
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <MobileMenu 
-            activeSection={activeSection} 
-            onSectionChange={handleSectionChange} 
+          <MobileMenu
+            activeSection={activeSection}
+            onSectionChange={handleSectionChange}
             onClose={toggleMobileMenu}
             onRerunReport={handleRerunReport}
+            onOpenChat={handleOpenChat}
           />
         )}
 
         {/* Desktop Navigation */}
-        <DesktopNavigation 
-          activeSection={activeSection} 
+        <DesktopNavigation
+          activeSection={activeSection}
           onSectionChange={handleSectionChange}
           onRerunReport={handleRerunReport}
+          onOpenChat={handleOpenChat}
         />
 
         {/* Main Content Area */}
@@ -207,15 +234,25 @@ const CustomerReportView: React.FC<CustomerReportViewProps> = ({ report, status,
           onSectionChange={handleSectionChange}
           onOpenMenu={toggleMobileMenu}
           onRerunReport={handleRerunReport}
+          onOpenChat={handleOpenChat}
         />
 
         {/* Rerun Modal */}
-        <RerunModal 
+        <RerunModal
           isOpen={isRerunModalOpen}
           onClose={handleCloseRerunModal}
           onConfirm={handleRerunConfirm}
           segment={segment}
           isLoading={isRerunLoading}
+        />
+
+        {/* Chat Modal */}
+        <ChatModal
+          isOpen={isChatModalOpen}
+          onClose={handleCloseChat}
+          segmentId={segmentId}
+          segmentTitle={segment?.title || ''}
+          currentSection={activeSection}
         />
       </div>
     </TooltipProvider>

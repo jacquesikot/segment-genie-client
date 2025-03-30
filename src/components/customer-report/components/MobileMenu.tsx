@@ -1,5 +1,5 @@
 import React from 'react';
-import { RefreshCw, X } from 'lucide-react';
+import { MessageSquare, RefreshCw, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { SECTIONS } from '../../customer-report/constants';
 import { Button } from '@/components/ui/button';
@@ -9,9 +9,16 @@ interface MobileMenuProps {
   onSectionChange: (sectionId: string) => void;
   onClose: () => void;
   onRerunReport: () => void;
+  onOpenChat?: () => void;
 }
 
-const MobileMenu: React.FC<MobileMenuProps> = ({ activeSection, onSectionChange, onClose, onRerunReport }) => {
+const MobileMenu: React.FC<MobileMenuProps> = ({
+  activeSection,
+  onSectionChange,
+  onClose,
+  onRerunReport,
+  onOpenChat = () => {},
+}) => {
   return (
     <div className="fixed inset-0 z-50 bg-background/95 flex flex-col p-4">
       <div className="flex justify-between items-center mb-6">
@@ -42,14 +49,15 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ activeSection, onSectionChange,
           );
         })}
       </div>
-      
-      {/* Re-run button at the bottom */}
-      <div className="pt-4 mt-2 border-t">
-        <Button 
-          onClick={onRerunReport}
-          variant="outline" 
-          className="w-full flex items-center justify-center gap-2"
-        >
+
+      {/* Action buttons at the bottom */}
+      <div className="pt-4 mt-2 border-t space-y-2">
+        <Button onClick={onOpenChat} variant="outline" className="w-full flex items-center justify-center gap-2">
+          <MessageSquare className="w-4 h-4" />
+          <span>Chat with AI Assistant</span>
+        </Button>
+
+        <Button onClick={onRerunReport} variant="outline" className="w-full flex items-center justify-center gap-2">
           <RefreshCw className="w-4 h-4" />
           <span>Re-run Report</span>
         </Button>
