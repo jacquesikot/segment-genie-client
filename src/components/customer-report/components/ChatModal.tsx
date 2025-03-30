@@ -35,6 +35,8 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, segmentId, segme
   const [isLoading, setIsLoading] = useState(false);
   const [chatState, setChatState] = useState<ChatState>(ChatState.UNINITIATED);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
+  const [isCursorInModal, setIsCursorInModal] = useState(false);
 
   const suggestedQuestions = [
     `What are the main pain points for ${segmentTitle}?`,
@@ -68,17 +70,69 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, segmentId, segme
     }
   }, [isOpen, analytics, segmentId, currentSection, chatState]);
 
-  // Add body class to prevent scrolling when panel is open on mobile
+  // Handle scroll behavior based on cursor position
   useEffect(() => {
+    // Function to prevent default scroll behavior
+    const preventScroll = (e: WheelEvent) => {
+      if (isCursorInModal) {
+        // When cursor is in modal, allow modal to scroll but not main page
+        e.stopPropagation();
+      } else if (isOpen) {
+        // When modal is open but cursor is not in it, prevent modal from scrolling
+        const modalElement = modalRef.current;
+        if (modalElement) {
+          const scrollElements = modalElement.querySelectorAll('[data-radix-scroll-area-viewport]');
+          scrollElements.forEach((el) => {
+            (el as HTMLElement).style.overflowY = 'hidden';
+          });
+        }
+      }
+    };
+
+    // Functions to track cursor position
+    const handleMouseEnter = () => {
+      setIsCursorInModal(true);
+      // Re-enable scrolling in modal
+      const modalElement = modalRef.current;
+      if (modalElement) {
+        const scrollElements = modalElement.querySelectorAll('[data-radix-scroll-area-viewport]');
+        scrollElements.forEach((el) => {
+          (el as HTMLElement).style.overflowY = 'auto';
+        });
+      }
+    };
+
+    const handleMouseLeave = () => {
+      setIsCursorInModal(false);
+    };
+
+    // Body class setup for mobile
     if (isOpen) {
       document.body.classList.add('overflow-hidden', 'md:overflow-auto');
+
+      // Add event listeners when modal is open
+      const modalElement = modalRef.current;
+      if (modalElement) {
+        modalElement.addEventListener('mouseenter', handleMouseEnter);
+        modalElement.addEventListener('mouseleave', handleMouseLeave);
+        window.addEventListener('wheel', preventScroll, { passive: false });
+      }
     } else {
       document.body.classList.remove('overflow-hidden', 'md:overflow-auto');
     }
+
     return () => {
       document.body.classList.remove('overflow-hidden', 'md:overflow-auto');
+
+      // Clean up event listeners
+      const modalElement = modalRef.current;
+      if (modalElement) {
+        modalElement.removeEventListener('mouseenter', handleMouseEnter);
+        modalElement.removeEventListener('mouseleave', handleMouseLeave);
+        window.removeEventListener('wheel', preventScroll);
+      }
     };
-  }, [isOpen]);
+  }, [isOpen, isCursorInModal]);
 
   const initiateChat = () => {
     setMessages([
@@ -251,6 +305,7 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, segmentId, segme
 
       {/* Side panel */}
       <div
+        ref={modalRef}
         className={cn(
           'fixed top-0 right-0 z-50 w-full max-w-[420px] h-full border-l shadow-xl flex flex-col transition-transform duration-300 ease-in-out bg-background/97',
           isOpen ? 'translate-x-0' : 'translate-x-full'
