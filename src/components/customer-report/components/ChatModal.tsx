@@ -607,7 +607,7 @@ interface ChatHeaderProps {
 }
 
 const ChatHeader: React.FC<ChatHeaderProps> = ({ segmentTitle, onClose, chatState }) => (
-  <div className="p-3 flex items-center justify-between border-b bg-background/98">
+  <div className="p-3 flex items-center justify-between bg-background/98">
     <div className="flex items-center gap-2.5">
       <div className="flex items-center justify-center w-7 h-7 rounded-full bg-primary/10 flex-shrink-0">
         <Bot className="h-3.5 w-3.5 text-primary" />
