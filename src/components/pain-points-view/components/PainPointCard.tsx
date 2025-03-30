@@ -93,7 +93,7 @@ const PainPointCard = ({ point }: { point: PainPoint }) => {
                   {point.impact.businessSize && (
                     <div className="flex items-center gap-1 text-xs text-muted-foreground">
                       <Users className="w-3.5 h-3.5 flex-shrink-0" />
-                      <span className="truncate">{point.impact.businessSize.join(', ')}</span>
+                      <span>{point.impact.businessSize.join(', ')}</span>
                     </div>
                   )}
                 </div>
