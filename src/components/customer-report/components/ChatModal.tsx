@@ -7,6 +7,11 @@ import { useAnalytics } from '@/hooks/use-analytics';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Avatar } from '@/components/ui/avatar';
+import { initialiseChat, newChat, getChatBySegmentId, getChatMessages, sendMessage } from '@/api/chat';
+import { useAuth } from '@/lib/auth-context';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import 'highlight.js/styles/github-dark.css';
 
 interface ChatModalProps {
   isOpen: boolean;
@@ -17,9 +22,10 @@ interface ChatModalProps {
 }
 
 interface ChatMessage {
-  role: 'user' | 'assistant';
+  sender: 'user' | 'system';
   content: string;
   timestamp: Date;
+  _id?: string; // Add ID for server messages
 }
 
 enum ChatState {
@@ -30,13 +36,16 @@ enum ChatState {
 
 const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, segmentId, segmentTitle, currentSection }) => {
   const analytics = useAnalytics();
+  const { user } = useAuth();
   const [inputValue, setInputValue] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [chatState, setChatState] = useState<ChatState>(ChatState.UNINITIATED);
+  const [chatId, setChatId] = useState<string | null>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   const [isCursorInModal, setIsCursorInModal] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(false);
 
   const suggestedQuestions = [
     `What are the main pain points for ${segmentTitle}?`,
@@ -134,34 +143,120 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, segmentId, segme
     };
   }, [isOpen, isCursorInModal]);
 
-  const initiateChat = () => {
-    setMessages([
-      {
-        role: 'assistant',
-        content: `Hello! I'm your AI assistant for the "${segmentTitle}" segment. How can I help you understand the ${currentSection} data or any other aspect of this segment?`,
-        timestamp: new Date(),
-      },
-    ]);
-    setChatState(ChatState.INITIATED);
+  // Check initial chat state when modal opens
+  useEffect(() => {
+    if (isOpen && user) {
+      setIsInitializing(true);
+      checkChatState();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, segmentId]);
 
-    // Track chat initiated in analytics
-    analytics.trackEvent(
-      analytics.Event.SEGMENT_CHAT_OPENED,
-      {
-        segmentId,
-        currentSection,
-      },
-      true
-    );
+  // Function to check if chat already exists for this segment
+  const checkChatState = async () => {
+    try {
+      setIsLoading(true);
+      const response = await getChatBySegmentId(segmentId);
+
+      if (response.data && response.data.length > 0) {
+        // Chat has been initialized
+        const mostRecentChat = response.data.sort(
+          (a, b) => new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime()
+        )[0];
+        setChatId(mostRecentChat._id);
+
+        // Fetch messages for this chat
+        const messagesResponse = await getChatMessages(mostRecentChat._id);
+
+        if (messagesResponse.data && messagesResponse.data.length > 0) {
+          // Chat has messages, set state to ACTIVE
+          const formattedMessages = messagesResponse.data.map((msg) => ({
+            sender: msg.sender,
+            content: msg.content,
+            timestamp: msg.createdAt ? new Date(msg.createdAt) : new Date(),
+            _id: msg._id,
+          }));
+
+          setMessages(formattedMessages);
+          setChatState(ChatState.ACTIVE);
+        } else {
+          // Chat exists but no messages, set state to INITIATED
+          setChatState(ChatState.INITIATED);
+          setMessages([
+            {
+              sender: 'system',
+              content: `Hello! I'm your AI assistant for the "${segmentTitle}" segment. How can I help you understand the ${currentSection} data or any other aspect of this segment?`,
+              timestamp: new Date(),
+            },
+          ]);
+        }
+      } else {
+        // No chat exists yet
+        setChatState(ChatState.UNINITIATED);
+        // Clear any existing messages
+        setMessages([]);
+      }
+    } catch (error) {
+      console.error('Error checking chat state:', error);
+      setChatState(ChatState.UNINITIATED);
+      // Show error message to user
+      setMessages([
+        {
+          sender: 'system',
+          content: 'Sorry, I encountered an error loading the conversation. Please try again.',
+          timestamp: new Date(),
+        },
+      ]);
+    } finally {
+      setIsLoading(false);
+      setIsInitializing(false);
+    }
+  };
+
+  const initiateChat = async () => {
+    try {
+      setIsLoading(true);
+      await initialiseChat(segmentId);
+      const chatResponse = await newChat(segmentId, user!.id, segmentTitle);
+
+      if (chatResponse.data) {
+        setChatId(chatResponse.data._id);
+      }
+
+      setMessages([
+        {
+          sender: 'system',
+          content: `Hello! I'm your AI assistant for the "${segmentTitle}" segment. How can I help you understand the ${currentSection} data or any other aspect of this segment?`,
+          timestamp: new Date(),
+        },
+      ]);
+      setChatState(ChatState.INITIATED);
+
+      // Track chat initiated in analytics
+      analytics.trackEvent(
+        analytics.Event.SEGMENT_CHAT_OPENED,
+        {
+          segmentId,
+          currentSection,
+        },
+        true
+      );
+    } catch (error) {
+      console.error('Error initiating chat:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSendMessage = async (content: string = inputValue) => {
-    if (!content.trim()) return;
+    if (!content.trim() || !chatId) return;
 
-    // Add user message to chat
+    const trimmedContent = content.trim();
+
+    // Add user message to chat immediately for responsive UI
     const userMessage: ChatMessage = {
-      role: 'user',
-      content: content,
+      sender: 'user',
+      content: trimmedContent,
       timestamp: new Date(),
     };
     setMessages((prev) => [...prev, userMessage]);
@@ -172,7 +267,7 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, segmentId, segme
       {
         segmentId,
         currentSection,
-        messageContent: content,
+        messageContent: trimmedContent,
       },
       true
     );
@@ -182,20 +277,45 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, segmentId, segme
       setChatState(ChatState.ACTIVE);
     }
 
+    // Clear input field and show loading state
     setInputValue('');
     setIsLoading(true);
 
-    // TODO: Replace with actual API call to your AI service
-    // This is a placeholder for demonstration
-    setTimeout(() => {
-      const aiResponse: ChatMessage = {
-        role: 'assistant',
-        content: `I'm analyzing the ${currentSection} data for your segment "${segmentTitle}" (ID: ${segmentId}). This is a placeholder response. Please implement the actual API integration.`,
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, aiResponse]);
+    try {
+      // Send message to the API
+      const response = await sendMessage(segmentId, chatId, trimmedContent);
+
+      if (response.data) {
+        // Create AI response message
+        const aiResponse: ChatMessage = {
+          sender: 'system',
+          content: response.data.response,
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, aiResponse]);
+
+        // If user has scrolled up, don't auto-scroll to bottom
+        if (scrollAreaRef.current) {
+          const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+          if (scrollContainer) {
+            scrollContainer.scrollTop = scrollContainer.scrollHeight;
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+      // Add error message to the chat
+      setMessages((prev) => [
+        ...prev,
+        {
+          sender: 'system',
+          content: 'Sorry, I encountered an error processing your request. Please try again.',
+          timestamp: new Date(),
+        },
+      ]);
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   const handleSuggestedQuestion = (question: string) => {
@@ -211,6 +331,29 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, segmentId, segme
 
   // Render content based on chat state
   const renderChatContent = () => {
+    // Show loading indicator while initializing
+    if (isInitializing) {
+      return (
+        <div className="flex flex-col items-center justify-center h-full p-6 text-center">
+          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6">
+            <Bot className="h-8 w-8 text-primary animate-pulse" />
+          </div>
+          <h3 className="text-xl font-semibold mb-4">Loading conversation...</h3>
+          <div className="flex space-x-3 py-2">
+            <div className="w-2.5 h-2.5 rounded-full bg-primary/60 animate-bounce"></div>
+            <div
+              className="w-2.5 h-2.5 rounded-full bg-primary/60 animate-bounce"
+              style={{ animationDelay: '0.2s' }}
+            ></div>
+            <div
+              className="w-2.5 h-2.5 rounded-full bg-primary/60 animate-bounce"
+              style={{ animationDelay: '0.4s' }}
+            ></div>
+          </div>
+        </div>
+      );
+    }
+
     switch (chatState) {
       case ChatState.UNINITIATED:
         return (
@@ -277,6 +420,7 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, segmentId, segme
                 {messages.map((message, index) => (
                   <MessageBubble key={index} message={message} />
                 ))}
+
                 {isLoading && <LoadingIndicator />}
               </div>
             </ScrollArea>
@@ -307,7 +451,7 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, segmentId, segme
       <div
         ref={modalRef}
         className={cn(
-          'fixed top-0 right-0 z-50 w-full max-w-[420px] h-full border-l shadow-xl flex flex-col transition-transform duration-300 ease-in-out bg-background/97',
+          'fixed top-0 right-0 z-50 w-full md:max-w-[420px] h-full border-l shadow-xl flex flex-col transition-transform duration-300 ease-in-out bg-background/97',
           isOpen ? 'translate-x-0' : 'translate-x-full'
         )}
         style={{
@@ -324,10 +468,24 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, segmentId, segme
 };
 
 // Component for message bubbles
+// All assistant responses are automatically rendered with markdown formatting
+// Supports headings, lists, tables, code blocks, blockquotes, and other markdown elements
 const MessageBubble: React.FC<{ message: ChatMessage }> = ({ message }) => {
+  // Format timestamp to show time
+  const formattedTime = message.timestamp.toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  });
+
+  // Ensure content is string for markdown processing
+  const content = typeof message.content === 'string' ? message.content : '';
+
   return (
-    <div className={`flex items-end gap-2.5 ${message.role === 'user' ? 'justify-end' : 'justify-start'} w-full mb-3`}>
-      {message.role === 'assistant' && (
+    <div
+      className={`flex items-end gap-2.5 ${message.sender === 'user' ? 'justify-end' : 'justify-start'} w-full mb-3`}
+    >
+      {message.sender === 'system' && (
         <Avatar className="w-8 h-8 justify-center align-middle items-center flex-shrink-0 border border-border/50 shadow-sm">
           <Bot className="h-4 w-4 text-primary" />
         </Avatar>
@@ -335,20 +493,49 @@ const MessageBubble: React.FC<{ message: ChatMessage }> = ({ message }) => {
       <div
         className={cn(
           'max-w-[85%] p-3 rounded-2xl shadow-sm',
-          message.role === 'user'
+          message.sender === 'user'
             ? 'bg-gradient-to-br from-primary to-primary/90 text-primary-foreground rounded-tr-none'
             : 'bg-muted/80 backdrop-blur-sm border border-border/40 rounded-tl-none'
         )}
       >
-        <div className="text-sm whitespace-pre-wrap break-words leading-relaxed">{message.content}</div>
-        <div className="text-[10px] opacity-70 mt-1.5 text-right font-medium">
-          {message.timestamp.toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-          })}
-        </div>
+        {message.sender === 'system' ? (
+          <article
+            className={cn(
+              'prose prose-sm dark:prose-invert max-w-none !text-foreground text-sm',
+              'prose-headings:text-foreground prose-headings:font-bold prose-headings:my-2',
+              'prose-h1:text-lg prose-h2:text-base prose-h2:border-b prose-h2:pb-1 prose-h3:text-sm',
+              'prose-p:my-1.5 prose-p:text-foreground/90',
+              'prose-a:text-primary',
+              'prose-pre:bg-muted/60 prose-pre:rounded prose-pre:p-2',
+              'prose-code:text-primary prose-code:bg-muted/70 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none',
+              'prose-blockquote:border-l-4 prose-blockquote:border-primary/30 prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:my-2.5 prose-blockquote:text-muted-foreground',
+              'prose-ol:my-2 prose-ul:my-2 prose-ul:list-disc prose-ol:list-decimal prose-li:my-0.5 prose-li:marker:text-primary/70',
+              'prose-table:border-collapse prose-table:border prose-table:border-border/30 prose-table:my-3 prose-table:w-full',
+              'prose-thead:bg-muted/30',
+              'prose-th:bg-muted/50 prose-th:p-2 prose-th:border prose-th:border-border/30 prose-th:font-semibold',
+              'prose-td:p-2 prose-td:border prose-td:border-border/30',
+              'prose-hr:my-4 prose-hr:border-muted-foreground/20',
+              'prose-strong:font-semibold prose-strong:text-foreground'
+            )}
+          >
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={{
+                // Override pre rendering for better code block styling
+                pre: ({ children }) => (
+                  <pre className="bg-muted/30 p-3 rounded-md overflow-x-auto my-3">{children}</pre>
+                ),
+              }}
+            >
+              {content}
+            </ReactMarkdown>
+          </article>
+        ) : (
+          <div className="text-sm whitespace-pre-wrap break-words leading-relaxed">{content}</div>
+        )}
+        <div className="text-[10px] opacity-70 mt-1.5 text-right font-medium">{formattedTime}</div>
       </div>
-      {message.role === 'user' && (
+      {message.sender === 'user' && (
         <Avatar className="w-8 h-8 justify-center align-middle items-center flex-shrink-0 bg-primary/90 shadow-sm ring-2 ring-primary/20">
           <div className="font-semibold text-xs text-primary-foreground">You</div>
         </Avatar>

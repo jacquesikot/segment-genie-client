@@ -34,7 +34,7 @@ const CustomerReportView: React.FC<CustomerReportViewProps> = ({
   segment,
   refetchSegment,
 }) => {
-  const [activeSection, setActiveSection] = useState('marketSize');
+  const [activeSection, setActiveSection] = useState('painPoints');
   const activeSectionRef = useRef('marketSize');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const previousActiveSectionRef = useRef<string | null>(null);
