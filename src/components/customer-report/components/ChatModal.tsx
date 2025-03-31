@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Send, X, Bot, Sparkles, MessageCircle, Lightbulb, ChevronRight } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAnalytics } from '@/hooks/use-analytics';
 import { cn } from '@/lib/utils';
@@ -12,6 +10,8 @@ import { useAuth } from '@/lib/auth-context';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import 'highlight.js/styles/github-dark.css';
+import { Textarea } from '@/components/ui/textarea';
+import { Send, X, Bot, Sparkles, MessageCircle, Lightbulb, ChevronRight } from 'lucide-react';
 
 interface ChatModalProps {
   isOpen: boolean;
@@ -578,13 +578,13 @@ const ChatInput: React.FC<ChatInputProps> = ({
 }) => (
   <div className="p-3 border-t mt-auto bg-background/98">
     <div className="flex gap-2">
-      <Input
+      <Textarea
         placeholder="Type your message..."
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
         onKeyDown={handleKeyPress}
         disabled={isLoading}
-        className="flex-1 py-5 shadow-sm border-muted-foreground/20 focus-visible:ring-primary text-sm"
+        className="flex-1 py-2 px-3 shadow-sm border-muted-foreground/20 focus-visible:ring-primary text-sm min-h-[100px] resize-none"
         autoComplete="off"
       />
       <Button
