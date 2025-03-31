@@ -47,6 +47,7 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, segmentId, segme
   const resizeHandleRef = useRef<HTMLDivElement>(null);
   const [isCursorInModal, setIsCursorInModal] = useState(false);
   const [isInitializing, setIsInitializing] = useState(false);
+  const [loadingText, setLoadingText] = useState('Loading conversation...');
   const [isResizing, setIsResizing] = useState(false);
   const [modalWidth, setModalWidth] = useState<number | null>(null);
 
@@ -297,6 +298,7 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, segmentId, segme
 
   const initiateChat = async () => {
     try {
+      setLoadingText('Initializing chat - this may take a moment...');
       setIsInitializing(true);
       await initialiseChat(segmentId);
       const chatResponse = await newChat(segmentId, user!.id, segmentTitle);
@@ -327,6 +329,7 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, segmentId, segme
       console.error('Error initiating chat:', error);
     } finally {
       setIsInitializing(false);
+      setLoadingText('Loading conversation...');
     }
   };
 
@@ -426,7 +429,7 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, segmentId, segme
           <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6">
             <Bot className="h-8 w-8 text-primary animate-pulse" />
           </div>
-          <h3 className="text-xl font-semibold mb-4">Loading conversation...</h3>
+          <h3 className="text-xl font-semibold mb-4">{loadingText}</h3>
           <div className="flex space-x-3 py-2">
             <div className="w-2.5 h-2.5 rounded-full bg-primary/60 animate-bounce"></div>
             <div
