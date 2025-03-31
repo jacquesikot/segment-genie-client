@@ -11,7 +11,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import 'highlight.js/styles/github-dark.css';
 import { Textarea } from '@/components/ui/textarea';
-import { Send, X, Bot, Sparkles, MessageCircle, Lightbulb, ChevronRight } from 'lucide-react';
+import { Send, X, Bot, Sparkles, MessageCircle, Lightbulb, ChevronRight, GripVertical } from 'lucide-react';
 
 interface ChatModalProps {
   isOpen: boolean;
@@ -44,8 +44,11 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, segmentId, segme
   const [chatId, setChatId] = useState<string | null>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
+  const resizeHandleRef = useRef<HTMLDivElement>(null);
   const [isCursorInModal, setIsCursorInModal] = useState(false);
   const [isInitializing, setIsInitializing] = useState(false);
+  const [isResizing, setIsResizing] = useState(false);
+  const [modalWidth, setModalWidth] = useState<number | null>(null);
 
   const suggestedQuestions = [
     `What are the main pain points for ${segmentTitle}?`,
@@ -53,6 +56,85 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, segmentId, segme
     `Who are the top competitors in the ${segmentTitle} space?`,
     `What market trends affect ${segmentTitle}?`,
   ];
+
+  // Load saved width from localStorage on mount
+  useEffect(() => {
+    const savedWidth = localStorage.getItem('chatModalWidth');
+    if (savedWidth) {
+      // Validate that the saved width is still within current constraints
+      const windowWidth = window.innerWidth;
+      const parsedWidth = parseInt(savedWidth, 10);
+      const maxWidth = windowWidth * 0.5;
+
+      if (parsedWidth >= 420 && parsedWidth <= maxWidth) {
+        setModalWidth(parsedWidth);
+      }
+    }
+  }, []);
+
+  // Handle resizing of the modal
+  useEffect(() => {
+    // Only apply resize functionality for desktop screens
+    const isDesktop = window.matchMedia('(min-width: 768px)').matches;
+    if (!isDesktop || !isOpen) return;
+
+    const handleMouseDown = (e: MouseEvent) => {
+      e.preventDefault();
+
+      // Add a class to indicate resizing state (for CSS transitions and visual feedback)
+      if (modalRef.current) {
+        modalRef.current.classList.add('resizing');
+      }
+
+      setIsResizing(true);
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isResizing) return;
+
+      // Calculate width based on mouse position
+      const windowWidth = window.innerWidth;
+      const newWidth = windowWidth - e.clientX;
+
+      // Set min and max width constraints
+      const minWidth = 420; // Minimum width in px
+      const maxWidth = windowWidth * 0.5; // Maximum width: 50% of viewport
+
+      if (newWidth >= minWidth && newWidth <= maxWidth) {
+        setModalWidth(newWidth);
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+
+      // Save current width to localStorage
+      if (modalWidth) {
+        localStorage.setItem('chatModalWidth', modalWidth.toString());
+      }
+
+      // Remove the resizing class for smooth transitions when not actively resizing
+      if (modalRef.current) {
+        modalRef.current.classList.remove('resizing');
+      }
+    };
+
+    // Add event listeners for resize handle
+    const resizeHandle = resizeHandleRef.current;
+    if (resizeHandle) {
+      resizeHandle.addEventListener('mousedown', handleMouseDown);
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    }
+
+    return () => {
+      if (resizeHandle) {
+        resizeHandle.removeEventListener('mousedown', handleMouseDown);
+      }
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isOpen, isResizing, modalWidth]);
 
   // Scroll to bottom when new messages arrive
   useEffect(() => {
@@ -329,6 +411,12 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, segmentId, segme
     }
   };
 
+  // Function to reset modal width to default
+  const resetModalWidth = () => {
+    setModalWidth(null);
+    localStorage.removeItem('chatModalWidth');
+  };
+
   // Render content based on chat state
   const renderChatContent = () => {
     // Show loading indicator while initializing
@@ -451,16 +539,45 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, segmentId, segme
       <div
         ref={modalRef}
         className={cn(
-          'fixed top-0 right-0 z-50 w-full md:max-w-[420px] h-full border-l shadow-xl flex flex-col transition-transform duration-300 ease-in-out bg-background/97',
-          isOpen ? 'translate-x-0' : 'translate-x-full'
+          'fixed top-0 right-0 z-50 w-full md:max-w-[420px] h-full border-l shadow-xl flex flex-col bg-background/97',
+          'transition-transform duration-300 ease-in-out',
+          isOpen ? 'translate-x-0' : 'translate-x-full',
+          isResizing ? 'transition-none' : 'transition-all'
         )}
         style={{
           backdropFilter: 'blur(8px)',
           boxShadow: 'rgba(0, 0, 0, 0.12) -5px 0px 24px',
           borderLeft: '1px solid rgba(var(--border), 0.3)',
+          width: modalWidth ? `${modalWidth}px` : undefined,
+          maxWidth: modalWidth ? 'none' : undefined,
         }}
       >
-        <ChatHeader segmentTitle={segmentTitle} onClose={onClose} chatState={chatState} />
+        {/* Resize handle (desktop only) */}
+        <div
+          ref={resizeHandleRef}
+          className={cn(
+            'hidden md:block absolute left-0 top-0 bottom-0 w-1.5 cursor-ew-resize transition-colors',
+            'hover:bg-primary/10',
+            isResizing ? 'bg-primary/20' : ''
+          )}
+          title="Drag to resize"
+        >
+          <div
+            className={cn(
+              'absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transition-opacity',
+              isResizing ? 'opacity-100' : 'opacity-30 hover:opacity-70'
+            )}
+          >
+            <GripVertical className="h-5 w-5 text-muted-foreground" />
+          </div>
+        </div>
+        <ChatHeader
+          segmentTitle={segmentTitle}
+          onClose={onClose}
+          chatState={chatState}
+          hasCustomWidth={!!modalWidth}
+          onResetWidth={resetModalWidth}
+        />
         {renderChatContent()}
       </div>
     </>
@@ -607,9 +724,11 @@ interface ChatHeaderProps {
   segmentTitle: string;
   onClose: () => void;
   chatState: ChatState;
+  hasCustomWidth?: boolean;
+  onResetWidth?: () => void;
 }
 
-const ChatHeader: React.FC<ChatHeaderProps> = ({ segmentTitle, onClose, chatState }) => (
+const ChatHeader: React.FC<ChatHeaderProps> = ({ segmentTitle, onClose, chatState, hasCustomWidth, onResetWidth }) => (
   <div className="p-3 flex items-center justify-between bg-background/98">
     <div className="flex items-center gap-2.5">
       <div className="flex items-center justify-center w-7 h-7 rounded-full bg-primary/10 flex-shrink-0">
@@ -627,9 +746,37 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ segmentTitle, onClose, chatStat
         </div>
       </div>
     </div>
-    <Button variant="ghost" size="icon" onClick={onClose} className="ml-auto flex-shrink-0">
-      <X className="h-4 w-4" />
-    </Button>
+    <div className="flex items-center gap-1">
+      {/* Reset width button (only shown when width has been customized) */}
+      {hasCustomWidth && onResetWidth && (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onResetWidth}
+          className="hidden md:flex flex-shrink-0 h-8 w-8"
+          title="Reset panel width"
+        >
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="stroke-current"
+          >
+            <path
+              d="M3 8V5C3 3.89543 3.89543 3 5 3H8M21 8V5C21 3.89543 20.1046 3 19 3H16M16 21H19C20.1046 21 21 20.1046 21 19V16M8 21H5C3.89543 21 3 20.1046 3 19V16"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </Button>
+      )}
+      <Button variant="ghost" size="icon" onClick={onClose} className="ml-auto flex-shrink-0">
+        <X className="h-4 w-4" />
+      </Button>
+    </div>
   </div>
 );
 
