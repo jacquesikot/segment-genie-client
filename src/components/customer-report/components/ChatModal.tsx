@@ -588,7 +588,10 @@ const ChatInput: React.FC<ChatInputProps> = ({
         autoComplete="off"
       />
       <Button
-        onClick={handleSendMessage}
+        onClick={(e) => {
+          e.preventDefault();
+          handleSendMessage();
+        }}
         disabled={!inputValue.trim() || isLoading}
         size="icon"
         className="bg-primary hover:bg-primary/90 transition-all duration-200 transform active:scale-95 flex-shrink-0"
