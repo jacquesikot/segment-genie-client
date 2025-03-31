@@ -4,7 +4,7 @@ import { Segment, SegmentStatus } from '@/api/segment';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { useAnalytics } from '@/hooks/use-analytics';
 import axios from 'axios';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import CompetitionView from '../competition-view/CompetitionView';
 import MarketSizeView from '../market-size/MarketSizeView';
 import MarketTrendsView from '../market-trends/MarketTrendsView';
@@ -201,12 +201,22 @@ const CustomerReportView: React.FC<CustomerReportViewProps> = ({
     setIsChatModalOpen(false);
   };
 
+  const shouldAllowChat = useMemo(() => {
+    return segment?.data?.marketSize &&
+      segment?.data?.competitors &&
+      segment?.data?.painPoints &&
+      segment?.data?.marketTrends
+      ? true
+      : false;
+  }, [segment?.data]);
+
   return (
     <TooltipProvider>
       <div className="flex flex-col flex-1 bg-background/50 overflow-hidden transition-all duration-300">
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <MobileMenu
+            shouldAllowChat={shouldAllowChat}
             activeSection={activeSection}
             onSectionChange={handleSectionChange}
             onClose={toggleMobileMenu}
@@ -217,6 +227,7 @@ const CustomerReportView: React.FC<CustomerReportViewProps> = ({
 
         {/* Desktop Navigation */}
         <DesktopNavigation
+          shouldAllowChat={shouldAllowChat}
           activeSection={activeSection}
           onSectionChange={handleSectionChange}
           onRerunReport={handleRerunReport}
@@ -230,6 +241,7 @@ const CustomerReportView: React.FC<CustomerReportViewProps> = ({
 
         {/* Mobile Navigation */}
         <MobileNavigation
+          shouldAllowChat={shouldAllowChat}
           activeSection={activeSection}
           onSectionChange={handleSectionChange}
           onOpenMenu={toggleMobileMenu}

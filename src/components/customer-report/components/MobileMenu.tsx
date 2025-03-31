@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 
 interface MobileMenuProps {
   activeSection: string;
+  shouldAllowChat: boolean;
   onSectionChange: (sectionId: string) => void;
   onClose: () => void;
   onRerunReport: () => void;
@@ -14,6 +15,7 @@ interface MobileMenuProps {
 
 const MobileMenu: React.FC<MobileMenuProps> = ({
   activeSection,
+  shouldAllowChat,
   onSectionChange,
   onClose,
   onRerunReport,
@@ -52,7 +54,12 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
 
       {/* Action buttons at the bottom */}
       <div className="pt-4 mt-2 border-t space-y-2">
-        <Button onClick={onOpenChat} variant="outline" className="w-full flex items-center justify-center gap-2">
+        <Button
+          onClick={onOpenChat}
+          disabled={!shouldAllowChat}
+          variant="outline"
+          className="w-full flex items-center justify-center gap-2"
+        >
           <MessageSquare className="w-4 h-4" />
           <span>Chat with AI Assistant</span>
         </Button>

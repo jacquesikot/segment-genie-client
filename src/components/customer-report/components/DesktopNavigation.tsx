@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 
 interface DesktopNavigationProps {
   activeSection: string;
+  shouldAllowChat: boolean;
   onSectionChange: (sectionId: string) => void;
   onRerunReport: () => void;
   onOpenChat?: () => void;
@@ -14,6 +15,7 @@ interface DesktopNavigationProps {
 
 const DesktopNavigation: React.FC<DesktopNavigationProps> = ({
   activeSection,
+  shouldAllowChat,
   onSectionChange,
   onRerunReport,
   onOpenChat = () => {},
@@ -28,6 +30,7 @@ const DesktopNavigation: React.FC<DesktopNavigationProps> = ({
               <Button
                 onClick={onOpenChat}
                 size="sm"
+                disabled={!shouldAllowChat}
                 variant="outline"
                 className="flex items-center gap-1 text-xs transition-all hover:bg-muted"
               >
