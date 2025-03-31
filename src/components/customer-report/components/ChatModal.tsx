@@ -215,7 +215,7 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, segmentId, segme
 
   const initiateChat = async () => {
     try {
-      setIsLoading(true);
+      setIsInitializing(true);
       await initialiseChat(segmentId);
       const chatResponse = await newChat(segmentId, user!.id, segmentTitle);
 
@@ -244,7 +244,7 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, segmentId, segme
     } catch (error) {
       console.error('Error initiating chat:', error);
     } finally {
-      setIsLoading(false);
+      setIsInitializing(false);
     }
   };
 
