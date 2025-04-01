@@ -1,16 +1,27 @@
-import React from 'react';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ExternalLink } from 'lucide-react';
-import { Progress } from '@/components/ui/progress';
-import ConfidenceIndicator from '../common/ConfidenceIndicator';
-import CompanyProfile from '../competitor-details/CompanyProfile';
-import MarketPosition from '../competitor-details/MarketPosition';
-import ProductDetails from '../competitor-details/ProductDetails';
-import SwotAnalysis from '../competitor-details/SwotAnalysis';
-import { PricingItem } from '../common/MetricItems';
-import CustomerThemeSection from '../common/CustomerThemeSection';
+import React from "react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ChevronDown, ExternalLink } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import ConfidenceIndicator from "../common/ConfidenceIndicator";
+import CompanyProfile from "../competitor-details/CompanyProfile";
+import MarketPosition from "../competitor-details/MarketPosition";
+import ProductDetails from "../competitor-details/ProductDetails";
+import SwotAnalysis from "../competitor-details/SwotAnalysis";
+import { PricingItem } from "../common/MetricItems";
+import CustomerThemeSection from "../common/CustomerThemeSection";
 
 interface CompanyProfile {
   foundedYear: number;
@@ -97,7 +108,11 @@ interface CompetitorsTabProps {
   setFilterCategory: (value: string) => void;
 }
 
-const CompetitorsTab: React.FC<CompetitorsTabProps> = ({ competitors, filterCategory, setFilterCategory }) => {
+const CompetitorsTab: React.FC<CompetitorsTabProps> = ({
+  competitors,
+  filterCategory,
+  setFilterCategory,
+}) => {
   return (
     <>
       <div className="flex justify-end mb-4 sm:mb-6">
@@ -124,18 +139,25 @@ const CompetitorsTab: React.FC<CompetitorsTabProps> = ({ competitors, filterCate
               <div className="flex flex-col sm:flex-row sm:justify-between w-full items-start sm:items-center gap-2">
                 <div className="flex items-center gap-2 sm:gap-3">
                   <Badge
-                    variant={competitor.category.toLowerCase() === 'direct' ? 'default' : 'secondary'}
+                    variant={
+                      competitor.category.toLowerCase() === "direct"
+                        ? "default"
+                        : "secondary"
+                    }
                     className={`text-xs sm:text-sm ${
-                      competitor.category.toLowerCase() === 'direct'
-                        ? 'bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400'
-                        : competitor.category.toLowerCase() === 'indirect'
-                        ? 'bg-amber-100 text-amber-700 hover:bg-amber-200 dark:bg-amber-900/30 dark:text-amber-400'
-                        : 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-400'
+                      competitor.category.toLowerCase() === "direct"
+                        ? "bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400"
+                        : competitor.category.toLowerCase() === "indirect"
+                        ? "bg-amber-100 text-amber-700 hover:bg-amber-200 dark:bg-amber-900/30 dark:text-amber-400"
+                        : "bg-indigo-100 text-indigo-700 hover:bg-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-400"
                     }`}
                   >
-                    {competitor.category.charAt(0).toUpperCase() + competitor.category.slice(1).toLowerCase()}
+                    {competitor.category.charAt(0).toUpperCase() +
+                      competitor.category.slice(1).toLowerCase()}
                   </Badge>
-                  <span className="font-semibold text-sm sm:text-base">{competitor.name}</span>
+                  <span className="font-semibold text-sm sm:text-base">
+                    {competitor.name}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2 sm:gap-4">
                   <ConfidenceIndicator
@@ -167,7 +189,6 @@ const CompetitorsTab: React.FC<CompetitorsTabProps> = ({ competitors, filterCate
                   <SwotAnalysis swotAnalysis={competitor.swotAnalysis} />
                 </div>
               </div>
-
               <div className="mt-4 sm:mt-8 space-y-4 sm:space-y-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
                   <div className="bg-gray-50 dark:bg-gray-900/50 p-3 sm:p-4 rounded-lg">
@@ -176,20 +197,35 @@ const CompetitorsTab: React.FC<CompetitorsTabProps> = ({ competitors, filterCate
                       Pricing Strategy
                     </h4>
                     <div className="text-xs sm:text-sm space-y-2 sm:space-y-3">
-                      <PricingItem label="Model" value={competitor.pricingStrategy.model || 'Not specified'} />
+                      <PricingItem
+                        label="Model"
+                        value={
+                          competitor.pricingStrategy.model || "Not specified"
+                        }
+                      />
                       {competitor.pricingStrategy.pricePoints.length > 0 && (
                         <div>
-                          <span className="font-medium text-gray-700 dark:text-gray-300">Price Points:</span>
+                          <span className="font-medium text-gray-700 dark:text-gray-300">
+                            Price Points:
+                          </span>
                           <ul className="list-disc pl-4 mt-1 sm:mt-2 space-y-1">
-                            {competitor.pricingStrategy.pricePoints.map((price: string, i: number) => (
-                              <li key={i} className="text-gray-600 dark:text-gray-400">
-                                {price}
-                              </li>
-                            ))}
+                            {competitor.pricingStrategy.pricePoints.map(
+                              (price: string, i: number) => (
+                                <li
+                                  key={i}
+                                  className="text-gray-600 dark:text-gray-400"
+                                >
+                                  {price}
+                                </li>
+                              )
+                            )}
                           </ul>
                         </div>
                       )}
-                      <PricingItem label="Value" value={competitor.pricingStrategy.comparativeValue} />
+                      <PricingItem
+                        label="Value"
+                        value={competitor.pricingStrategy.comparativeValue}
+                      />
                     </div>
                   </div>
                   <div className="bg-gray-50 dark:bg-gray-900/50 p-3 sm:p-4 rounded-lg">
@@ -200,26 +236,40 @@ const CompetitorsTab: React.FC<CompetitorsTabProps> = ({ competitors, filterCate
                     <div className="text-xs sm:text-sm space-y-3 sm:space-y-4">
                       <div>
                         <div className="flex justify-between items-center">
-                          <span className="font-medium text-gray-700 dark:text-gray-300">Satisfaction Score:</span>
+                          <span className="font-medium text-gray-700 dark:text-gray-300">
+                            Satisfaction Score:
+                          </span>
                           <span className="font-bold text-base sm:text-lg">
-                            {competitor.customerInsights.satisfaction.overallScore || 'N/A'}
-                            <span className="text-[10px] sm:text-xs text-gray-500">/10</span>
+                            {competitor.customerInsights.satisfaction
+                              .overallScore || "N/A"}
+                            <span className="text-[10px] sm:text-xs text-gray-500">
+                              /10
+                            </span>
                           </span>
                         </div>
                         <Progress
-                          value={competitor.customerInsights.satisfaction.overallScore * 10}
+                          value={
+                            competitor.customerInsights.satisfaction
+                              .overallScore * 10
+                          }
                           className="h-1.5 sm:h-2 mt-1 sm:mt-2"
                         />
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-3 sm:mt-4">
                         <CustomerThemeSection
                           title="Positive Themes"
-                          items={competitor.customerInsights.satisfaction.positiveThemes}
+                          items={
+                            competitor.customerInsights.satisfaction
+                              .positiveThemes
+                          }
                           type="positive"
                         />
                         <CustomerThemeSection
                           title="Negative Themes"
-                          items={competitor.customerInsights.satisfaction.negativeThemes}
+                          items={
+                            competitor.customerInsights.satisfaction
+                              .negativeThemes
+                          }
                           type="negative"
                         />
                       </div>
@@ -230,30 +280,32 @@ const CompetitorsTab: React.FC<CompetitorsTabProps> = ({ competitors, filterCate
                 {/* New sections for Forums and Social Media */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
                   {/* Forums Section */}
-                  {competitor.forums && Array.isArray(competitor.forums) && competitor.forums.length > 0 && (
-                    <div className="bg-gray-50 dark:bg-gray-900/50 p-3 sm:p-4 rounded-lg">
-                      <h4 className="font-semibold mb-2 sm:mb-3 text-base sm:text-lg flex items-center gap-2">
-                        <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                        Active Forums
-                      </h4>
-                      <div className="space-y-2 max-h-[250px] overflow-y-auto pr-1 custom-scrollbar">
-                        {competitor.forums.map((forum, i) => (
-                          <a
-                            key={i}
-                            href={forum?.url || '#'}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center justify-between p-2 rounded-md border border-gray-200 dark:border-gray-700 hover:bg-indigo-50 dark:hover:bg-indigo-950/10 transition-colors group"
-                          >
-                            <span className="text-xs sm:text-sm text-gray-800 dark:text-gray-200 truncate max-w-[80%]">
-                              {forum?.name || 'Unknown Forum'}
-                            </span>
-                            <ExternalLink className="w-3.5 h-3.5 text-gray-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors" />
-                          </a>
-                        ))}
+                  {competitor.forums &&
+                    Array.isArray(competitor.forums) &&
+                    competitor.forums.length > 0 && (
+                      <div className="bg-gray-50 dark:bg-gray-900/50 p-3 sm:p-4 rounded-lg">
+                        <h4 className="font-semibold mb-2 sm:mb-3 text-base sm:text-lg flex items-center gap-2">
+                          <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                          Active Forums
+                        </h4>
+                        <div className="space-y-2 max-h-[250px] overflow-y-auto pr-1 custom-scrollbar">
+                          {competitor.forums.map((forum, i) => (
+                            <a
+                              key={i}
+                              href={forum?.url || "#"}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center justify-between p-2 rounded-md border border-gray-200 dark:border-gray-700 hover:bg-indigo-50 dark:hover:bg-indigo-950/10 transition-colors group"
+                            >
+                              <span className="text-xs sm:text-sm text-gray-800 dark:text-gray-200 truncate max-w-[80%]">
+                                {forum?.name || "Unknown Forum"}
+                              </span>
+                              <ExternalLink className="w-3.5 h-3.5 text-gray-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors" />
+                            </a>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
                   {/* Social Media Section */}
                   {competitor.socialMedia &&
@@ -268,36 +320,45 @@ const CompetitorsTab: React.FC<CompetitorsTabProps> = ({ competitors, filterCate
                           {competitor.socialMedia.map((social, i) => (
                             <a
                               key={i}
-                              href={social?.url || '#'}
+                              href={social?.url || "#"}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="flex items-center gap-2 p-2 rounded-md border border-gray-200 dark:border-gray-700 hover:bg-indigo-50 dark:hover:bg-indigo-950/10 transition-colors group"
                             >
                               <div
                                 className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                                  social?.platform?.toLowerCase() === 'instagram'
-                                    ? 'bg-gradient-to-tr from-purple-500 to-pink-500'
-                                    : social?.platform?.toLowerCase() === 'facebook'
-                                    ? 'bg-blue-600'
-                                    : social?.platform?.toLowerCase() === 'twitter'
-                                    ? 'bg-sky-500'
-                                    : social?.platform?.toLowerCase() === 'linkedin'
-                                    ? 'bg-blue-700'
-                                    : social?.platform?.toLowerCase() === 'youtube'
-                                    ? 'bg-red-600'
-                                    : 'bg-gray-500'
+                                  social?.platform?.toLowerCase() ===
+                                  "instagram"
+                                    ? "bg-gradient-to-tr from-purple-500 to-pink-500"
+                                    : social?.platform?.toLowerCase() ===
+                                      "facebook"
+                                    ? "bg-blue-600"
+                                    : social?.platform?.toLowerCase() ===
+                                      "twitter"
+                                    ? "bg-sky-500"
+                                    : social?.platform?.toLowerCase() ===
+                                      "linkedin"
+                                    ? "bg-blue-700"
+                                    : social?.platform?.toLowerCase() ===
+                                      "youtube"
+                                    ? "bg-red-600"
+                                    : "bg-gray-500"
                                 }`}
                               >
                                 <span className="text-white text-xs font-bold">
-                                  {social?.platform ? social.platform.charAt(0).toUpperCase() : '?'}
+                                  {social?.platform
+                                    ? social.platform.charAt(0).toUpperCase()
+                                    : "?"}
                                 </span>
                               </div>
                               <div className="flex flex-col overflow-hidden">
                                 <span className="text-xs font-medium text-gray-800 dark:text-gray-200">
-                                  {social?.platform || 'Unknown Platform'}
+                                  {social?.platform || "Unknown Platform"}
                                 </span>
                                 <span className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                                  {social?.username ? `@${social.username}` : 'Unknown Username'}
+                                  {social?.username
+                                    ? `@${social.username}`
+                                    : "Unknown Username"}
                                 </span>
                               </div>
                               <ExternalLink className="w-3 h-3 text-gray-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors ml-auto" />
@@ -316,19 +377,29 @@ const CompetitorsTab: React.FC<CompetitorsTabProps> = ({ competitors, filterCate
                   <div className="text-xs sm:text-sm">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-6">
                       <div>
-                        <span className="font-medium text-gray-700 dark:text-gray-300">Customer Pain Points:</span>
+                        <span className="font-medium text-gray-700 dark:text-gray-300">
+                          Customer Pain Points:
+                        </span>
                         <ul className="list-disc pl-4 mt-1 sm:mt-2 space-y-1">
-                          {competitor.customerInsights.painPoints.map((pain: string, i: number) => (
-                            <li key={i} className="text-gray-600 dark:text-gray-400">
-                              {pain}
-                            </li>
-                          ))}
+                          {competitor.customerInsights.painPoints.map(
+                            (pain: string, i: number) => (
+                              <li
+                                key={i}
+                                className="text-gray-600 dark:text-gray-400"
+                              >
+                                {pain}
+                              </li>
+                            )
+                          )}
                         </ul>
                       </div>
                       <div className="bg-amber-50 dark:bg-amber-900/20 p-2 sm:p-3 rounded-lg border border-amber-100 dark:border-amber-900/30">
-                        <span className="font-medium text-amber-800 dark:text-amber-300">Switching Costs:</span>
+                        <span className="font-medium text-amber-800 dark:text-amber-300">
+                          Switching Costs:
+                        </span>
                         <p className="mt-1 sm:mt-2 text-amber-700 dark:text-amber-400">
-                          {competitor.customerInsights.switchingCosts || 'Not assessed'}
+                          {competitor.customerInsights.switchingCosts ||
+                            "Not assessed"}
                         </p>
                       </div>
                     </div>
@@ -346,14 +417,16 @@ const CompetitorsTab: React.FC<CompetitorsTabProps> = ({ competitors, filterCate
                           <div key={i} className="relative">
                             <div className="absolute -left-[19px] sm:-left-[25px] w-3 sm:w-4 h-3 sm:h-4 rounded-full bg-indigo-500"></div>
                             <p className="font-medium text-gray-800 dark:text-gray-200 text-xs sm:text-sm">
-                              {new Date(dev.date).toLocaleDateString('en-US', {
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric',
+                              {new Date(dev.date).toLocaleDateString("en-US", {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
                               })}
                               : {dev.development}
                             </p>
-                            <p className="text-gray-600 dark:text-gray-400 mt-1 text-xs">{dev.significance}</p>
+                            <p className="text-gray-600 dark:text-gray-400 mt-1 text-xs">
+                              {dev.significance}
+                            </p>
                           </div>
                         ))}
                       </div>
@@ -380,10 +453,10 @@ const CompetitorsTab: React.FC<CompetitorsTabProps> = ({ competitors, filterCate
                         <Badge
                           className={`mt-1 sm:mt-0 text-xs ${
                             source.relevance >= 0.8
-                              ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                              ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
                               : source.relevance >= 0.5
-                              ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400'
-                              : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400'
+                              ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"
+                              : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400"
                           }`}
                         >
                           {(source.relevance * 100).toFixed(0)}% Relevance
@@ -393,6 +466,13 @@ const CompetitorsTab: React.FC<CompetitorsTabProps> = ({ competitors, filterCate
                   </div>
                 </div>
               </div>
+              
+              <AccordionTrigger className="flex w-full items-center justify-between px-3 py-2 sm:px-4 sm:py-3 hover:no-underline">
+                {/* Your content goes here */}
+                <div className="flex items-center" />
+                
+              </AccordionTrigger>
+              
             </AccordionContent>
           </AccordionItem>
         ))}
