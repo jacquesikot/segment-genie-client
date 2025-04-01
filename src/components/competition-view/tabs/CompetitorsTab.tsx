@@ -395,17 +395,18 @@ const CompetitorsTab: React.FC<CompetitorsTabProps> = ({ competitors, filterCate
                   </div>
                 </div>
               </div>
+              <div className='flex justify-center mt-6'>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <AccordionTrigger className="flex w-full items-center justify-between px-3 py-2 sm:px-4 sm:py-3 hover:no-underline">
-                {/* Your content goes here */}
-                  <div className="flex items-center" />
+                  <AccordionTrigger className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium hover:no-underline transition-colors [&>svg]:rotate-180 [&[data-state=open]>svg]:rotate-0">
+                    Close
                   </AccordionTrigger>
                 </TooltipTrigger>
-                <TooltipContent side="right" align="center">
-                  <p>Close</p>
+                <TooltipContent side="right">
+                  Collapse section
                 </TooltipContent>
-          </Tooltip>
+              </Tooltip>
+              </div>
             </AccordionContent>
           </AccordionItem>
         ))}
