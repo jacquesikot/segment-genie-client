@@ -18,6 +18,7 @@ import { SECTIONS } from './constants';
 import { z } from 'zod';
 import { researchInputForm } from '@/pages/schemas';
 import ChatModal from './components/ChatModal';
+import FloatingChatButton from './components/FloatingChatButton';
 
 interface CustomerReportViewProps {
   report?: ResearchReport;
@@ -249,13 +250,11 @@ const CustomerReportView: React.FC<CustomerReportViewProps> = ({
           onOpenChat={handleOpenChat}
         />
 
-        {/* Rerun Modal */}
-        <RerunModal
-          isOpen={isRerunModalOpen}
-          onClose={handleCloseRerunModal}
-          onConfirm={handleRerunConfirm}
-          segment={segment}
-          isLoading={isRerunLoading}
+        {/* Floating Chat Button - appears when scrolling */}
+        <FloatingChatButton
+          shouldAllowChat={shouldAllowChat}
+          onOpenChat={handleOpenChat}
+          isChatModalOpen={isChatModalOpen}
         />
 
         {/* Chat Modal */}
@@ -265,6 +264,15 @@ const CustomerReportView: React.FC<CustomerReportViewProps> = ({
           segmentId={segmentId}
           segmentTitle={segment?.title || ''}
           currentSection={activeSection}
+        />
+
+        {/* Rerun Modal */}
+        <RerunModal
+          isOpen={isRerunModalOpen}
+          onClose={handleCloseRerunModal}
+          onConfirm={handleRerunConfirm}
+          segment={segment}
+          isLoading={isRerunLoading}
         />
       </div>
     </TooltipProvider>
