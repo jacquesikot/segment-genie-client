@@ -50,7 +50,7 @@ const DataSources = ({ data }: DataSourcesProps) => {
                 className="flex flex-col sm:flex-row justify-between gap-2 p-3 rounded-lg border hover:bg-indigo-50 dark:hover:bg-indigo-950/10 transition-colors"
               >
                 <div className="flex flex-col max-w-full">
-                  <span className="text-indigo-600 dark:text-indigo-400 text-xs sm:text-sm truncate">
+                  <span className="text-indigo-600 dark:text-indigo-400 text-xs sm:text-sm break-words">
                     {source.title}
                   </span>
                   <span className="text-xs text-gray-500 dark:text-gray-400">{source.url}</span>
