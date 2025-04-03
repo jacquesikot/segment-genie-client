@@ -29,7 +29,7 @@ const SourceItem = ({ source }: SourceItemProps) => (
           <Link2 className="w-4 h-4 text-muted-foreground" />
           <span className="font-medium">{source.platform}</span>
         </span>
-        <span className="text-muted-foreground/70 text-xs">{new Date(source.date).toLocaleDateString()}</span>
+        {/* <span className="text-muted-foreground/70 text-xs">{new Date(source.date).toLocaleDateString()}</span> */}
         <ExternalLink className="w-3 h-3 ml-1 text-muted-foreground/70" />
       </a>
       <Badge variant="outline" className="text-xs capitalize">

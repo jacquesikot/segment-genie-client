@@ -1,10 +1,10 @@
-import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
-import { AlertCircle, ArrowUpRight, BarChart, ChevronDown, ChevronUp, TrendingUp, Users } from 'lucide-react';
+import { AlertCircle, ArrowUpRight, ChevronDown, ChevronUp, TrendingUp, Users } from 'lucide-react';
+import React from 'react';
 import SourceItem from './common/SourceItem';
 import Tooltip from './common/Tooltip';
 
@@ -112,9 +112,9 @@ const PainPointCard = ({ point }: { point: PainPoint }) => {
               <>
                 <Separator />
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 overflow-x-hidden">
+                <div className="grid grid-cols-1 md:grid-cols-1 gap-4 overflow-x-hidden">
                   <div className="space-y-4 min-w-0">
-                    <div>
+                    {/* <div>
                       <h4 className="font-medium mb-2 flex items-center gap-2 text-sm">
                         <BarChart className="w-4 h-4 flex-shrink-0" />
                         <span className="truncate">Impact Analysis</span>
@@ -135,7 +135,7 @@ const PainPointCard = ({ point }: { point: PainPoint }) => {
                           <span className="font-medium break-words">{point.impact.timeWasted.join(', ')}</span>
                         </div>
                       </div>
-                    </div>
+                    </div> */}
 
                     <div>
                       <h4 className="font-medium mb-2 flex items-center gap-2 text-sm">

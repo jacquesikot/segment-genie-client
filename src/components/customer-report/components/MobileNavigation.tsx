@@ -10,10 +10,12 @@ interface MobileNavigationProps {
   onOpenMenu: () => void;
   onRerunReport: () => void;
   onOpenChat?: () => void;
+  shouldAllowChat: boolean;
 }
 
 const MobileNavigation: React.FC<MobileNavigationProps> = ({
   activeSection,
+  shouldAllowChat,
   onSectionChange,
   onOpenMenu,
   onRerunReport,
@@ -53,6 +55,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
         <TooltipTrigger asChild>
           <button
             onClick={onOpenChat}
+            disabled={!shouldAllowChat}
             className="flex flex-col items-center p-2 rounded-lg text-muted-foreground hover:text-primary transition-colors"
           >
             <MessageSquare className="w-5 h-5 mb-1" />
