@@ -72,21 +72,17 @@ const RerunModal: React.FC<RerunModalProps> = ({ isOpen, onClose, onConfirm, seg
             Update the segment information below to re-run your report with new inputs.
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="py-2">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleFormSubmit)}>
               <NewSegmentForm form={form} isRerunModal={true} />
-              
+
               <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:justify-between sm:gap-0 mt-6 pt-4 border-t">
                 <Button type="button" variant="outline" onClick={onClose}>
                   Cancel
                 </Button>
-                <Button 
-                  type="submit"
-                  className="flex items-center gap-2"
-                  disabled={isLoading}
-                >
+                <Button type="submit" className="flex items-center gap-2" disabled={isLoading}>
                   {isLoading ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -108,4 +104,4 @@ const RerunModal: React.FC<RerunModalProps> = ({ isOpen, onClose, onConfirm, seg
   );
 };
 
-export default RerunModal; 
+export default RerunModal;
