@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { getResearchInput, NewResearch, startNewResearch } from '@/api/research';
+import { getStatus } from '@/api/status';
 import { NewSegmentForm } from '@/components/NewSegmentForm';
 import PageHeader from '@/components/page-header';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -7,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Form } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAnalytics } from '@/hooks/use-analytics';
 import { useToast } from '@/hooks/use-toast';
 import { useAppDispatch } from '@/redux/hooks';
@@ -14,7 +16,7 @@ import { addNewSegment } from '@/redux/slice/segment';
 import { useAuth } from '@/lib/auth-context';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft, ArrowRight, History, InfoIcon, Loader2, Plus, Sparkles, Sun } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { researchInputForm } from './schemas';
@@ -36,6 +38,8 @@ export default function Dashboard() {
   const [isInitialLoading, setIsInitialLoading] = useState(false);
   const [showDetailedForm, setShowDetailedForm] = useState(false);
   const [isFinalLoading, setIsFinalLoading] = useState(false);
+  const [statusOk, setStatusOk] = useState(true);
+  const [statusLoading, setStatusLoading] = useState(true);
 
   const form = useForm({
     resolver: zodResolver(researchInputForm),
@@ -52,6 +56,29 @@ export default function Dashboard() {
       channels: '',
     },
   });
+
+  useEffect(() => {
+    const checkStatus = async () => {
+      try {
+        setStatusLoading(true);
+        const statusData = await getStatus();
+        setStatusOk(statusData.status === 'ok');
+
+        if (statusData.status !== 'ok') {
+          analytics.trackEvent(analytics.Event.API_ERROR, {
+            message: 'Usage limit reached',
+          });
+        }
+      } catch (error) {
+        console.error('Error checking status:', error);
+        setStatusOk(false);
+      } finally {
+        setStatusLoading(false);
+      }
+    };
+
+    checkStatus();
+  }, [analytics]);
 
   const handleInitialAnalysis = async () => {
     if (!initialIdea.trim()) {
@@ -165,19 +192,23 @@ export default function Dashboard() {
       <PageHeader />
       <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-6xl">
         <div className="flex flex-col space-y-6 py-6">
-          {/* Premium Banner */}
-          {/* <div className="bg-gradient-to-r from-indigo-500/10 to-purple-500/10 dark:from-indigo-500/20 dark:to-purple-500/20 rounded-lg p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2 text-xs sm:text-sm text-indigo-700 dark:text-indigo-300">
-              <Sparkles size={16} className="text-indigo-500 flex-shrink-0" />
-              <span>Unlock advanced features with Segment Genie Pro</span>
+          {/* Usage Limit Banner */}
+          {!statusOk && (
+            <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4 sm:p-5 flex items-center gap-4 animate-in slide-in-from-top duration-300">
+              <div className="flex items-center gap-3 text-blue-800 dark:text-blue-300">
+                <div className="p-2 bg-blue-100 dark:bg-blue-900/50 rounded-full">
+                  <Loader2 size={20} className="text-blue-600 dark:text-blue-400 animate-spin" />
+                </div>
+                <div>
+                  <h3 className="font-medium">High System Usage</h3>
+                  <p className="text-sm text-blue-700 dark:text-blue-400">
+                    Our servers are experiencing high demand during this open beta phase. Please try again in a few
+                    minutes.
+                  </p>
+                </div>
+              </div>
             </div>
-            <Button
-              variant="default"
-              className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-xs sm:text-sm w-full sm:w-auto"
-            >
-              Upgrade to Pro
-            </Button>
-          </div> */}
+          )}
 
           {/* Greeting Section */}
           <div className="space-y-2">
@@ -211,6 +242,7 @@ export default function Dashboard() {
                         key={index}
                         onClick={() => handleExampleClick(example)}
                         className="text-xs sm:text-sm px-2 sm:px-3 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                        disabled={!statusOk || statusLoading}
                       >
                         <Plus size={12} className="inline mr-1" />
                         <span className="hidden sm:inline">Try Example</span> {index + 1}
@@ -219,12 +251,36 @@ export default function Dashboard() {
                   </div>
 
                   <div className="relative">
-                    <Textarea
-                      value={initialIdea}
-                      onChange={(e) => setInitialIdea(e.target.value)}
-                      placeholder="Describe your business idea or target audience in detail..."
-                      className="min-h-[150px] sm:min-h-[200px] w-full p-3 sm:p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:border-indigo-300 dark:focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900 outline-none resize-none text-sm sm:text-base"
-                    />
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className={`${!statusOk ? 'relative' : ''}`}>
+                            <Textarea
+                              value={initialIdea}
+                              onChange={(e) => setInitialIdea(e.target.value)}
+                              placeholder="Describe your business idea or target audience in detail..."
+                              className={`min-h-[150px] sm:min-h-[200px] w-full p-3 sm:p-4 rounded-lg border ${
+                                !statusOk
+                                  ? 'border-blue-300 dark:border-blue-700 bg-blue-50/30 dark:bg-gray-900/90'
+                                  : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900'
+                              } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:border-indigo-300 dark:focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900 outline-none resize-none text-sm sm:text-base`}
+                              disabled={!statusOk || statusLoading}
+                            />
+                            {!statusOk && (
+                              <div className="absolute inset-0 bg-blue-50/30 dark:bg-gray-900/50 rounded-lg pointer-events-none"></div>
+                            )}
+                          </div>
+                        </TooltipTrigger>
+                        {!statusOk && (
+                          <TooltipContent
+                            side="top"
+                            className="max-w-xs bg-blue-50 dark:bg-gray-800 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-800"
+                          >
+                            <p>System is currently experiencing high usage. Service will be available again shortly.</p>
+                          </TooltipContent>
+                        )}
+                      </Tooltip>
+                    </TooltipProvider>
                     <div className="absolute bottom-2 right-2 flex items-center gap-1 text-xs text-gray-400">
                       <InfoIcon size={12} />
                       <span className="hidden sm:inline">More detail = better results</span>
@@ -238,10 +294,19 @@ export default function Dashboard() {
                     </div>
                     <Button
                       onClick={handleInitialAnalysis}
-                      disabled={!initialIdea.trim() || isInitialLoading}
-                      className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white px-4 sm:px-8 py-2 text-sm sm:text-base w-full sm:w-auto"
+                      disabled={!initialIdea.trim() || isInitialLoading || !statusOk || statusLoading}
+                      className={`${
+                        !statusOk
+                          ? 'bg-gray-400 dark:bg-gray-700 cursor-not-allowed'
+                          : 'bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600'
+                      } text-white px-4 sm:px-8 py-2 text-sm sm:text-base w-full sm:w-auto`}
                     >
-                      {isInitialLoading ? (
+                      {statusLoading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Checking status...
+                        </>
+                      ) : isInitialLoading ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                           Analyzing...
