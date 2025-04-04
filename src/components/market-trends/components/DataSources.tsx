@@ -53,7 +53,7 @@ const DataSources = ({ data }: DataSourcesProps) => {
                   <span className="text-indigo-600 dark:text-indigo-400 text-xs sm:text-sm break-words">
                     {source.title}
                   </span>
-                  <span className="text-xs text-gray-500 dark:text-gray-400">{source.url}</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400 break-words">{source.url}</span>
                   <div className="flex flex-wrap items-center gap-2 mt-1 text-xs text-gray-500 dark:text-gray-400">
                     <Badge variant="outline" className="text-xs capitalize">
                       {source.type}
@@ -61,7 +61,7 @@ const DataSources = ({ data }: DataSourcesProps) => {
                     <span>{source.publicationDate}</span>
                   </div>
                 </div>
-                <div className="flex flex-row sm:flex-col items-start sm:items-end gap-2 sm:gap-0 mt-1 sm:mt-0">
+                <div className="flex flex-row sm:flex-col max-[328px]:flex-col items-start sm:items-end gap-2 sm:gap-0 max-[328px]:gap-1 mt-1 sm:mt-0">
                   <Badge className={`text-xs whitespace-nowrap ${getCredibilityBadgeStyle(source.credibilityScore)}`}>
                     {(source.credibilityScore * 100).toFixed(0)}% Credibility
                   </Badge>
