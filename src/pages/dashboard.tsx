@@ -15,11 +15,64 @@ import { useAppDispatch } from '@/redux/hooks';
 import { addNewSegment } from '@/redux/slice/segment';
 import { useAuth } from '@/lib/auth-context';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowLeft, ArrowRight, History, InfoIcon, Loader2, Plus, Sparkles, Sun } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { ArrowLeft, ArrowRight, History, InfoIcon, Loader2, Mic, MicOff, Plus, Sparkles, Sun } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { researchInputForm } from './schemas';
+
+// Define SpeechRecognition types to fix TypeScript errors
+interface SpeechRecognitionEvent extends Event {
+  results: SpeechRecognitionResultList;
+  resultIndex: number;
+  interpretation: string;
+}
+
+interface SpeechRecognitionErrorEvent extends Event {
+  error: string;
+  message: string;
+}
+
+interface SpeechRecognitionResult {
+  isFinal: boolean;
+  [index: number]: SpeechRecognitionAlternative;
+}
+
+interface SpeechRecognitionResultList {
+  length: number;
+  item(index: number): SpeechRecognitionResult;
+  [index: number]: SpeechRecognitionResult;
+}
+
+interface SpeechRecognitionAlternative {
+  transcript: string;
+  confidence: number;
+}
+
+interface SpeechRecognition extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  start(): void;
+  stop(): void;
+  abort(): void;
+  onresult: ((event: SpeechRecognitionEvent) => void) | null;
+  onerror: ((event: SpeechRecognitionErrorEvent) => void) | null;
+  onend: (() => void) | null;
+}
+
+// Define a constructor interface
+interface SpeechRecognitionConstructor {
+  new (): SpeechRecognition;
+}
+
+// Declare the global types
+declare global {
+  interface Window {
+    SpeechRecognition?: SpeechRecognitionConstructor;
+    webkitSpeechRecognition?: SpeechRecognitionConstructor;
+  }
+}
 
 const recentExamples = [
   'A subscription box service for exotic cooking ingredients with recipe cards',
@@ -40,6 +93,11 @@ export default function Dashboard() {
   const [isFinalLoading, setIsFinalLoading] = useState(false);
   const [statusOk, setStatusOk] = useState(true);
   const [statusLoading, setStatusLoading] = useState(true);
+
+  // Audio transcription states
+  const [isListening, setIsListening] = useState(false);
+  const [hasAudioPermission, setHasAudioPermission] = useState<boolean | null>(null);
+  const recognitionRef = useRef<any>(null);
 
   const form = useForm({
     resolver: zodResolver(researchInputForm),
@@ -74,6 +132,126 @@ export default function Dashboard() {
     checkStatus();
   }, []);
 
+    // Initialize speech recognition
+    useEffect(() => {
+      // Check if the browser supports the Web Speech API
+      if (!window.webkitSpeechRecognition && !window.SpeechRecognition) {
+        console.warn('Speech recognition is not supported in this browser.');
+        setHasAudioPermission(false);
+        return;
+      }
+  
+      // Create speech recognition instance
+      const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (SpeechRecognitionAPI) {
+        recognitionRef.current = new SpeechRecognitionAPI();
+      
+      // Configure speech recognition
+      recognitionRef.current.continuous = true;
+      recognitionRef.current.interimResults = true;
+      recognitionRef.current.lang = 'en-US';
+  
+      // Handle results
+      recognitionRef.current.onresult = (event: any) => {
+        const transcript = Array.from(event.results)
+          .map((result: any) => result[0].transcript)
+          .join('');
+        
+        setInitialIdea(transcript);
+      };
+  
+      // Handle errors
+      recognitionRef.current.onerror = (event: any) => {
+        console.error('Speech recognition error', event.error);
+        if (event.error === 'not-allowed') {
+          setHasAudioPermission(false);
+          toast({
+            variant: 'destructive',
+            title: 'Microphone access denied',
+            description: 'Please enable microphone access to use the dictation feature.',
+          });
+        }
+        setIsListening(false);
+      };
+  
+      // Handle when speech recognition stops
+      recognitionRef.current.onend = () => {
+        if (!isListening || !recognitionRef.current) {
+          setIsListening(false);
+        }
+      };
+
+     }
+  
+      // Cleanup
+      return () => {
+        if (recognitionRef.current) {
+          recognitionRef.current.stop();
+        }
+      };
+    }, [toast]);
+  
+    const toggleListening = async () => {
+      if (!recognitionRef.current) {
+        toast({
+          variant: 'destructive',
+          title: 'Not supported',
+          description: 'Speech recognition is not supported in your browser.',
+        });
+        return;
+      }
+  
+      if (isListening) {
+        // Stop listening
+        recognitionRef.current.stop();
+        setIsListening(false);
+        analytics.trackEvent(analytics.Event.FEATURE_USED, {
+          feature: 'audio_transcription',
+          transcriptionLength: initialIdea.length,
+        });
+      } else {
+        // Try to get microphone permission if we don't know the status yet
+        if (hasAudioPermission === null) {
+          try {
+            await navigator.mediaDevices.getUserMedia({ audio: true });
+            setHasAudioPermission(true);
+          } catch (error) {
+            console.error('Error accessing microphone:', error);
+            setHasAudioPermission(false);
+            toast({
+              variant: 'destructive',
+              title: 'Microphone access denied',
+              description: 'Please enable microphone access to use the dictation feature.',
+            });
+            return;
+          }
+        }
+  
+        // Start listening
+        try {
+          recognitionRef.current.start();
+          setIsListening(true);
+          analytics.trackEvent(analytics.Event.FEATURE_USED, {
+            feature: 'audio_transcription',
+            transcriptionLength: initialIdea.length,
+          });
+          
+          toast({
+            variant: 'default',
+            title: 'Listening...',
+            description: 'Speak clearly into your microphone. Click the mic button again to stop.',
+          });
+        } catch (error) {
+          console.error('Error starting speech recognition:', error);
+          toast({
+            variant: 'destructive',
+            title: 'Error starting dictation',
+            description: 'Could not start the speech recognition service.',
+          });
+        }
+      }
+    };
+
   const handleInitialAnalysis = async () => {
     if (!initialIdea.trim()) {
       toast({
@@ -86,6 +264,12 @@ export default function Dashboard() {
       });
       return;
     }
+
+      // Stop listening if active
+      if (isListening && recognitionRef.current) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+      }
 
     setIsInitialLoading(true);
     try {
@@ -117,6 +301,13 @@ export default function Dashboard() {
   };
 
   const handleExampleClick = (example: string) => {
+
+    // Stop listening if active
+    if (isListening && recognitionRef.current) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    }
+
     setInitialIdea(example);
     const textarea = document.querySelector('textarea');
     if (textarea) textarea.focus();
@@ -260,9 +451,49 @@ export default function Dashboard() {
                               } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:border-indigo-300 dark:focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900 outline-none resize-none text-sm sm:text-base`}
                               disabled={!statusOk || statusLoading}
                             />
+
+                              {/* Microphone Button */}
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <button
+                                      type="button"
+                                      onClick={toggleListening}
+                                      disabled={!statusOk || statusLoading || hasAudioPermission === false}
+                                      className={`absolute right-3 top-3 p-2 rounded-full transition-colors ${
+                                        isListening
+                                          ? 'bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400 animate-pulse'
+                                          : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                                      } ${(!statusOk || statusLoading) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    >
+                                      {isListening ? (
+                                        <MicOff size={18} />
+                                      ) : (
+                                        <Mic size={18} />
+                                      )}
+                                    </button>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="top">
+                                    {isListening
+                                      ? 'Stop dictation'
+                                      : hasAudioPermission === false
+                                      ? 'Microphone access denied'
+                                      : 'Dictate your business idea'}
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+
                             {!statusOk && (
                               <div className="absolute inset-0 bg-blue-50/30 dark:bg-gray-900/50 rounded-lg pointer-events-none"></div>
                             )}
+
+                            {/* Dictation indicator */}
+                            {isListening && (
+                                <div className="absolute bottom-3 left-3 flex items-center gap-2 bg-red-50 dark:bg-red-900/30 rounded-full py-1 px-3 text-xs text-red-600 dark:text-red-400">
+                                  <div className="h-2 w-2 rounded-full bg-red-500 animate-pulse"></div>
+                                  <span>Listening...</span>
+                                </div>
+                              )}                            
                           </div>
                         </TooltipTrigger>
                         {!statusOk && (
