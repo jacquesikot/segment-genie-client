@@ -1,7 +1,9 @@
 import client from './client';
 
 export interface Status {
-  status: 'ok' | 'error';
+  data: {
+    status: 'ok' | 'error';
+  };
 }
 
 export const getStatus = async () => {

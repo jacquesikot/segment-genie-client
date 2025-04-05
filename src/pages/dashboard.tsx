@@ -62,13 +62,7 @@ export default function Dashboard() {
       try {
         setStatusLoading(true);
         const statusData = await getStatus();
-        setStatusOk(statusData.status === 'ok');
-
-        if (statusData.status !== 'ok') {
-          analytics.trackEvent(analytics.Event.API_ERROR, {
-            message: 'Usage limit reached',
-          });
-        }
+        setStatusOk(statusData.data.status === 'ok');
       } catch (error) {
         console.error('Error checking status:', error);
         setStatusOk(false);
@@ -78,7 +72,7 @@ export default function Dashboard() {
     };
 
     checkStatus();
-  }, [analytics]);
+  }, []);
 
   const handleInitialAnalysis = async () => {
     if (!initialIdea.trim()) {

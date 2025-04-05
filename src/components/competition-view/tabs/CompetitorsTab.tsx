@@ -2,6 +2,8 @@ import React from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+
 import { ExternalLink } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import ConfidenceIndicator from '../common/ConfidenceIndicator';
@@ -392,6 +394,18 @@ const CompetitorsTab: React.FC<CompetitorsTabProps> = ({ competitors, filterCate
                     ))}
                   </div>
                 </div>
+              </div>
+              <div className='flex justify-center mt-6'>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <AccordionTrigger className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium hover:no-underline transition-colors [&>svg]:rotate-180 [&[data-state=open]>svg]:rotate-0">
+                    Close
+                  </AccordionTrigger>
+                </TooltipTrigger>
+                <TooltipContent side="right">
+                  Collapse section
+                </TooltipContent>
+              </Tooltip>
               </div>
             </AccordionContent>
           </AccordionItem>
