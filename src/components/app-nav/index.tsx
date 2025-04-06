@@ -27,7 +27,7 @@ const mainNavRoutes = {
       icon: Layers,
     },
     {
-      title: 'Feed',
+      title: 'Product Feed',
       url: '/feed',
       icon: Rss,
     },
