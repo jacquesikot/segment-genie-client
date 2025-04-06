@@ -200,7 +200,7 @@ export default function Feed() {
 
               <Button
                 onClick={handleRefresh}
-                disabled={!selectedSegmentId || isRefreshing}
+                disabled={!selectedSegmentId || isRefreshing || isLoading}
                 variant="outline"
                 className="w-full sm:w-auto self-end"
               >
