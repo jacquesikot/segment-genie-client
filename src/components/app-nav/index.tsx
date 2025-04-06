@@ -1,5 +1,5 @@
 import { Segment } from '@/api/segment';
-import { Home, Layers } from 'lucide-react';
+import { Home, Layers, Rss } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import {
   Sidebar as CNSidebar,
@@ -25,6 +25,11 @@ const mainNavRoutes = {
       title: 'Segments',
       url: '/segments',
       icon: Layers,
+    },
+    {
+      title: 'Feed',
+      url: '/feed',
+      icon: Rss,
     },
   ],
 };
