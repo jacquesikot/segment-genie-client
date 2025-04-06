@@ -10,6 +10,7 @@ import { AlertCircle, ExternalLink, MessageSquare, RefreshCw, ThumbsUp } from 'l
 import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import PageHeader from '@/components/page-header';
+import { siReddit } from 'simple-icons/icons';
 
 // Format relative time (e.g., "2 hours ago")
 const formatDistanceToNow = (date: Date, options?: { addSuffix?: boolean }): string => {
@@ -130,39 +131,57 @@ export default function Feed() {
       <div className="container mx-auto py-6 px-4 md:px-6">
         <div className="flex flex-col space-y-4">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">Reddit Feed</h1>
-              <p className="text-muted-foreground mt-1">Discover relevant Reddit posts based on your segments</p>
+            <div className="flex items-center gap-3">
+              <svg
+                role="img"
+                viewBox="0 0 24 24"
+                width={24}
+                height={24}
+                xmlns="http://www.w3.org/2000/svg"
+                fill={`#${siReddit.hex}`}
+              >
+                <title>{siReddit.title}</title>
+                <path d={siReddit.path} />
+              </svg>
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight">Reddit Feed</h1>
+                <p className="text-muted-foreground mt-1">Discover relevant Reddit posts based on your segments</p>
+              </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto">
-              <Select
-                value={selectedSegmentId}
-                onValueChange={handleSegmentChange}
-                disabled={segments.length === 0 || isLoading}
-              >
-                <SelectTrigger className="w-full sm:w-[220px]">
-                  <SelectValue placeholder="Select a segment" />
-                </SelectTrigger>
-                <SelectContent>
-                  {segments.map((segment) => (
-                    <SelectItem key={segment._id} value={segment._id}>
-                      {segment.title}
-                    </SelectItem>
-                  ))}
-                  {segments.length === 0 && (
-                    <SelectItem value="none" disabled>
-                      No segments available
-                    </SelectItem>
-                  )}
-                </SelectContent>
-              </Select>
+            <div className="flex flex-col sm:flex-row items-start sm:items-end gap-3 w-full sm:w-auto">
+              <div className="flex flex-col w-full sm:w-auto gap-1.5">
+                <label htmlFor="segment-selector" className="text-sm font-medium text-muted-foreground">
+                  Active Segment
+                </label>
+                <Select
+                  value={selectedSegmentId}
+                  onValueChange={handleSegmentChange}
+                  disabled={segments.length === 0 || isLoading}
+                >
+                  <SelectTrigger id="segment-selector" className="w-full sm:w-[220px]">
+                    <SelectValue placeholder="Select a segment" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {segments.map((segment) => (
+                      <SelectItem key={segment._id} value={segment._id}>
+                        {segment.title}
+                      </SelectItem>
+                    ))}
+                    {segments.length === 0 && (
+                      <SelectItem value="none" disabled>
+                        No segments available
+                      </SelectItem>
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
 
               <Button
                 onClick={handleRefresh}
                 disabled={!selectedSegmentId || isRefreshing}
                 variant="outline"
-                className="w-full sm:w-auto"
+                className="w-full sm:w-auto self-end"
               >
                 <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
                 Refresh
@@ -235,8 +254,8 @@ export default function Feed() {
             <div className="flex flex-col space-y-4 max-w-3xl mx-auto">
               {feedPosts.map((post) => (
                 <Card key={post.id} className="w-full hover:shadow-md transition-shadow">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between gap-2">
                       <div className="space-y-1.5">
                         <CardTitle className="text-lg leading-tight">
                           <a
@@ -248,55 +267,142 @@ export default function Feed() {
                             {truncateText(post.title, 100)}
                           </a>
                         </CardTitle>
-                        <CardDescription>
-                          <span className="font-medium text-foreground/80">r/{post.subreddit}</span> • Posted by u/
-                          {post.author} • {formatDate(post.created_utc)}
+                        <CardDescription className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                          <span className="font-medium text-foreground/80">r/{post.subreddit}</span>
+                          <span>•</span>
+                          <span>Posted by u/{post.author}</span>
+                          <span>•</span>
+                          <span>{formatDate(post.created_utc)}</span>
+                          {post.domain && post.domain !== 'self.' + post.subreddit && (
+                            <>
+                              <span>•</span>
+                              <span className="text-xs bg-muted px-1.5 py-0.5 rounded">{post.domain}</span>
+                            </>
+                          )}
                         </CardDescription>
                       </div>
-                      {post.relevanceScore !== undefined && (
-                        <div className="rounded-full text-xs px-2 py-1 bg-primary/10 text-primary font-medium">
-                          {Math.round(post.relevanceScore * 100)}% relevant
-                        </div>
-                      )}
+                      <div className="flex flex-col gap-1.5 items-end">
+                        {post.relevanceScore !== undefined && (
+                          <div className="rounded-full text-xs px-2 py-1 bg-primary/10 text-primary font-medium whitespace-nowrap">
+                            {Math.round(post.relevanceScore * 100)}% relevant
+                          </div>
+                        )}
+                        {post.is_original_content && (
+                          <div className="rounded-full text-xs px-2 py-0.5 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 font-medium">
+                            OC
+                          </div>
+                        )}
+                      </div>
                     </div>
+                    {post.post_categories && post.post_categories.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {post.post_categories.map((category, index) => (
+                          <span key={index} className="text-xs bg-secondary/50 px-1.5 py-0.5 rounded">
+                            {category}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="pt-0">
                     {post.selftext ? (
                       <p className="text-sm text-muted-foreground">{truncateText(post.selftext, 280)}</p>
-                    ) : post.thumbnail && post.thumbnail !== 'self' && post.thumbnail !== 'default' ? (
-                      <div className="mt-2 flex justify-center">
-                        <img
-                          src={post.thumbnail}
-                          alt={post.title}
-                          className="rounded-md max-h-48 object-cover"
-                          onError={(e) => {
-                            // Hide image on error
-                            (e.target as HTMLImageElement).style.display = 'none';
-                          }}
-                        />
-                      </div>
                     ) : null}
+
+                    {/* Improved media display logic */}
+                    {!post.is_self && (
+                      <div className="mt-3">
+                        {post.is_video && post.media?.reddit_video ? (
+                          <div className="rounded-md overflow-hidden">
+                            <video
+                              controls
+                              className="w-full max-h-80 object-contain"
+                              poster={post.thumbnail !== 'default' ? post.thumbnail : undefined}
+                            >
+                              <source src={post.media.reddit_video.fallback_url} type="video/mp4" />
+                              Your browser does not support the video tag.
+                            </video>
+                          </div>
+                        ) : post.preview?.images && post.preview.images.length > 0 ? (
+                          <div className="rounded-md overflow-hidden">
+                            <img
+                              src={post.preview.images[0].source.url.replace(/&amp;/g, '&')}
+                              alt={post.title}
+                              className="w-full max-h-80 object-contain"
+                              onError={(e) => {
+                                // Fallback to thumbnail on error
+                                if (post.thumbnail && post.thumbnail !== 'self' && post.thumbnail !== 'default') {
+                                  (e.target as HTMLImageElement).src = post.thumbnail;
+                                } else {
+                                  (e.target as HTMLImageElement).style.display = 'none';
+                                }
+                              }}
+                            />
+                          </div>
+                        ) : post.thumbnail && post.thumbnail !== 'self' && post.thumbnail !== 'default' ? (
+                          <div className="rounded-md overflow-hidden flex justify-center">
+                            <img
+                              src={post.thumbnail}
+                              alt={post.title}
+                              className="max-h-48 object-contain"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).style.display = 'none';
+                              }}
+                            />
+                          </div>
+                        ) : null}
+
+                        {/* Gallery display */}
+                        {post.gallery_data && post.gallery_data.items && post.gallery_data.items.length > 0 && (
+                          <div className="mt-2">
+                            <p className="text-xs text-muted-foreground mb-1">
+                              Gallery with {post.gallery_data.items.length} items
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </CardContent>
-                  <CardFooter className="pt-4 pb-4 border-t flex justify-between items-center">
-                    <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1">
+                  <CardFooter className="pt-4 pb-4 border-t flex flex-wrap justify-between items-center gap-2">
+                    <div className="flex items-center flex-wrap gap-4 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-1.5">
                         <ThumbsUp className="h-4 w-4" />
                         <span>{post.score.toLocaleString()}</span>
+                        {post.upvote_ratio && <span className="text-xs">({Math.round(post.upvote_ratio * 100)}%)</span>}
                       </div>
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-1.5">
                         <MessageSquare className="h-4 w-4" />
                         <span>{post.num_comments.toLocaleString()}</span>
                       </div>
+                      {post.subreddit_subscribers && (
+                        <div className="text-xs flex items-center gap-1">
+                          <span className="font-medium">Subscribers:</span>
+                          <span>{post.subreddit_subscribers.toLocaleString()}</span>
+                        </div>
+                      )}
                     </div>
-                    <a
-                      href={formatRedditUrl(post.permalink)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs flex items-center hover:underline text-muted-foreground"
-                    >
-                      View on Reddit
-                      <ExternalLink className="ml-1 h-3 w-3" />
-                    </a>
+
+                    <div className="flex items-center gap-3">
+                      {post.over_18 && (
+                        <span className="text-xs px-1.5 py-0.5 bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 rounded font-medium">
+                          NSFW
+                        </span>
+                      )}
+                      {post.spoiler && (
+                        <span className="text-xs px-1.5 py-0.5 bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300 rounded font-medium">
+                          Spoiler
+                        </span>
+                      )}
+                      <a
+                        href={formatRedditUrl(post.permalink)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs flex items-center hover:underline text-muted-foreground"
+                      >
+                        View on Reddit
+                        <ExternalLink className="ml-1 h-3 w-3" />
+                      </a>
+                    </div>
                   </CardFooter>
                 </Card>
               ))}
