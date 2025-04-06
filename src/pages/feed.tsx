@@ -1,437 +1,309 @@
-import { FeedPost, getSegmentFeed, getUserSegments, Segment } from '@/api/segment';
-import PageHeader from '@/components/page-header';
+import { Segment, getSegmentFeed } from '@/api/segment';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { keys, storage } from '@/lib/storage';
-import { useQuery } from '@tanstack/react-query';
-import {
-  ArrowUpRight,
-  Clock,
-  ExternalLink,
-  Eye,
-  Image,
-  Loader2,
-  MessageSquare,
-  RefreshCw,
-  Rss,
-  ScanSearch,
-  Share2,
-  ThumbsUp,
-  Video,
-} from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/hooks/use-toast';
+import { useAppSelector } from '@/redux/hooks';
+import { storage } from '@/lib/storage';
+import { AlertCircle, ExternalLink, MessageSquare, RefreshCw, ThumbsUp } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import PageHeader from '@/components/page-header';
 
-// Format time elapsed
-const timeAgo = (timestamp: number) => {
-  const seconds = Math.floor((Date.now() - timestamp * 1000) / 1000);
+// Format relative time (e.g., "2 hours ago")
+const formatDistanceToNow = (date: Date, options?: { addSuffix?: boolean }): string => {
+  const now = new Date();
+  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
-  let interval = seconds / 31536000;
-  if (interval > 1) return Math.floor(interval) + ' years ago';
+  if (diffInSeconds < 60) {
+    return options?.addSuffix ? 'just now' : 'less than a minute';
+  }
 
-  interval = seconds / 2592000;
-  if (interval > 1) return Math.floor(interval) + ' months ago';
+  const diffInMinutes = Math.floor(diffInSeconds / 60);
+  if (diffInMinutes < 60) {
+    return `${diffInMinutes} minute${diffInMinutes > 1 ? 's' : ''}${options?.addSuffix ? ' ago' : ''}`;
+  }
 
-  interval = seconds / 86400;
-  if (interval > 1) return Math.floor(interval) + ' days ago';
+  const diffInHours = Math.floor(diffInMinutes / 60);
+  if (diffInHours < 24) {
+    return `${diffInHours} hour${diffInHours > 1 ? 's' : ''}${options?.addSuffix ? ' ago' : ''}`;
+  }
 
-  interval = seconds / 3600;
-  if (interval > 1) return Math.floor(interval) + ' hours ago';
+  const diffInDays = Math.floor(diffInHours / 24);
+  if (diffInDays < 30) {
+    return `${diffInDays} day${diffInDays > 1 ? 's' : ''}${options?.addSuffix ? ' ago' : ''}`;
+  }
 
-  interval = seconds / 60;
-  if (interval > 1) return Math.floor(interval) + ' minutes ago';
+  const diffInMonths = Math.floor(diffInDays / 30);
+  if (diffInMonths < 12) {
+    return `${diffInMonths} month${diffInMonths > 1 ? 's' : ''}${options?.addSuffix ? ' ago' : ''}`;
+  }
 
-  return Math.floor(seconds) + ' seconds ago';
+  const diffInYears = Math.floor(diffInMonths / 12);
+  return `${diffInYears} year${diffInYears > 1 ? 's' : ''}${options?.addSuffix ? ' ago' : ''}`;
 };
 
-// Get content type icon
-const ContentTypeIcon = ({ post }: { post: FeedPost }) => {
-  if (post.is_video) return <Video className="h-4 w-4 text-red-500" />;
-  if (post.gallery_data) return <Image className="h-4 w-4 text-blue-500" />;
-  if (post.post_hint === 'image') return <Image className="h-4 w-4 text-green-500" />;
-  if (post.is_self) return <Eye className="h-4 w-4 text-purple-500" />;
-  return <ExternalLink className="h-4 w-4 text-primary" />;
-};
+const STORAGE_KEY_SELECTED_SEGMENT = 'SELECTED_SEGMENT';
 
-// Feed post component
-const FeedPostItem = ({ post }: { post: FeedPost }) => {
-  const handlePostClick = () => {
-    window.open(`https://reddit.com${post.permalink}`, '_blank');
-  };
-
-  // Extract image from post if available
-  const getPostImage = () => {
-    if (post.preview?.images && post.preview.images.length > 0) {
-      const image = post.preview.images[0];
-      if (image.source?.url) {
-        return decodeURIComponent(image.source.url.replace(/&amp;/g, '&'));
-      }
-    }
-    if (post.thumbnail && post.thumbnail !== 'self' && post.thumbnail !== 'default') {
-      return post.thumbnail;
-    }
-    return null;
-  };
-
-  const imageUrl = getPostImage();
-  const hasAwards = post.all_awardings && post.all_awardings.length > 0;
-  const postDate = post.created_utc ? timeAgo(post.created_utc) : '';
-  const awardCount = post.all_awardings ? post.all_awardings.reduce((sum, award) => sum + award.count, 0) : 0;
-
-  return (
-    <Card className="mb-4 hover:shadow-md transition-all border overflow-hidden group">
-      <CardHeader className="pb-2 pt-4">
-        <div className="flex items-center justify-between flex-wrap gap-2">
-          <div className="flex items-center gap-3">
-            {/* <Avatar className="h-8 w-8 border bg-primary/10">
-              <span className="text-xs font-medium">r/</span>
-            </Avatar> */}
-            <div>
-              <div className="flex items-center gap-2">
-                <p className="text-sm font-medium">r/{post.subreddit}</p>
-                {post.subreddit_subscribers > 0 && (
-                  <span className="text-xs text-muted-foreground hidden sm:inline">
-                    {post.subreddit_subscribers.toLocaleString()} members
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center text-xs text-muted-foreground flex-wrap">
-                <span>u/{post.author}</span>
-                {post.author_flair_text && (
-                  <>
-                    <span className="mx-1">•</span>
-                    <Badge variant="outline" className="px-1 py-0 text-[10px] h-4">
-                      {post.author_flair_text}
-                    </Badge>
-                  </>
-                )}
-                <span className="mx-1">•</span>
-                <span className="flex items-center gap-1">
-                  <Clock className="h-3 w-3" /> {postDate}
-                </span>
-              </div>
-            </div>
-          </div>
-          <div className="flex flex-col items-end gap-1 ml-auto">
-            <Badge variant="outline" className="bg-primary/5 text-xs">
-              {post.relevanceScore !== undefined ? `${Math.round(post.relevanceScore * 100)}% relevant` : 'Relevant'}
-            </Badge>
-            {hasAwards && (
-              <div className="flex items-center gap-1">
-                <Badge variant="outline" className="bg-yellow-100 text-yellow-800 text-xs px-1.5 py-0">
-                  {post.gilded > 0 && '🥇 '}Awards: {awardCount}
-                </Badge>
-              </div>
-            )}
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="pb-1 pt-2 space-y-3">
-        <div className="flex items-start gap-2">
-          <ContentTypeIcon post={post} />
-          <h3
-            className="font-medium text-lg cursor-pointer hover:text-primary transition-colors group-hover:underline"
-            onClick={handlePostClick}
-          >
-            {post.title}
-          </h3>
-        </div>
-
-        {/* Post content preview */}
-        {post.selftext && post.selftext.length > 0 && (
-          <div className="text-sm text-muted-foreground line-clamp-3 mt-2">{post.selftext}</div>
-        )}
-
-        {/* Image preview */}
-        {imageUrl && (
-          <div
-            className="mt-2 overflow-hidden rounded-md border cursor-pointer aspect-video relative"
-            onClick={handlePostClick}
-          >
-            <img
-              src={imageUrl}
-              alt={post.title}
-              className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
-              loading="lazy"
-            />
-            {post.is_video && (
-              <div className="absolute top-2 right-2 bg-black/70 text-white px-1.5 py-0.5 rounded text-xs flex items-center">
-                <Video className="h-3 w-3 mr-1" /> Video
-              </div>
-            )}
-          </div>
-        )}
-      </CardContent>
-      <CardFooter className="flex justify-between py-3 flex-wrap gap-2">
-        <div className="flex items-center gap-4 sm:gap-6 flex-wrap">
-          <div className="flex items-center gap-1 text-muted-foreground hover:text-primary text-xs cursor-pointer transition-colors">
-            <ThumbsUp className="h-4 w-4" />
-            <span>
-              {post.score.toLocaleString()} {post.upvote_ratio && `(${Math.round(post.upvote_ratio * 100)}%)`}
-            </span>
-          </div>
-          <div className="flex items-center gap-1 text-muted-foreground hover:text-primary text-xs cursor-pointer transition-colors">
-            <MessageSquare className="h-4 w-4" />
-            <span>{post.num_comments.toLocaleString()} comments</span>
-          </div>
-          <div className="flex items-center gap-1 text-muted-foreground hover:text-primary text-xs cursor-pointer transition-colors">
-            <Share2 className="h-4 w-4" />
-            <span>Share</span>
-          </div>
-        </div>
-        <button
-          className="flex items-center gap-1 text-muted-foreground hover:text-primary text-xs transition-colors"
-          onClick={handlePostClick}
-        >
-          <ArrowUpRight className="h-4 w-4" />
-          <span>View on Reddit</span>
-        </button>
-      </CardFooter>
-    </Card>
-  );
-};
-
-// Post skeleton loading state
-const FeedPostSkeleton = () => {
-  return (
-    <Card className="mb-4 border overflow-hidden">
-      <CardHeader className="pb-2 pt-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Skeleton className="h-8 w-8 rounded-full" />
-            <div>
-              <Skeleton className="h-4 w-24 mb-2" />
-              <Skeleton className="h-3 w-40" />
-            </div>
-          </div>
-          <div>
-            <Skeleton className="h-5 w-20" />
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="pb-1 pt-2 space-y-3">
-        <Skeleton className="h-6 w-full" />
-        <Skeleton className="h-4 w-3/4" />
-        <Skeleton className="h-40 w-full rounded-md" />
-      </CardContent>
-      <CardFooter className="flex justify-between py-3">
-        <div className="flex items-center gap-6">
-          <Skeleton className="h-4 w-16" />
-          <Skeleton className="h-4 w-24" />
-          <Skeleton className="h-4 w-12" />
-        </div>
-        <Skeleton className="h-4 w-24" />
-      </CardFooter>
-    </Card>
-  );
-};
-
-// Simple content loader
-const ContentLoader = () => {
-  return (
-    <div className="space-y-4">
-      {Array(3)
-        .fill(0)
-        .map((_, i) => (
-          <FeedPostSkeleton key={i} />
-        ))}
-    </div>
-  );
-};
-
-// Empty state component
-const EmptyState = () => {
-  return (
-    <div className="flex flex-col items-center justify-center p-8 min-h-[400px] text-center">
-      <div className="bg-primary/10 p-4 rounded-full mb-4">
-        <ScanSearch className="h-8 w-8 text-primary" />
-      </div>
-      <h3 className="text-xl font-semibold mb-2">No Feed Posts Found</h3>
-      <p className="text-muted-foreground mb-6 max-w-md">
-        We couldn't find any relevant Reddit posts for this segment. Try selecting a different segment or refreshing.
-      </p>
-      <Button variant="outline">Try Another Segment</Button>
-    </div>
-  );
-};
-
-// Loading segments state
-const LoadingSegmentsState = () => {
-  return (
-    <div className="flex flex-col items-center justify-center p-8 min-h-[400px] text-center">
-      <div className="bg-primary/10 p-4 rounded-full mb-4 relative">
-        <Loader2 className="h-8 w-8 text-primary animate-spin" />
-      </div>
-      <h3 className="text-xl font-semibold mb-2">Loading Your Segments</h3>
-      <p className="text-muted-foreground mb-6 max-w-md">
-        We're retrieving your segments. This will only take a moment...
-      </p>
-    </div>
-  );
-};
-
-// No segments state
-const NoSegmentsState = () => {
-  return (
-    <div className="flex flex-col items-center justify-center p-8 min-h-[400px] text-center">
-      <div className="bg-primary/10 p-4 rounded-full mb-4">
-        <Rss className="h-8 w-8 text-primary" />
-      </div>
-      <h3 className="text-xl font-semibold mb-2">No Segments Available</h3>
-      <p className="text-muted-foreground mb-6 max-w-md">
-        You need to create at least one segment before you can view a feed. Head to the segments page to create your
-        first segment.
-      </p>
-      <Button className="bg-primary hover:bg-primary/90">Create a Segment</Button>
-    </div>
-  );
-};
-
-const Feed = () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const user: any = storage.getItem(keys.USER);
+export default function Feed() {
+  const { toast } = useToast();
+  const segments = useAppSelector((state) => state.segment.segments) as Segment[];
   const [selectedSegmentId, setSelectedSegmentId] = useState<string>('');
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Fetch user segments
-  const { data: segments, isLoading: segmentsLoading } = useQuery({
-    queryKey: ['segments'],
-    queryFn: () => getUserSegments(user!.id),
-    enabled: !!user?.id,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
-
-  // Set the first segment as selected when segments load
+  // Load selected segment from local storage on initial render
   useEffect(() => {
-    if (segments && segments.length > 0 && !selectedSegmentId) {
-      setSelectedSegmentId(segments[0]._id);
-    }
-  }, [segments, selectedSegmentId]);
+    const savedSegmentId = storage.getItem<string>(STORAGE_KEY_SELECTED_SEGMENT);
 
-  // Fetch feed posts for selected segment
+    if (savedSegmentId && segments.some((segment) => segment._id === savedSegmentId)) {
+      setSelectedSegmentId(savedSegmentId);
+    } else if (segments.length > 0) {
+      // Default to first segment if saved segment doesn't exist or is invalid
+      setSelectedSegmentId(segments[0]._id);
+      storage.setItem(STORAGE_KEY_SELECTED_SEGMENT, segments[0]._id);
+    }
+  }, [segments]);
+
+  // Save selected segment to local storage when it changes
+  useEffect(() => {
+    if (selectedSegmentId) {
+      storage.setItem(STORAGE_KEY_SELECTED_SEGMENT, selectedSegmentId);
+    }
+  }, [selectedSegmentId]);
+
   const {
     data: feedPosts,
-    isLoading: feedLoading,
-    refetch: refetchFeed,
-    isFetching: isRefetching,
+    isLoading,
+    isError,
+    error,
+    refetch,
   } = useQuery({
     queryKey: ['feed', selectedSegmentId],
     queryFn: () => getSegmentFeed(selectedSegmentId),
     enabled: !!selectedSegmentId,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    refetchOnWindowFocus: false, // Don't refetch when the window regains focus
-    refetchOnMount: false, // Don't refetch when the component remounts
+    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
   });
 
-  // Handle segment change
-  const handleSegmentChange = (segmentId: string) => {
-    setSelectedSegmentId(segmentId);
+  const handleSegmentChange = (value: string) => {
+    setSelectedSegmentId(value);
   };
 
-  // Handle refresh
-  const handleRefresh = () => {
-    if (selectedSegmentId) {
-      refetchFeed();
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await refetch();
+      toast({
+        title: 'Feed refreshed',
+        description: 'Latest posts have been loaded',
+      });
+    } catch {
+      toast({
+        title: 'Failed to refresh feed',
+        description: 'Please try again later',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsRefreshing(false);
     }
   };
 
-  // Always render the control bar to prevent layout shift
-  const renderControls = () => (
-    <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center sticky top-0 z-10 bg-background pb-4 pt-1 border-b mb-4">
-      <div className="w-full sm:w-72">
-        <Select
-          value={selectedSegmentId}
-          onValueChange={handleSegmentChange}
-          disabled={segmentsLoading || !(segments && segments.length > 0)}
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder={segmentsLoading ? 'Loading segments...' : 'Select a segment'} />
-          </SelectTrigger>
-          <SelectContent>
-            {segments &&
-              segments.length > 0 &&
-              segments.map((segment: Segment) => (
-                <SelectItem key={segment._id} value={segment._id}>
-                  {segment.title}
-                </SelectItem>
-              ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={handleRefresh}
-        disabled={feedLoading || isRefetching || !selectedSegmentId}
-        className="w-full sm:w-auto"
-      >
-        {isRefetching ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />}
-        Refresh Feed
-      </Button>
-    </div>
-  );
+  // Helper to format Reddit URLs
+  const formatRedditUrl = (permalink: string) => {
+    return `https://reddit.com${permalink}`;
+  };
+
+  // Helper to format date
+  const formatDate = (timestamp: number) => {
+    return formatDistanceToNow(new Date(timestamp * 1000), { addSuffix: true });
+  };
+
+  // Helper to truncate text
+  const truncateText = (text: string, maxLength: number) => {
+    if (text.length <= maxLength) return text;
+    return text.slice(0, maxLength) + '...';
+  };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <>
       <PageHeader />
-      <div className="max-w-[800px] w-full mx-auto p-4 md:p-6 space-y-6 flex-1">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-semibold">Feed</h1>
-            <p className="text-muted-foreground">View relevant Reddit posts for your segments</p>
-          </div>
-        </div>
+      <div className="container mx-auto py-6 px-4 md:px-6">
+        <div className="flex flex-col space-y-4">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">Reddit Feed</h1>
+              <p className="text-muted-foreground mt-1">Discover relevant Reddit posts based on your segments</p>
+            </div>
 
-        {/* Loading Segments State */}
-        {segmentsLoading && <LoadingSegmentsState />}
-
-        {/* No Segments State */}
-        {!segmentsLoading && segments && segments.length === 0 && <NoSegmentsState />}
-
-        {/* Feed content */}
-        {!segmentsLoading && segments && segments.length > 0 && (
-          <>
-            {/* Always render controls to prevent layout shift */}
-            {renderControls()}
-
-            <ScrollArea className="h-[calc(100vh-240px)]">
-              {/* Select a segment prompt */}
-              {!selectedSegmentId && (
-                <div className="flex flex-col items-center justify-center p-8 text-center">
-                  <div className="bg-primary/10 p-4 rounded-full mb-4">
-                    <Rss className="h-8 w-8 text-primary" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2">Select a Segment</h3>
-                  <p className="text-muted-foreground mb-6 max-w-md">
-                    Choose a segment to view relevant Reddit posts tailored to that market segment.
-                  </p>
-                </div>
-              )}
-
-              {/* Loading feed posts */}
-              {selectedSegmentId && (feedLoading || isRefetching) && <ContentLoader />}
-
-              {/* Empty feed state */}
-              {selectedSegmentId && !feedLoading && !isRefetching && feedPosts && feedPosts.length === 0 && (
-                <EmptyState />
-              )}
-
-              {/* Feed posts */}
-              {selectedSegmentId && !feedLoading && !isRefetching && feedPosts && feedPosts.length > 0 && (
-                <div className="pb-4">
-                  {feedPosts.map((post) => (
-                    <FeedPostItem key={post.id || post.url} post={post} />
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto">
+              <Select
+                value={selectedSegmentId}
+                onValueChange={handleSegmentChange}
+                disabled={segments.length === 0 || isLoading}
+              >
+                <SelectTrigger className="w-full sm:w-[220px]">
+                  <SelectValue placeholder="Select a segment" />
+                </SelectTrigger>
+                <SelectContent>
+                  {segments.map((segment) => (
+                    <SelectItem key={segment._id} value={segment._id}>
+                      {segment.title}
+                    </SelectItem>
                   ))}
-                </div>
-              )}
-            </ScrollArea>
-          </>
-        )}
-      </div>
-    </div>
-  );
-};
+                  {segments.length === 0 && (
+                    <SelectItem value="none" disabled>
+                      No segments available
+                    </SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
 
-export default Feed;
+              <Button
+                onClick={handleRefresh}
+                disabled={!selectedSegmentId || isRefreshing}
+                variant="outline"
+                className="w-full sm:w-auto"
+              >
+                <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                Refresh
+              </Button>
+            </div>
+          </div>
+
+          {/* Loading state */}
+          {isLoading && (
+            <div className="flex flex-col space-y-4 max-w-3xl mx-auto">
+              {[...Array(6)].map((_, i) => (
+                <Card key={i} className="flex flex-col w-full">
+                  <CardHeader>
+                    <Skeleton className="h-6 w-3/4 mb-2" />
+                    <Skeleton className="h-4 w-1/2" />
+                  </CardHeader>
+                  <CardContent className="flex-grow">
+                    <Skeleton className="h-24 w-full" />
+                  </CardContent>
+                  <CardFooter>
+                    <Skeleton className="h-4 w-full" />
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          )}
+
+          {/* Error state */}
+          {isError && (
+            <Card className="border-red-300 bg-red-50 dark:bg-red-950 dark:border-red-800 max-w-3xl mx-auto">
+              <CardHeader>
+                <div className="flex items-center">
+                  <AlertCircle className="text-red-500 mr-2 h-5 w-5" />
+                  <CardTitle className="text-red-600 dark:text-red-400">Error loading feed</CardTitle>
+                </div>
+                <CardDescription className="text-red-500 dark:text-red-400">
+                  {error instanceof Error ? error.message : 'Failed to load feed data. Please try again.'}
+                </CardDescription>
+              </CardHeader>
+              <CardFooter>
+                <Button onClick={() => refetch()} variant="outline" className="mt-2">
+                  Try again
+                </Button>
+              </CardFooter>
+            </Card>
+          )}
+
+          {/* Empty state */}
+          {!isLoading && !isError && feedPosts && feedPosts.length === 0 && (
+            <Card className="text-center p-8 max-w-3xl mx-auto">
+              <div className="flex flex-col items-center justify-center space-y-4">
+                <div className="rounded-full bg-muted p-4">
+                  <MessageSquare className="h-10 w-10 text-muted-foreground" />
+                </div>
+                <h3 className="text-lg font-semibold">No posts found</h3>
+                <p className="text-muted-foreground max-w-sm mx-auto">
+                  There are no relevant Reddit posts for this segment at the moment. Try selecting a different segment
+                  or refreshing later.
+                </p>
+                <Button onClick={handleRefresh} variant="outline">
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  Refresh
+                </Button>
+              </div>
+            </Card>
+          )}
+
+          {/* Feed posts column */}
+          {!isLoading && !isError && feedPosts && feedPosts.length > 0 && (
+            <div className="flex flex-col space-y-4 max-w-3xl mx-auto">
+              {feedPosts.map((post) => (
+                <Card key={post.id} className="w-full hover:shadow-md transition-shadow">
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-1.5">
+                        <CardTitle className="text-lg leading-tight">
+                          <a
+                            href={formatRedditUrl(post.permalink)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="hover:underline text-primary"
+                          >
+                            {truncateText(post.title, 100)}
+                          </a>
+                        </CardTitle>
+                        <CardDescription>
+                          <span className="font-medium text-foreground/80">r/{post.subreddit}</span> • Posted by u/
+                          {post.author} • {formatDate(post.created_utc)}
+                        </CardDescription>
+                      </div>
+                      {post.relevanceScore !== undefined && (
+                        <div className="rounded-full text-xs px-2 py-1 bg-primary/10 text-primary font-medium">
+                          {Math.round(post.relevanceScore * 100)}% relevant
+                        </div>
+                      )}
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    {post.selftext ? (
+                      <p className="text-sm text-muted-foreground">{truncateText(post.selftext, 280)}</p>
+                    ) : post.thumbnail && post.thumbnail !== 'self' && post.thumbnail !== 'default' ? (
+                      <div className="mt-2 flex justify-center">
+                        <img
+                          src={post.thumbnail}
+                          alt={post.title}
+                          className="rounded-md max-h-48 object-cover"
+                          onError={(e) => {
+                            // Hide image on error
+                            (e.target as HTMLImageElement).style.display = 'none';
+                          }}
+                        />
+                      </div>
+                    ) : null}
+                  </CardContent>
+                  <CardFooter className="pt-4 pb-4 border-t flex justify-between items-center">
+                    <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <ThumbsUp className="h-4 w-4" />
+                        <span>{post.score.toLocaleString()}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <MessageSquare className="h-4 w-4" />
+                        <span>{post.num_comments.toLocaleString()}</span>
+                      </div>
+                    </div>
+                    <a
+                      href={formatRedditUrl(post.permalink)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs flex items-center hover:underline text-muted-foreground"
+                    >
+                      View on Reddit
+                      <ExternalLink className="ml-1 h-3 w-3" />
+                    </a>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
