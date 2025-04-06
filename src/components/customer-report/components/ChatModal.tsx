@@ -5,13 +5,31 @@ import { useAnalytics } from '@/hooks/use-analytics';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Avatar } from '@/components/ui/avatar';
-import { initialiseChat, newChat, getChatBySegmentId, getChatMessages, sendMessage } from '@/api/chat';
+import {
+  initialiseChat,
+  newChat,
+  getChatBySegmentId,
+  getChatMessages,
+  sendMessage,
+} from '@/api/chat';
 import { useAuth } from '@/lib/auth-context';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import 'highlight.js/styles/github-dark.css';
 import { Textarea } from '@/components/ui/textarea';
-import { Send, X, Bot, Sparkles, MessageCircle, Lightbulb, ChevronRight, GripVertical } from 'lucide-react';
+import {
+  Send,
+  X,
+  Bot,
+  Sparkles,
+  MessageCircle,
+  Lightbulb,
+  ChevronRight,
+  GripVertical,
+  Mic,
+  Square,
+} from 'lucide-react';
+import { AudioRecorder } from '@/components/ui/audio-recorder';
 
 interface ChatModalProps {
   isOpen: boolean;
@@ -34,7 +52,13 @@ enum ChatState {
   ACTIVE = 'active',
 }
 
-const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, segmentId, segmentTitle, currentSection }) => {
+const ChatModal: React.FC<ChatModalProps> = ({
+  isOpen,
+  onClose,
+  segmentId,
+  segmentTitle,
+  currentSection,
+}) => {
   const analytics = useAnalytics();
   const { user } = useAuth();
   const [inputValue, setInputValue] = useState('');
@@ -140,7 +164,9 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, segmentId, segme
   // Scroll to bottom when new messages arrive
   useEffect(() => {
     if (scrollAreaRef.current) {
-      const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      const scrollContainer = scrollAreaRef.current.querySelector(
+        '[data-radix-scroll-area-viewport]'
+      );
       if (scrollContainer) {
         scrollContainer.scrollTop = scrollContainer.scrollHeight;
       }
@@ -164,6 +190,9 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, segmentId, segme
 
   // Handle scroll behavior based on cursor position
   useEffect(() => {
+    // Capture the ref value at the time the effect runs
+    const currentModalRef = modalRef.current;
+
     // Function to prevent default scroll behavior
     const preventScroll = (e: WheelEvent) => {
       if (isCursorInModal) {
@@ -171,9 +200,10 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, segmentId, segme
         e.stopPropagation();
       } else if (isOpen) {
         // When modal is open but cursor is not in it, prevent modal from scrolling
-        const modalElement = modalRef.current;
-        if (modalElement) {
-          const scrollElements = modalElement.querySelectorAll('[data-radix-scroll-area-viewport]');
+        if (currentModalRef) {
+          const scrollElements = currentModalRef.querySelectorAll(
+            '[data-radix-scroll-area-viewport]'
+          );
           scrollElements.forEach((el) => {
             (el as HTMLElement).style.overflowY = 'hidden';
           });
@@ -185,9 +215,10 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, segmentId, segme
     const handleMouseEnter = () => {
       setIsCursorInModal(true);
       // Re-enable scrolling in modal
-      const modalElement = modalRef.current;
-      if (modalElement) {
-        const scrollElements = modalElement.querySelectorAll('[data-radix-scroll-area-viewport]');
+      if (currentModalRef) {
+        const scrollElements = currentModalRef.querySelectorAll(
+          '[data-radix-scroll-area-viewport]'
+        );
         scrollElements.forEach((el) => {
           (el as HTMLElement).style.overflowY = 'auto';
         });
@@ -203,10 +234,9 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, segmentId, segme
       document.body.classList.add('overflow-hidden', 'md:overflow-auto');
 
       // Add event listeners when modal is open
-      const modalElement = modalRef.current;
-      if (modalElement) {
-        modalElement.addEventListener('mouseenter', handleMouseEnter);
-        modalElement.addEventListener('mouseleave', handleMouseLeave);
+      if (currentModalRef) {
+        currentModalRef.addEventListener('mouseenter', handleMouseEnter);
+        currentModalRef.addEventListener('mouseleave', handleMouseLeave);
         window.addEventListener('wheel', preventScroll, { passive: false });
       }
     } else {
@@ -216,11 +246,10 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, segmentId, segme
     return () => {
       document.body.classList.remove('overflow-hidden', 'md:overflow-auto');
 
-      // Clean up event listeners
-      const modalElement = modalRef.current;
-      if (modalElement) {
-        modalElement.removeEventListener('mouseenter', handleMouseEnter);
-        modalElement.removeEventListener('mouseleave', handleMouseLeave);
+      // Clean up event listeners using the captured ref
+      if (currentModalRef) {
+        currentModalRef.removeEventListener('mouseenter', handleMouseEnter);
+        currentModalRef.removeEventListener('mouseleave', handleMouseLeave);
         window.removeEventListener('wheel', preventScroll);
       }
     };
@@ -244,7 +273,9 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, segmentId, segme
       if (response.data && response.data.length > 0) {
         // Chat has been initialized
         const mostRecentChat = response.data.sort(
-          (a, b) => new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime()
+          (a, b) =>
+            new Date(b.createdAt || '').getTime() -
+            new Date(a.createdAt || '').getTime()
         )[0];
         setChatId(mostRecentChat._id);
 
@@ -286,7 +317,8 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, segmentId, segme
       setMessages([
         {
           sender: 'system',
-          content: 'Sorry, I encountered an error loading the conversation. Please try again.',
+          content:
+            'Sorry, I encountered an error loading the conversation. Please try again.',
           timestamp: new Date(),
         },
       ]);
@@ -381,7 +413,9 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, segmentId, segme
 
         // If user has scrolled up, don't auto-scroll to bottom
         if (scrollAreaRef.current) {
-          const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+          const scrollContainer = scrollAreaRef.current.querySelector(
+            '[data-radix-scroll-area-viewport]'
+          );
           if (scrollContainer) {
             scrollContainer.scrollTop = scrollContainer.scrollHeight;
           }
@@ -394,7 +428,8 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, segmentId, segme
         ...prev,
         {
           sender: 'system',
-          content: 'Sorry, I encountered an error processing your request. Please try again.',
+          content:
+            'Sorry, I encountered an error processing your request. Please try again.',
           timestamp: new Date(),
         },
       ]);
@@ -425,19 +460,19 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, segmentId, segme
     // Show loading indicator while initializing
     if (isInitializing) {
       return (
-        <div className="flex flex-col items-center justify-center h-full p-6 text-center">
-          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6">
-            <Bot className="h-8 w-8 text-primary animate-pulse" />
+        <div className='flex flex-col items-center justify-center h-full p-6 text-center'>
+          <div className='w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6'>
+            <Bot className='h-8 w-8 text-primary animate-pulse' />
           </div>
-          <h3 className="text-xl font-semibold mb-4">{loadingText}</h3>
-          <div className="flex space-x-3 py-2">
-            <div className="w-2.5 h-2.5 rounded-full bg-primary/60 animate-bounce"></div>
+          <h3 className='text-xl font-semibold mb-4'>{loadingText}</h3>
+          <div className='flex space-x-3 py-2'>
+            <div className='w-2.5 h-2.5 rounded-full bg-primary/60 animate-bounce'></div>
             <div
-              className="w-2.5 h-2.5 rounded-full bg-primary/60 animate-bounce"
+              className='w-2.5 h-2.5 rounded-full bg-primary/60 animate-bounce'
               style={{ animationDelay: '0.2s' }}
             ></div>
             <div
-              className="w-2.5 h-2.5 rounded-full bg-primary/60 animate-bounce"
+              className='w-2.5 h-2.5 rounded-full bg-primary/60 animate-bounce'
               style={{ animationDelay: '0.4s' }}
             ></div>
           </div>
@@ -448,16 +483,22 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, segmentId, segme
     switch (chatState) {
       case ChatState.UNINITIATED:
         return (
-          <div className="flex flex-col items-center justify-center h-full p-6 text-center">
-            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6">
-              <MessageCircle className="h-8 w-8 text-primary" />
+          <div className='flex flex-col items-center justify-center h-full p-6 text-center'>
+            <div className='w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6'>
+              <MessageCircle className='h-8 w-8 text-primary' />
             </div>
-            <h3 className="text-xl font-semibold mb-2">Segment Research Assistant</h3>
-            <p className="text-muted-foreground mb-6 max-w-[280px]">
-              Get insights and analysis about the "{segmentTitle}" segment with our AI research assistant.
+            <h3 className='text-xl font-semibold mb-2'>
+              Segment Research Assistant
+            </h3>
+            <p className='text-muted-foreground mb-6 max-w-[280px]'>
+              Get insights and analysis about the "{segmentTitle}" segment with
+              our AI research assistant.
             </p>
-            <Button onClick={initiateChat} className="bg-primary hover:bg-primary/90 gap-2">
-              <Sparkles className="h-4 w-4" />
+            <Button
+              onClick={initiateChat}
+              className='bg-primary hover:bg-primary/90 gap-2'
+            >
+              <Sparkles className='h-4 w-4' />
               Start Conversation
             </Button>
           </div>
@@ -466,25 +507,29 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, segmentId, segme
       case ChatState.INITIATED:
         return (
           <>
-            <ScrollArea className="flex-1 px-3 py-3" ref={scrollAreaRef}>
-              <div className="flex flex-col gap-4 pb-2">
+            <ScrollArea className='flex-1 px-3 py-3' ref={scrollAreaRef}>
+              <div className='flex flex-col gap-4 pb-2'>
                 {messages.map((message, index) => (
                   <MessageBubble key={index} message={message} />
                 ))}
 
-                <div className="mt-5">
-                  <p className="text-sm text-muted-foreground mb-2 font-medium">Suggested questions:</p>
-                  <div className="flex flex-col gap-2">
+                <div className='mt-5'>
+                  <p className='text-sm text-muted-foreground mb-2 font-medium'>
+                    Suggested questions:
+                  </p>
+                  <div className='flex flex-col gap-2'>
                     {suggestedQuestions.map((question, idx) => (
                       <Button
                         key={idx}
-                        variant="outline"
-                        className="w-full justify-start gap-2 text-left h-auto py-2 px-2.5 group hover:bg-primary/10 hover:text-primary text-xs"
+                        variant='outline'
+                        className='w-full justify-start gap-2 text-left h-auto py-2 px-2.5 group hover:bg-primary/10 hover:text-primary text-xs'
                         onClick={() => handleSuggestedQuestion(question)}
                       >
-                        <Lightbulb className="h-3 w-3 flex-shrink-0 text-muted-foreground group-hover:text-primary" />
-                        <span className="truncate overflow-hidden pr-1">{question}</span>
-                        <ChevronRight className="h-3 w-3 ml-auto flex-shrink-0 text-muted-foreground group-hover:text-primary" />
+                        <Lightbulb className='h-3 w-3 flex-shrink-0 text-muted-foreground group-hover:text-primary' />
+                        <span className='truncate overflow-hidden pr-1'>
+                          {question}
+                        </span>
+                        <ChevronRight className='h-3 w-3 ml-auto flex-shrink-0 text-muted-foreground group-hover:text-primary' />
                       </Button>
                     ))}
                   </div>
@@ -506,8 +551,8 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, segmentId, segme
       case ChatState.ACTIVE:
         return (
           <>
-            <ScrollArea className="flex-1 px-3 py-3" ref={scrollAreaRef}>
-              <div className="flex flex-col gap-4 pb-2">
+            <ScrollArea className='flex-1 px-3 py-3' ref={scrollAreaRef}>
+              <div className='flex flex-col gap-4 pb-2'>
                 {messages.map((message, index) => (
                   <MessageBubble key={index} message={message} />
                 ))}
@@ -563,7 +608,7 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, segmentId, segme
             'hover:bg-primary/10',
             isResizing ? 'bg-primary/20' : ''
           )}
-          title="Drag to resize"
+          title='Drag to resize'
         >
           <div
             className={cn(
@@ -571,7 +616,7 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, segmentId, segme
               isResizing ? 'opacity-100' : 'opacity-30 hover:opacity-70'
             )}
           >
-            <GripVertical className="h-5 w-5 text-muted-foreground" />
+            <GripVertical className='h-5 w-5 text-muted-foreground' />
           </div>
         </div>
         <ChatHeader
@@ -603,11 +648,13 @@ const MessageBubble: React.FC<{ message: ChatMessage }> = ({ message }) => {
 
   return (
     <div
-      className={`flex items-end gap-2.5 ${message.sender === 'user' ? 'justify-end' : 'justify-start'} w-full mb-3`}
+      className={`flex items-end gap-2.5 ${
+        message.sender === 'user' ? 'justify-end' : 'justify-start'
+      } w-full mb-3`}
     >
       {message.sender === 'system' && (
-        <Avatar className="w-8 h-8 justify-center align-middle items-center flex-shrink-0 border border-border/50 shadow-sm">
-          <Bot className="h-4 w-4 text-primary" />
+        <Avatar className='w-8 h-8 justify-center align-middle items-center flex-shrink-0 border border-border/50 shadow-sm'>
+          <Bot className='h-4 w-4 text-primary' />
         </Avatar>
       )}
       <div
@@ -643,7 +690,9 @@ const MessageBubble: React.FC<{ message: ChatMessage }> = ({ message }) => {
               components={{
                 // Override pre rendering for better code block styling
                 pre: ({ children }) => (
-                  <pre className="bg-muted/30 p-3 rounded-md overflow-x-auto my-3">{children}</pre>
+                  <pre className='bg-muted/30 p-3 rounded-md overflow-x-auto my-3'>
+                    {children}
+                  </pre>
                 ),
               }}
             >
@@ -651,13 +700,19 @@ const MessageBubble: React.FC<{ message: ChatMessage }> = ({ message }) => {
             </ReactMarkdown>
           </article>
         ) : (
-          <div className="text-sm whitespace-pre-wrap break-words leading-relaxed">{content}</div>
+          <div className='text-sm whitespace-pre-wrap break-words leading-relaxed'>
+            {content}
+          </div>
         )}
-        <div className="text-[10px] opacity-70 mt-1.5 text-right font-medium">{formattedTime}</div>
+        <div className='text-[10px] opacity-70 mt-1.5 text-right font-medium'>
+          {formattedTime}
+        </div>
       </div>
       {message.sender === 'user' && (
-        <Avatar className="w-8 h-8 justify-center align-middle items-center flex-shrink-0 bg-primary/90 shadow-sm ring-2 ring-primary/20">
-          <div className="font-semibold text-xs text-primary-foreground">You</div>
+        <Avatar className='w-8 h-8 justify-center align-middle items-center flex-shrink-0 bg-primary/90 shadow-sm ring-2 ring-primary/20'>
+          <div className='font-semibold text-xs text-primary-foreground'>
+            You
+          </div>
         </Avatar>
       )}
     </div>
@@ -666,15 +721,21 @@ const MessageBubble: React.FC<{ message: ChatMessage }> = ({ message }) => {
 
 // Component for loading indicator
 const LoadingIndicator: React.FC = () => (
-  <div className="flex justify-start items-end gap-2.5 w-full mb-3">
-    <Avatar className="w-8 h-8 flex-shrink-0 border border-border/50 shadow-sm">
-      <Bot className="h-4 w-4 text-primary" />
+  <div className='flex justify-start items-end gap-2.5 w-full mb-3'>
+    <Avatar className='w-8 h-8 flex-shrink-0 border border-border/50 shadow-sm'>
+      <Bot className='h-4 w-4 text-primary' />
     </Avatar>
-    <div className="max-w-[85%] p-3 rounded-2xl rounded-tl-none bg-muted/80 backdrop-blur-sm border border-border/40 shadow-sm">
-      <div className="flex space-x-2 py-0.5">
-        <div className="w-2 h-2 rounded-full bg-primary/40 animate-bounce"></div>
-        <div className="w-2 h-2 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-        <div className="w-2 h-2 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+    <div className='max-w-[85%] p-3 rounded-2xl rounded-tl-none bg-muted/80 backdrop-blur-sm border border-border/40 shadow-sm'>
+      <div className='flex space-x-2 py-0.5'>
+        <div className='w-2 h-2 rounded-full bg-primary/40 animate-bounce'></div>
+        <div
+          className='w-2 h-2 rounded-full bg-primary/40 animate-bounce'
+          style={{ animationDelay: '0.2s' }}
+        ></div>
+        <div
+          className='w-2 h-2 rounded-full bg-primary/40 animate-bounce'
+          style={{ animationDelay: '0.4s' }}
+        ></div>
       </div>
     </div>
   </div>
@@ -695,32 +756,69 @@ const ChatInput: React.FC<ChatInputProps> = ({
   handleSendMessage,
   handleKeyPress,
   isLoading,
-}) => (
-  <div className="p-3 border-t mt-auto bg-background/98">
-    <div className="flex gap-2">
-      <Textarea
-        placeholder="Type your message..."
-        value={inputValue}
-        onChange={(e) => setInputValue(e.target.value)}
-        onKeyDown={handleKeyPress}
-        disabled={isLoading}
-        className="flex-1 py-2 px-3 shadow-sm border-muted-foreground/20 focus-visible:ring-primary text-sm min-h-[100px] resize-none"
-        autoComplete="off"
-      />
-      <Button
-        onClick={(e) => {
-          e.preventDefault();
-          handleSendMessage();
-        }}
-        disabled={!inputValue.trim() || isLoading}
-        size="icon"
-        className="bg-primary hover:bg-primary/90 transition-all duration-200 transform active:scale-95 flex-shrink-0"
-      >
-        <Send className="h-4 w-4" />
-      </Button>
+}) => {
+  const [isRecording, setIsRecording] = useState(false);
+
+  return (
+    <div className='p-3 border-t mt-auto bg-background/98'>
+      <div className='flex gap-2'>
+        <div className='flex-1 flex flex-col gap-2'>
+          <div className='relative'>
+            <Textarea
+              placeholder='Type your message...'
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={handleKeyPress}
+              disabled={isLoading}
+              className='flex-1 py-2 px-3 shadow-sm border-muted-foreground/20 focus-visible:ring-primary text-sm min-h-[100px] resize-none pr-10'
+              autoComplete='off'
+            />
+            <Button
+              type='button'
+              variant='ghost'
+              size='icon'
+              className={cn(
+                'absolute right-2 top-2',
+                isRecording && 'text-red-500 hover:text-red-600 animate-pulse'
+              )}
+              onClick={() => {
+                const audioRecorder = document.querySelector(
+                  '[data-recorder-id="chat"]'
+                );
+                if (audioRecorder) {
+                  const startButton = audioRecorder.querySelector('button');
+                  if (startButton) startButton.click();
+                }
+              }}
+            >
+              {isRecording ? (
+                <Square className='h-4 w-4' />
+              ) : (
+                <Mic className='h-4 w-4' />
+              )}
+            </Button>
+          </div>
+          <AudioRecorder
+            data-recorder-id='chat'
+            onTranscriptionComplete={(text) => setInputValue(text)}
+            onRecordingStateChange={setIsRecording}
+            className='absolute right-0 top-0 opacity-0 pointer-events-none'
+          />
+        </div>
+        <Button
+          onClick={(e) => {
+            e.preventDefault();
+            handleSendMessage();
+          }}
+          disabled={!inputValue.trim() || isLoading}
+          className='self-end'
+        >
+          <Send className='h-4 w-4' />
+        </Button>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 // Component for chat header
 interface ChatHeaderProps {
@@ -731,53 +829,66 @@ interface ChatHeaderProps {
   onResetWidth?: () => void;
 }
 
-const ChatHeader: React.FC<ChatHeaderProps> = ({ segmentTitle, onClose, chatState, hasCustomWidth, onResetWidth }) => (
-  <div className="p-3 flex items-center justify-between bg-background/98">
-    <div className="flex items-center gap-2.5">
-      <div className="flex items-center justify-center w-7 h-7 rounded-full bg-primary/10 flex-shrink-0">
-        <Bot className="h-3.5 w-3.5 text-primary" />
+const ChatHeader: React.FC<ChatHeaderProps> = ({
+  segmentTitle,
+  onClose,
+  chatState,
+  hasCustomWidth,
+  onResetWidth,
+}) => (
+  <div className='p-3 flex items-center justify-between bg-background/98'>
+    <div className='flex items-center gap-2.5'>
+      <div className='flex items-center justify-center w-7 h-7 rounded-full bg-primary/10 flex-shrink-0'>
+        <Bot className='h-3.5 w-3.5 text-primary' />
       </div>
       <div>
-        <h2 className="font-semibold">Research Assistant</h2>
-        <div className="flex items-center gap-2">
-          <p className="text-xs text-muted-foreground truncate max-w-[200px]">"{segmentTitle}" segment</p>
+        <h2 className='font-semibold'>Research Assistant</h2>
+        <div className='flex items-center gap-2'>
+          <p className='text-xs text-muted-foreground truncate max-w-[200px]'>
+            "{segmentTitle}" segment
+          </p>
           {chatState !== ChatState.UNINITIATED && (
-            <Badge variant="outline" className="text-[10px] px-1 py-0 h-4">
+            <Badge variant='outline' className='text-[10px] px-1 py-0 h-4'>
               {chatState === ChatState.INITIATED ? 'New' : 'Active'}
             </Badge>
           )}
         </div>
       </div>
     </div>
-    <div className="flex items-center gap-1">
+    <div className='flex items-center gap-1'>
       {/* Reset width button (only shown when width has been customized) */}
       {hasCustomWidth && onResetWidth && (
         <Button
-          variant="ghost"
-          size="icon"
+          variant='ghost'
+          size='icon'
           onClick={onResetWidth}
-          className="hidden md:flex flex-shrink-0 h-8 w-8"
-          title="Reset panel width"
+          className='hidden md:flex flex-shrink-0 h-8 w-8'
+          title='Reset panel width'
         >
           <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            className="stroke-current"
+            width='14'
+            height='14'
+            viewBox='0 0 24 24'
+            fill='none'
+            xmlns='http://www.w3.org/2000/svg'
+            className='stroke-current'
           >
             <path
-              d="M3 8V5C3 3.89543 3.89543 3 5 3H8M21 8V5C21 3.89543 20.1046 3 19 3H16M16 21H19C20.1046 21 21 20.1046 21 19V16M8 21H5C3.89543 21 3 20.1046 3 19V16"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+              d='M3 8V5C3 3.89543 3.89543 3 5 3H8M21 8V5C21 3.89543 20.1046 3 19 3H16M16 21H19C20.1046 21 21 20.1046 21 19V16M8 21H5C3.89543 21 3 20.1046 3 19V16'
+              strokeWidth='2'
+              strokeLinecap='round'
+              strokeLinejoin='round'
             />
           </svg>
         </Button>
       )}
-      <Button variant="ghost" size="icon" onClick={onClose} className="ml-auto flex-shrink-0">
-        <X className="h-4 w-4" />
+      <Button
+        variant='ghost'
+        size='icon'
+        onClick={onClose}
+        className='ml-auto flex-shrink-0'
+      >
+        <X className='h-4 w-4' />
       </Button>
     </div>
   </div>
