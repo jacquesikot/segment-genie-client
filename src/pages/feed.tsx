@@ -83,6 +83,7 @@ export default function Feed() {
     queryFn: () => getSegmentFeed(selectedSegmentId),
     enabled: !!selectedSegmentId,
     staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
+    gcTime: 10 * 60 * 1000, // Keep data in cache for 10 minutes
   });
 
   const handleSegmentChange = (value: string) => {
