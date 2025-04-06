@@ -2,7 +2,6 @@ import { Segment, getSegmentFeed } from '@/api/segment';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { useAppSelector } from '@/redux/hooks';
 import { storage } from '@/lib/storage';
@@ -129,6 +128,28 @@ export default function Feed() {
     <>
       <PageHeader />
       <div className="container mx-auto py-6 px-4 md:px-6">
+        {/* Add the animation styles */}
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `
+          @keyframes progressAnimation {
+            0% { width: 5%; }
+            10% { width: 15%; }
+            25% { width: 28%; }
+            50% { width: 45%; }
+            75% { width: 65%; }
+            90% { width: 80%; }
+            95% { width: 90%; }
+            100% { width: 95%; }
+          }
+          .progress-bar {
+            animation: progressAnimation 2.5s ease-in-out infinite;
+            width: 0%;
+          }
+        `,
+          }}
+        />
+
         <div className="flex flex-col space-y-4">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
             <div className="flex items-center gap-3">
@@ -191,21 +212,33 @@ export default function Feed() {
 
           {/* Loading state */}
           {isLoading && (
-            <div className="flex flex-col space-y-4 max-w-3xl mx-auto">
-              {[...Array(6)].map((_, i) => (
-                <Card key={i} className="flex flex-col w-full">
-                  <CardHeader>
-                    <Skeleton className="h-6 w-3/4 mb-2" />
-                    <Skeleton className="h-4 w-1/2" />
-                  </CardHeader>
-                  <CardContent className="flex-grow">
-                    <Skeleton className="h-24 w-full" />
-                  </CardContent>
-                  <CardFooter>
-                    <Skeleton className="h-4 w-full" />
-                  </CardFooter>
-                </Card>
-              ))}
+            <div className="flex flex-col items-center justify-center py-12 px-4 text-center max-w-3xl mx-auto">
+              <div className="animate-pulse">
+                <svg
+                  role="img"
+                  viewBox="0 0 24 24"
+                  width={64}
+                  height={64}
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill={`#${siReddit.hex}`}
+                  className="mb-6 animate-bounce"
+                >
+                  <title>{siReddit.title}</title>
+                  <path d={siReddit.path} />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-semibold mt-4 mb-2">Finding relevant Reddit posts...</h3>
+              <p className="text-muted-foreground max-w-md mx-auto mb-6">
+                This may take a few moments as we search, filter, and analyze Reddit posts related to your segment.
+              </p>
+              <div className="flex justify-center w-full max-w-md mx-auto">
+                <div className="h-1.5 bg-orange-100 dark:bg-orange-950 rounded-full w-full overflow-hidden">
+                  <div className="h-full bg-orange-500 dark:bg-orange-600 rounded-full progress-bar"></div>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground mt-4">
+                We're collecting posts from various subreddits to find the most relevant content for you.
+              </p>
             </div>
           )}
 
