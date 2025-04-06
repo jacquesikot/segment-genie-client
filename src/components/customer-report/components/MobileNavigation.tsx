@@ -1,6 +1,10 @@
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import { Menu, MessageSquare, RefreshCw } from 'lucide-react';
+import { Loader2, Menu, MessageSquare, RefreshCw } from 'lucide-react';
 import React from 'react';
 import { SECTIONS } from '../../customer-report/constants';
 
@@ -11,6 +15,7 @@ interface MobileNavigationProps {
   onRerunReport: () => void;
   onOpenChat?: () => void;
   shouldAllowChat: boolean;
+  isRerunLoading: boolean;
 }
 
 const MobileNavigation: React.FC<MobileNavigationProps> = ({
@@ -20,9 +25,10 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
   onOpenMenu,
   onRerunReport,
   onOpenChat = () => {},
+  isRerunLoading,
 }) => {
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 flex justify-around bg-background border-t p-2 z-40">
+    <div className='md:hidden fixed bottom-0 left-0 right-0 flex justify-around bg-background border-t p-2 z-40'>
       {SECTIONS.map((section, index) => {
         const Icon = section.icon;
         const isActive = activeSection === section.id;
@@ -39,8 +45,10 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
                   isActive ? 'text-primary' : 'text-muted-foreground'
                 )}
               >
-                <Icon className="w-5 h-5 mb-1" />
-                <span className="text-xs font-medium">{section.label.split(' ')[0]}</span>
+                <Icon className='w-5 h-5 mb-1' />
+                <span className='text-xs font-medium'>
+                  {section.label.split(' ')[0]}
+                </span>
               </button>
             </TooltipTrigger>
             <TooltipContent>
@@ -56,10 +64,10 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
           <button
             onClick={onOpenChat}
             disabled={!shouldAllowChat}
-            className="flex flex-col items-center p-2 rounded-lg text-muted-foreground hover:text-primary transition-colors"
+            className='flex flex-col items-center p-2 rounded-lg text-muted-foreground hover:text-primary transition-colors'
           >
-            <MessageSquare className="w-5 h-5 mb-1" />
-            <span className="text-xs font-medium">AI Chat</span>
+            <MessageSquare className='w-5 h-5 mb-1' />
+            <span className='text-xs font-medium'>AI Chat</span>
           </button>
         </TooltipTrigger>
         <TooltipContent>
@@ -72,10 +80,17 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
         <TooltipTrigger asChild>
           <button
             onClick={onRerunReport}
-            className="flex flex-col items-center p-2 rounded-lg text-muted-foreground hover:text-primary transition-colors"
+            disabled={isRerunLoading}
+            className='flex flex-col items-center p-2 rounded-lg text-muted-foreground hover:text-primary transition-colors'
           >
-            <RefreshCw className="w-5 h-5 mb-1" />
-            <span className="text-xs font-medium">Re-run</span>
+            {isRerunLoading ? (
+              <Loader2 className='w-5 h-5 mb-1 animate-spin' />
+            ) : (
+              <RefreshCw className='w-5 h-5 mb-1' />
+            )}
+            <span className='text-xs font-medium'>
+              {isRerunLoading ? 'Re-running...' : 'Re-run'}
+            </span>
           </button>
         </TooltipTrigger>
         <TooltipContent>
@@ -84,9 +99,12 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
       </Tooltip>
 
       {/* More button if there are more than 3 sections */}
-      <button onClick={onOpenMenu} className="flex flex-col items-center p-2 rounded-lg text-muted-foreground">
-        <Menu className="w-5 h-5 mb-1" />
-        <span className="text-xs font-medium">More</span>
+      <button
+        onClick={onOpenMenu}
+        className='flex flex-col items-center p-2 rounded-lg text-muted-foreground'
+      >
+        <Menu className='w-5 h-5 mb-1' />
+        <span className='text-xs font-medium'>More</span>
       </button>
     </div>
   );
