@@ -13,6 +13,7 @@ import ProtectedRoute from './lib/protected-route.js';
 import AuthCallback from './pages/auth-callback.js';
 import Dashboard from './pages/dashboard.js';
 import { ErrorPage } from './pages/error.js';
+import Feed from './pages/feed.js';
 import ForgotPassword from './pages/forgot-password.js';
 import { NotFound } from './pages/not-found.js';
 import ResetPassword from './pages/reset-password.js';
@@ -76,6 +77,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <Segments />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'feed',
+        element: (
+          <ProtectedRoute>
+            <Feed />
           </ProtectedRoute>
         ),
       },

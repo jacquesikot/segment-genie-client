@@ -52,10 +52,10 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, segmentId, segme
   const [modalWidth, setModalWidth] = useState<number | null>(null);
 
   const suggestedQuestions = [
-    `What are the main pain points for ${segmentTitle}?`,
-    `How large is the market for ${segmentTitle}?`,
-    `Who are the top competitors in the ${segmentTitle} space?`,
-    `What market trends affect ${segmentTitle}?`,
+    `Who are the ideal customers for ${segmentTitle} and who should I target?`,
+    `If I had to launch an MVP today, what exact features should I include to test the market?`,
+    `Who are the top competitors with product offerings similar to ${segmentTitle}?`,
+    `What are the exact gaps in feature offerings of existing products in this space?`,
   ];
 
   // Load saved width from localStorage on mount
@@ -483,8 +483,8 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, segmentId, segme
                         onClick={() => handleSuggestedQuestion(question)}
                       >
                         <Lightbulb className="h-3 w-3 flex-shrink-0 text-muted-foreground group-hover:text-primary" />
-                        <span className="truncate overflow-hidden pr-1">{question}</span>
-                        <ChevronRight className="h-3 w-3 ml-auto flex-shrink-0 text-muted-foreground group-hover:text-primary" />
+                        <div className="flex-1 whitespace-normal line-clamp-3">{question}</div>
+                        <ChevronRight className="h-3 w-3 ml-2 flex-shrink-0 text-muted-foreground group-hover:text-primary" />
                       </Button>
                     ))}
                   </div>
