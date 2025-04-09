@@ -142,7 +142,7 @@ export const getSegmentFeed = async (segmentId: string): Promise<FeedPost[]> => 
   const data = await client.post(`/feed/${segmentId}/relevant-posts`, {
     limit: 50,
     timeframe: 'week',
-    relevanceThreshold: 0.15,
+    relevanceThreshold: 0.3,
   });
   return data.data.data;
 };
