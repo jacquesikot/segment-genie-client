@@ -143,7 +143,11 @@ export const getSegmentFeed = async (segmentId: string): Promise<FeedPost[]> => 
   return data.data.data;
 };
 
-export const getSegmentFeedReply = async (segmentId: string, postId: string, subreddit: string): Promise<string> => {
+export const generateSegmentFeedReply = async (
+  segmentId: string,
+  postId: string,
+  subreddit: string
+): Promise<string> => {
   const data = await client.post(`/feed/reply`, {
     segmentId,
     postId,
