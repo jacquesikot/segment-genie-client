@@ -1,16 +1,17 @@
-import { Segment, getSegmentFeed, generateSegmentFeedReply } from '@/api/segment';
+import { Segment, generateSegmentFeedReply, getSegmentFeed } from '@/api/segment';
+import PageHeader from '@/components/page-header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { useAppSelector } from '@/redux/hooks';
 import { storage } from '@/lib/storage';
+import { useAppSelector } from '@/redux/hooks';
+import { useQuery } from '@tanstack/react-query';
 import { AlertCircle, Copy, ExternalLink, MessageSquare, RefreshCw, ThumbsUp, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import PageHeader from '@/components/page-header';
-import { siReddit } from 'simple-icons/icons';
 import ReactMarkdown from 'react-markdown';
+import { siReddit } from 'simple-icons/icons';
+
 // Format relative time (e.g., "2 hours ago")
 const formatDistanceToNow = (date: Date, options?: { addSuffix?: boolean }): string => {
   const now = new Date();

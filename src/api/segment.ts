@@ -29,6 +29,7 @@ export interface FeedPost {
   title: string;
   selftext: string;
   url: string;
+  isBookmarked?: boolean;
   created_utc: number;
   subreddit: string;
   author: string;
