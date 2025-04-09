@@ -10,7 +10,7 @@ import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import PageHeader from '@/components/page-header';
 import { siReddit } from 'simple-icons/icons';
-
+import ReactMarkdown from 'react-markdown';
 // Format relative time (e.g., "2 hours ago")
 const formatDistanceToNow = (date: Date, options?: { addSuffix?: boolean }): string => {
   const now = new Date();
@@ -340,7 +340,9 @@ export default function Feed() {
                   </CardHeader>
                   <CardContent className="pt-0">
                     {post.selftext ? (
-                      <p className="text-sm text-muted-foreground">{truncateText(post.selftext, 280)}</p>
+                      <div className="prose dark:prose-invert max-w-none text-sm text-muted-foreground">
+                        <ReactMarkdown>{truncateText(post.selftext, 280)}</ReactMarkdown>
+                      </div>
                     ) : null}
 
                     {/* Improved media display logic */}

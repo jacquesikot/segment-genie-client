@@ -139,10 +139,15 @@ export const deleteSegment = async (segmentId: string): Promise<any> => {
 };
 
 export const getSegmentFeed = async (segmentId: string): Promise<FeedPost[]> => {
-  const data = await client.post(`/feed/${segmentId}/relevant-posts`, {
-    limit: 50,
-    timeframe: 'week',
-    relevanceThreshold: 0.3,
+  const data = await client.post(`/feed/${segmentId}/relevant-posts`);
+  return data.data.data;
+};
+
+export const getSegmentFeedReply = async (segmentId: string, postId: string, subreddit: string): Promise<string> => {
+  const data = await client.post(`/feed/reply`, {
+    segmentId,
+    postId,
+    subreddit,
   });
   return data.data.data;
 };
