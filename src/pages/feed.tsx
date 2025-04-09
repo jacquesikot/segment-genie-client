@@ -1,11 +1,11 @@
-import { Segment, getSegmentFeed } from '@/api/segment';
+import { Segment, getSegmentFeed, generateSegmentFeedReply } from '@/api/segment';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useAppSelector } from '@/redux/hooks';
 import { storage } from '@/lib/storage';
-import { AlertCircle, ExternalLink, MessageSquare, RefreshCw, ThumbsUp } from 'lucide-react';
+import { AlertCircle, Copy, ExternalLink, MessageSquare, RefreshCw, ThumbsUp } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import PageHeader from '@/components/page-header';
@@ -51,6 +51,8 @@ export default function Feed() {
   const segments = useAppSelector((state) => state.segment.segments) as Segment[];
   const [selectedSegmentId, setSelectedSegmentId] = useState<string>('');
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [generatingReplies, setGeneratingReplies] = useState<Record<string, boolean>>({});
+  const [generatedReplies, setGeneratedReplies] = useState<Record<string, string>>({});
 
   // Load selected segment from local storage on initial render
   useEffect(() => {
@@ -106,6 +108,45 @@ export default function Feed() {
       });
     } finally {
       setIsRefreshing(false);
+    }
+  };
+
+  const handleGenerateReply = async (postId: string, subreddit: string) => {
+    if (generatingReplies[postId]) return;
+
+    try {
+      // Mark this post as generating a reply
+      setGeneratingReplies((prev) => ({ ...prev, [postId]: true }));
+
+      // Call the API to generate a reply
+      const reply = await generateSegmentFeedReply(selectedSegmentId, postId, subreddit);
+
+      // Store the generated reply
+      setGeneratedReplies((prev) => ({ ...prev, [postId]: reply }));
+
+      toast({
+        title: 'Reply generated',
+        description: 'Your reply is ready to copy',
+      });
+    } catch (error) {
+      toast({
+        title: 'Failed to generate reply',
+        description: error instanceof Error ? error.message : 'Please try again later',
+        variant: 'destructive',
+      });
+    } finally {
+      // Mark generation as complete
+      setGeneratingReplies((prev) => ({ ...prev, [postId]: false }));
+    }
+  };
+
+  const handleCopyReply = (postId: string) => {
+    if (generatedReplies[postId]) {
+      navigator.clipboard.writeText(generatedReplies[postId]);
+      toast({
+        title: 'Reply copied',
+        description: 'Reply has been copied to clipboard',
+      });
     }
   };
 
@@ -399,45 +440,77 @@ export default function Feed() {
                       </div>
                     )}
                   </CardContent>
-                  <CardFooter className="pt-4 pb-4 border-t flex flex-wrap justify-between items-center gap-2">
-                    <div className="flex items-center flex-wrap gap-4 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1.5">
-                        <ThumbsUp className="h-4 w-4" />
-                        <span>{post.score.toLocaleString()}</span>
-                        {post.upvote_ratio && <span className="text-xs">({Math.round(post.upvote_ratio * 100)}%)</span>}
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <MessageSquare className="h-4 w-4" />
-                        <span>{post.num_comments.toLocaleString()}</span>
-                      </div>
-                      {post.subreddit_subscribers && (
-                        <div className="text-xs flex items-center gap-1">
-                          <span className="font-medium">Subscribers:</span>
-                          <span>{post.subreddit_subscribers.toLocaleString()}</span>
+                  <CardFooter className="pt-4 pb-4 border-t flex flex-col gap-4">
+                    <div className="w-full flex flex-wrap justify-between items-center gap-2">
+                      <div className="flex items-center flex-wrap gap-4 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1.5">
+                          <ThumbsUp className="h-4 w-4" />
+                          <span>{post.score.toLocaleString()}</span>
+                          {post.upvote_ratio && (
+                            <span className="text-xs">({Math.round(post.upvote_ratio * 100)}%)</span>
+                          )}
                         </div>
-                      )}
+                        <div className="flex items-center gap-1.5">
+                          <MessageSquare className="h-4 w-4" />
+                          <span>{post.num_comments.toLocaleString()}</span>
+                        </div>
+                        {post.subreddit_subscribers && (
+                          <div className="text-xs flex items-center gap-1">
+                            <span className="font-medium">Subscribers:</span>
+                            <span>{post.subreddit_subscribers.toLocaleString()}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        {post.over_18 && (
+                          <span className="text-xs px-1.5 py-0.5 bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 rounded font-medium">
+                            NSFW
+                          </span>
+                        )}
+                        {post.spoiler && (
+                          <span className="text-xs px-1.5 py-0.5 bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300 rounded font-medium">
+                            Spoiler
+                          </span>
+                        )}
+                        <a
+                          href={formatRedditUrl(post.permalink)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs flex items-center hover:underline text-muted-foreground"
+                        >
+                          View on Reddit
+                          <ExternalLink className="ml-1 h-3 w-3" />
+                        </a>
+                      </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                      {post.over_18 && (
-                        <span className="text-xs px-1.5 py-0.5 bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 rounded font-medium">
-                          NSFW
-                        </span>
+                    {/* Reply generation section */}
+                    <div className="w-full">
+                      {!generatedReplies[post.id] ? (
+                        <Button
+                          onClick={() => handleGenerateReply(post.id, post.subreddit)}
+                          disabled={!!generatingReplies[post.id] || Object.values(generatingReplies).some(Boolean)}
+                          variant="outline"
+                          className="w-full"
+                        >
+                          {generatingReplies[post.id] && <RefreshCw className="mr-2 h-4 w-4 animate-spin" />}
+                          {generatingReplies[post.id] ? 'Generating reply...' : 'Generate AI Reply'}
+                        </Button>
+                      ) : (
+                        <div className="w-full space-y-3 border rounded-md p-3">
+                          <div className="flex justify-between items-center">
+                            <h4 className="text-sm font-medium">Generated Reply</h4>
+                            <Button onClick={() => handleCopyReply(post.id)} size="sm" variant="ghost">
+                              <Copy className="h-4 w-4 mr-2" />
+                              Copy
+                            </Button>
+                          </div>
+                          <div className="prose dark:prose-invert max-w-none text-sm p-2 bg-secondary/20 rounded-md">
+                            <ReactMarkdown>{generatedReplies[post.id]}</ReactMarkdown>
+                          </div>
+                        </div>
                       )}
-                      {post.spoiler && (
-                        <span className="text-xs px-1.5 py-0.5 bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300 rounded font-medium">
-                          Spoiler
-                        </span>
-                      )}
-                      <a
-                        href={formatRedditUrl(post.permalink)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs flex items-center hover:underline text-muted-foreground"
-                      >
-                        View on Reddit
-                        <ExternalLink className="ml-1 h-3 w-3" />
-                      </a>
                     </div>
                   </CardFooter>
                 </Card>
