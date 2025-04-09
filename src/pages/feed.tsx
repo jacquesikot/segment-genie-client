@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { useAppSelector } from '@/redux/hooks';
 import { storage } from '@/lib/storage';
-import { AlertCircle, Copy, ExternalLink, MessageSquare, RefreshCw, ThumbsUp } from 'lucide-react';
+import { AlertCircle, Copy, ExternalLink, MessageSquare, RefreshCw, ThumbsUp, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import PageHeader from '@/components/page-header';
@@ -53,6 +53,7 @@ export default function Feed() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [generatingReplies, setGeneratingReplies] = useState<Record<string, boolean>>({});
   const [generatedReplies, setGeneratedReplies] = useState<Record<string, string>>({});
+  const [showReplies, setShowReplies] = useState<Record<string, boolean>>({});
 
   // Load selected segment from local storage on initial render
   useEffect(() => {
@@ -121,8 +122,9 @@ export default function Feed() {
       // Call the API to generate a reply
       const reply = await generateSegmentFeedReply(selectedSegmentId, postId, subreddit);
 
-      // Store the generated reply
+      // Store the generated reply and show it
       setGeneratedReplies((prev) => ({ ...prev, [postId]: reply }));
+      setShowReplies((prev) => ({ ...prev, [postId]: true }));
 
       toast({
         title: 'Reply generated',
@@ -148,6 +150,10 @@ export default function Feed() {
         description: 'Reply has been copied to clipboard',
       });
     }
+  };
+
+  const handleToggleReply = (postId: string) => {
+    setShowReplies((prev) => ({ ...prev, [postId]: !prev[postId] }));
   };
 
   // Helper to format Reddit URLs
@@ -487,24 +493,69 @@ export default function Feed() {
 
                     {/* Reply generation section */}
                     <div className="w-full">
-                      {!generatedReplies[post.id] ? (
-                        <Button
-                          onClick={() => handleGenerateReply(post.id, post.subreddit)}
-                          disabled={!!generatingReplies[post.id] || Object.values(generatingReplies).some(Boolean)}
-                          variant="outline"
-                          className="w-full"
-                        >
-                          {generatingReplies[post.id] && <RefreshCw className="mr-2 h-4 w-4 animate-spin" />}
-                          {generatingReplies[post.id] ? 'Generating reply...' : 'Generate AI Reply'}
-                        </Button>
-                      ) : (
-                        <div className="w-full space-y-3 border rounded-md p-3">
+                      <div className="flex items-center justify-between gap-2">
+                        {/* Action buttons row */}
+                        <div className="flex items-center gap-2">
+                          <Button
+                            onClick={() => handleGenerateReply(post.id, post.subreddit)}
+                            disabled={!!generatingReplies[post.id] || Object.values(generatingReplies).some(Boolean)}
+                            variant="outline"
+                            size="sm"
+                            className="text-xs"
+                          >
+                            {generatingReplies[post.id] && <RefreshCw className="mr-1.5 h-3 w-3 animate-spin" />}
+                            {generatingReplies[post.id] ? 'Generating...' : 'Generate Reply'}
+                          </Button>
+
+                          {generatedReplies[post.id] && (
+                            <Button
+                              onClick={() => handleToggleReply(post.id)}
+                              variant="ghost"
+                              size="sm"
+                              className="text-xs"
+                            >
+                              {showReplies[post.id] ? 'Hide Reply' : 'Show Reply'}
+                            </Button>
+                          )}
+                        </div>
+
+                        {/* Other potential actions can go here */}
+                      </div>
+
+                      {/* Generated reply content */}
+                      {generatedReplies[post.id] && showReplies[post.id] && (
+                        <div className="w-full space-y-3 border rounded-md p-3 mt-3">
                           <div className="flex justify-between items-center">
                             <h4 className="text-sm font-medium">Generated Reply</h4>
-                            <Button onClick={() => handleCopyReply(post.id)} size="sm" variant="ghost">
-                              <Copy className="h-4 w-4 mr-2" />
-                              Copy
-                            </Button>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                onClick={() => handleGenerateReply(post.id, post.subreddit)}
+                                disabled={
+                                  !!generatingReplies[post.id] || Object.values(generatingReplies).some(Boolean)
+                                }
+                                size="sm"
+                                variant="ghost"
+                                className="h-8 px-2"
+                              >
+                                <RefreshCw className="h-3.5 w-3.5" />
+                              </Button>
+                              <Button
+                                onClick={() => handleCopyReply(post.id)}
+                                size="sm"
+                                variant="ghost"
+                                className="h-8 px-2"
+                              >
+                                <Copy className="h-3.5 w-3.5" />
+                              </Button>
+                              <Button
+                                onClick={() => handleToggleReply(post.id)}
+                                size="sm"
+                                variant="ghost"
+                                className="h-8 px-2"
+                              >
+                                <X className="h-3.5 w-3.5" />
+                              </Button>
+                            </div>
                           </div>
                           <div className="prose dark:prose-invert max-w-none text-sm p-2 bg-secondary/20 rounded-md">
                             <ReactMarkdown>{generatedReplies[post.id]}</ReactMarkdown>
