@@ -25,7 +25,13 @@ interface RerunModalProps {
   isLoading: boolean;
 }
 
-const RerunModal: React.FC<RerunModalProps> = ({ isOpen, onClose, onConfirm, segment, isLoading }) => {
+const RerunModal: React.FC<RerunModalProps> = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  segment,
+  isLoading,
+}) => {
   const form = useForm<z.infer<typeof researchInputForm>>({
     resolver: zodResolver(researchInputForm),
     defaultValues: {
@@ -65,32 +71,39 @@ const RerunModal: React.FC<RerunModalProps> = ({ isOpen, onClose, onConfirm, seg
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className='sm:max-w-[800px] max-h-[90vh] overflow-y-auto'>
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">Re-run Report</DialogTitle>
-          <DialogDescription className="text-muted-foreground">
-            Update the segment information below to re-run your report with new inputs.
+          <DialogTitle className='text-xl font-semibold'>
+            Re-run Report
+          </DialogTitle>
+          <DialogDescription className='text-muted-foreground'>
+            Update the segment information below to re-run your report with new
+            inputs.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="py-2">
+        <div className='py-2'>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleFormSubmit)}>
               <NewSegmentForm form={form} isRerunModal={true} />
 
-              <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:justify-between sm:gap-0 mt-6 pt-4 border-t">
-                <Button type="button" variant="outline" onClick={onClose}>
+              <DialogFooter className='flex flex-col sm:flex-row gap-2 sm:justify-between sm:gap-0 mt-6 pt-4 border-t'>
+                <Button type='button' variant='outline' onClick={onClose}>
                   Cancel
                 </Button>
-                <Button type="submit" className="flex items-center gap-2" disabled={isLoading}>
+                <Button
+                  type='submit'
+                  className='flex items-center gap-2'
+                  disabled={isLoading}
+                >
                   {isLoading ? (
                     <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <Loader2 className='w-4 h-4 animate-spin' />
                       <span>Re-running...</span>
                     </>
                   ) : (
                     <>
-                      <RefreshCw className="w-4 h-4" />
+                      <RefreshCw className='w-4 h-4' />
                       <span>Re-run Report</span>
                     </>
                   )}

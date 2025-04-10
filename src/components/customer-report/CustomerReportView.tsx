@@ -132,19 +132,29 @@ const CustomerReportView: React.FC<CustomerReportViewProps> = ({
           />
         );
       default:
-        return <ComingSoonSection title={SECTIONS.find((s) => s.id === activeSection)?.label || ''} />;
+        return (
+          <ComingSoonSection
+            title={SECTIONS.find((s) => s.id === activeSection)?.label || ''}
+          />
+        );
     }
   };
 
   const handleRetry = async () => {
-    await axios.post(`${import.meta.env.VITE_API_URL}/research/retry/${segmentId}/${activeSection}`);
+    await axios.post(
+      `${
+        import.meta.env.VITE_API_URL
+      }/research/retry/${segmentId}/${activeSection}`
+    );
   };
 
   const handleRerunReport = () => {
     setIsRerunModalOpen(true);
   };
 
-  const handleRerunConfirm = async (values: z.infer<typeof researchInputForm>) => {
+  const handleRerunConfirm = async (
+    values: z.infer<typeof researchInputForm>
+  ) => {
     setIsRerunLoading(true);
     await rerunResearch(segmentId, {
       title: segment?.title || '',
@@ -213,7 +223,7 @@ const CustomerReportView: React.FC<CustomerReportViewProps> = ({
 
   return (
     <TooltipProvider>
-      <div className="flex flex-col flex-1 bg-background/50 overflow-hidden transition-all duration-300">
+      <div className='flex flex-col flex-1 bg-background/50 overflow-hidden transition-all duration-300'>
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <MobileMenu
@@ -223,6 +233,7 @@ const CustomerReportView: React.FC<CustomerReportViewProps> = ({
             onClose={toggleMobileMenu}
             onRerunReport={handleRerunReport}
             onOpenChat={handleOpenChat}
+            isRerunLoading={isRerunLoading}
           />
         )}
 
@@ -233,11 +244,14 @@ const CustomerReportView: React.FC<CustomerReportViewProps> = ({
           onSectionChange={handleSectionChange}
           onRerunReport={handleRerunReport}
           onOpenChat={handleOpenChat}
+          isRerunLoading={isRerunLoading}
         />
 
         {/* Main Content Area */}
-        <div className="flex-1 overflow-hidden">
-          <div className="h-full overflow-auto p-4 md:p-4">{renderContent()}</div>
+        <div className='flex-1 overflow-hidden'>
+          <div className='h-full overflow-auto p-4 md:p-4'>
+            {renderContent()}
+          </div>
         </div>
 
         {/* Mobile Navigation */}
@@ -248,6 +262,7 @@ const CustomerReportView: React.FC<CustomerReportViewProps> = ({
           onOpenMenu={toggleMobileMenu}
           onRerunReport={handleRerunReport}
           onOpenChat={handleOpenChat}
+          isRerunLoading={isRerunLoading}
         />
 
         {/* Floating Chat Button - appears when scrolling */}
