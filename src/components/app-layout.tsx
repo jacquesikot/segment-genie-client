@@ -18,7 +18,7 @@ interface UserData {
 }
 
 const LoadingScreen = () => (
-  <div className="flex items-center justify-center h-screen w-screen">
+  <div className='flex items-center justify-center h-screen w-screen'>
     <p>SegmentGenie Loading...</p>
   </div>
 );
@@ -55,7 +55,8 @@ const AppLayout = () => {
 
   const { data: segments, isLoading } = useQuery({
     queryKey: ['segments'],
-    queryFn: () => (userData?.id ? getUserSegments(userData.id) : Promise.resolve([])),
+    queryFn: () =>
+      userData?.id ? getUserSegments(userData.id) : Promise.resolve([]),
     enabled: !!userData?.id,
   });
 
@@ -72,16 +73,18 @@ const AppLayout = () => {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-screen w-screen">
-        <p className="text-red-500">{error}</p>
+      <div className='flex items-center justify-center h-screen w-screen'>
+        <p className='text-red-500'>{error}</p>
       </div>
     );
   }
 
   return (
     <SidebarProvider>
-      <div className="flex w-screen">
-        {user && <AppNav segments={appSegments as Segment[]} isLoading={isLoading} />}
+      <div className='flex w-screen'>
+        {user && (
+          <AppNav segments={appSegments as Segment[]} isLoading={isLoading} />
+        )}
         <SidebarInset>
           <Outlet />
         </SidebarInset>

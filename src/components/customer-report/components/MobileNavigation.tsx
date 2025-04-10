@@ -4,7 +4,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import { Loader2, Menu, MessageSquare, RefreshCw } from 'lucide-react';
+import { Menu, MessageSquare, RefreshCw } from 'lucide-react';
 import React from 'react';
 import { SECTIONS } from '../../customer-report/constants';
 
@@ -25,7 +25,6 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
   onOpenMenu,
   onRerunReport,
   onOpenChat = () => {},
-  isRerunLoading,
 }) => {
   return (
     <div className='md:hidden fixed bottom-0 left-0 right-0 flex justify-around bg-background border-t p-2 z-40'>
@@ -80,17 +79,10 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
         <TooltipTrigger asChild>
           <button
             onClick={onRerunReport}
-            disabled={isRerunLoading}
             className='flex flex-col items-center p-2 rounded-lg text-muted-foreground hover:text-primary transition-colors'
           >
-            {isRerunLoading ? (
-              <Loader2 className='w-5 h-5 mb-1 animate-spin' />
-            ) : (
-              <RefreshCw className='w-5 h-5 mb-1' />
-            )}
-            <span className='text-xs font-medium'>
-              {isRerunLoading ? 'Re-running...' : 'Re-run'}
-            </span>
+            <RefreshCw className='w-5 h-5 mb-1' />
+            <span className='text-xs font-medium'>Re-run</span>
           </button>
         </TooltipTrigger>
         <TooltipContent>

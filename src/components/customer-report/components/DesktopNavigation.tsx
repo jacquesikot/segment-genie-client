@@ -4,7 +4,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import { Loader2, MessageSquare, RefreshCw } from 'lucide-react';
+import { MessageSquare, RefreshCw } from 'lucide-react';
 import React from 'react';
 import { SECTIONS } from '../../customer-report/constants';
 import { Button } from '@/components/ui/button';
@@ -24,7 +24,6 @@ const DesktopNavigation: React.FC<DesktopNavigationProps> = ({
   onSectionChange,
   onRerunReport,
   onOpenChat = () => {},
-  isRerunLoading,
 }) => {
   return (
     <div className='hidden md:flex flex-col p-4 bg-background/95 backdrop-blur-sm flex-shrink-0'>
@@ -54,20 +53,10 @@ const DesktopNavigation: React.FC<DesktopNavigationProps> = ({
                 onClick={onRerunReport}
                 size='sm'
                 variant='outline'
-                disabled={isRerunLoading}
                 className='flex items-center gap-1 text-xs transition-all hover:bg-muted'
               >
-                {isRerunLoading ? (
-                  <>
-                    <Loader2 className='w-3.5 h-3.5 animate-spin' />
-                    <span>Re-running...</span>
-                  </>
-                ) : (
-                  <>
-                    <RefreshCw className='w-3.5 h-3.5' />
-                    <span>Re-run Report</span>
-                  </>
-                )}
+                <RefreshCw className='w-3.5 h-3.5' />
+                <span>Re-run Report</span>
               </Button>
             </TooltipTrigger>
             <TooltipContent side='left'>

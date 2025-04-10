@@ -3,6 +3,7 @@ import { Button } from './button';
 import { Mic, Square, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { RecordingOptionsModal } from './recording-options-modal';
 
 // Add complete type definitions for Web Speech API
 interface SpeechRecognitionEvent extends Event {
@@ -74,82 +75,13 @@ export function AudioRecorder({
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [transcription, setTranscription] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [showOptionsModal, setShowOptionsModal] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const previousTranscriptionRef = useRef<string>('');
-  const isFirstRecordingRef = useRef<boolean>(true);
   const accumulatedTranscriptRef = useRef<string>('');
   const { toast } = useToast();
-
-  // Notify parent component when recording state changes
-  useEffect(() => {
-    if (onRecordingStateChange) {
-      onRecordingStateChange(isRecording);
-    }
-  }, [isRecording, onRecordingStateChange]);
-
-  // Initialize speech recognition
-  useEffect(() => {
-    if (
-      typeof window !== 'undefined' &&
-      ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)
-    ) {
-      const SpeechRecognition =
-        window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (SpeechRecognition) {
-        const recognition = new SpeechRecognition();
-        recognition.continuous = true;
-        recognition.interimResults = true;
-        recognition.lang = 'en-US';
-
-        recognition.onresult = (event: SpeechRecognitionEvent) => {
-          let interimTranscript = '';
-          let finalTranscript = '';
-
-          for (let i = event.resultIndex; i < event.results.length; i++) {
-            const transcript = event.results[i][0].transcript;
-            if (event.results[i].isFinal) {
-              finalTranscript += transcript + ' ';
-            } else {
-              interimTranscript += transcript;
-            }
-          }
-
-          // If this is the first result in a new session, reset the accumulated transcript
-          if (event.resultIndex === 0 && isFirstRecordingRef.current) {
-            accumulatedTranscriptRef.current = '';
-            isFirstRecordingRef.current = false;
-          }
-
-          // Update the accumulated transcript with the new final transcript
-          if (finalTranscript) {
-            accumulatedTranscriptRef.current += finalTranscript;
-          }
-
-          // Combine the accumulated transcript with the current interim transcript
-          const newTranscription =
-            accumulatedTranscriptRef.current + interimTranscript;
-
-          setTranscription(newTranscription);
-          onTranscriptionComplete(newTranscription);
-        };
-
-        recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-          console.error('Speech recognition error:', event.error);
-          setError(`Speech recognition error: ${event.error}`);
-        };
-
-        recognitionRef.current = recognition;
-      }
-    }
-
-    return () => {
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
-      }
-    };
-  }, [onTranscriptionComplete]);
 
   const transcribeAudio = useCallback(
     async (audioBlob: Blob) => {
@@ -216,25 +148,54 @@ export function AudioRecorder({
       mediaRecorder.start();
       setIsRecording(true);
 
-      // Start speech recognition
-      if (recognitionRef.current) {
-        try {
-          // Reset the accumulated transcript when starting a new recording session
-          if (isFirstRecordingRef.current) {
-            accumulatedTranscriptRef.current = '';
+      // Create a new speech recognition instance
+      const SpeechRecognitionClass =
+        window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (SpeechRecognitionClass) {
+        const recognition = new SpeechRecognitionClass();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = 'en-US';
+
+        recognition.onresult = (event: SpeechRecognitionEvent) => {
+          let interimTranscript = '';
+          let finalTranscript = '';
+
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            const transcript = event.results[i][0].transcript;
+            if (event.results[i].isFinal) {
+              finalTranscript += transcript + ' ';
+            } else {
+              interimTranscript += transcript;
+            }
           }
 
-          recognitionRef.current.start();
+          if (finalTranscript) {
+            accumulatedTranscriptRef.current = accumulatedTranscriptRef.current
+              ? accumulatedTranscriptRef.current + ' ' + finalTranscript
+              : finalTranscript;
+          }
 
-          toast({
-            title: 'Recording started',
-            description:
-              'Speak now. Click the microphone icon again to stop recording.',
-          });
-        } catch (err) {
-          console.error('Error starting speech recognition:', err);
-          // Continue with recording even if speech recognition fails
-        }
+          const newTranscription =
+            accumulatedTranscriptRef.current +
+            (interimTranscript ? ' ' + interimTranscript : '');
+          setTranscription(newTranscription);
+          onTranscriptionComplete(newTranscription);
+        };
+
+        recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+          console.error('Speech recognition error:', event.error);
+          setError(`Speech recognition error: ${event.error}`);
+        };
+
+        recognitionRef.current = recognition;
+        recognitionRef.current.start();
+
+        toast({
+          title: 'Recording started',
+          description:
+            'Speak now. Click the microphone icon again to stop recording.',
+        });
       }
     } catch (err) {
       console.error('Error accessing microphone:', err);
@@ -248,44 +209,80 @@ export function AudioRecorder({
         variant: 'destructive',
       });
     }
-  }, [toast]);
+  }, [toast, onTranscriptionComplete]);
+
+  const handleStartRecording = useCallback(async () => {
+    if (previousTranscriptionRef.current) {
+      setShowOptionsModal(true);
+      return;
+    }
+    await startRecording();
+  }, [startRecording]);
+
+  const handleContinueRecording = useCallback(async () => {
+    // Preserve the previous transcription
+    const previousText = previousTranscriptionRef.current;
+    await startRecording();
+    // Restore the previous transcription
+    setTranscription(previousText);
+    onTranscriptionComplete(previousText);
+    previousTranscriptionRef.current = previousText;
+    accumulatedTranscriptRef.current = previousText;
+  }, [startRecording, onTranscriptionComplete]);
+
+  const handleNewRecording = useCallback(async () => {
+    previousTranscriptionRef.current = '';
+    accumulatedTranscriptRef.current = '';
+    setTranscription('');
+    onTranscriptionComplete('');
+    await startRecording();
+  }, [startRecording, onTranscriptionComplete]);
 
   const stopRecording = useCallback(() => {
     if (mediaRecorderRef.current && isRecording) {
+      // Stop media recording first
       mediaRecorderRef.current.stop();
       mediaRecorderRef.current.stream
         .getTracks()
         .forEach((track) => track.stop());
       setIsRecording(false);
 
-      // Stop speech recognition
+      // Completely destroy the speech recognition instance
       if (recognitionRef.current) {
         try {
           recognitionRef.current.stop();
+          recognitionRef.current.abort();
+          recognitionRef.current.onresult = null;
+          recognitionRef.current.onerror = null;
+          recognitionRef.current = null;
         } catch (err) {
           console.error('Error stopping speech recognition:', err);
         }
       }
 
-      // Save the current transcription before stopping
+      // Save the current transcription
       if (transcription) {
         previousTranscriptionRef.current = transcription;
-      }
-
-      // If we have a transcription, use it
-      if (transcription) {
         onTranscriptionComplete(transcription);
-        return;
       }
 
-      // Otherwise, fall back to OpenAI transcription
-      setIsTranscribing(true);
-      const audioBlob = new Blob(audioChunksRef.current, {
-        type: 'audio/webm',
-      });
-      transcribeAudio(audioBlob);
+      // Only proceed with OpenAI transcription if we don't have a transcription
+      if (!transcription) {
+        setIsTranscribing(true);
+        const audioBlob = new Blob(audioChunksRef.current, {
+          type: 'audio/webm',
+        });
+        transcribeAudio(audioBlob);
+      }
     }
   }, [isRecording, transcription, onTranscriptionComplete, transcribeAudio]);
+
+  // Remove the initialization useEffect since we're now creating the instance in startRecording
+  useEffect(() => {
+    if (onRecordingStateChange) {
+      onRecordingStateChange(isRecording);
+    }
+  }, [isRecording, onRecordingStateChange]);
 
   return (
     <div
@@ -300,7 +297,7 @@ export function AudioRecorder({
           'absolute right-2 top-2',
           isRecording && 'text-red-500 hover:text-red-600 animate-pulse'
         )}
-        onClick={isRecording ? stopRecording : startRecording}
+        onClick={isRecording ? stopRecording : handleStartRecording}
         disabled={isTranscribing}
       >
         {isTranscribing ? (
@@ -312,6 +309,12 @@ export function AudioRecorder({
         )}
       </Button>
       {error && <div className='text-sm text-red-500 mt-2'>{error}</div>}
+      <RecordingOptionsModal
+        isOpen={showOptionsModal}
+        onClose={() => setShowOptionsModal(false)}
+        onContinue={handleContinueRecording}
+        onNewRecording={handleNewRecording}
+      />
     </div>
   );
 }

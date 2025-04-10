@@ -29,6 +29,7 @@ import {
   Sparkles,
   Sun,
   Square,
+  InfoIcon,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -269,11 +270,25 @@ export default function Dashboard() {
 
                   <div className='relative'>
                     <Textarea
-                      placeholder='Describe your business idea...'
                       value={initialIdea}
                       onChange={(e) => setInitialIdea(e.target.value)}
-                      className='min-h-[100px] resize-none pr-10'
+                      placeholder='Describe your business idea or target audience in detail...'
+                      className={`min-h-[150px] sm:min-h-[200px] w-full p-3 sm:p-4 pr-10 rounded-lg border ${
+                        !statusOk
+                          ? 'border-blue-300 dark:border-blue-700 bg-blue-50/30 dark:bg-gray-900/90'
+                          : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900'
+                      } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:border-indigo-300 dark:focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900 outline-none resize-none text-sm sm:text-base`}
+                      disabled={!statusOk || statusLoading}
                     />
+                    {!statusOk && (
+                      <div className='absolute inset-0 bg-blue-50/30 dark:bg-gray-900/50 rounded-lg pointer-events-none'></div>
+                    )}
+                    <div className='absolute bottom-2 right-2 flex items-center gap-1 text-xs text-gray-400'>
+                      <InfoIcon size={12} />
+                      <span className='hidden sm:inline'>
+                        More detail = better results
+                      </span>
+                    </div>
                     <Button
                       type='button'
                       variant='ghost'
