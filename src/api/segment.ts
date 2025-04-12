@@ -29,6 +29,7 @@ export interface FeedPost {
   title: string;
   selftext: string;
   url: string;
+  isBookmarked?: boolean;
   created_utc: number;
   subreddit: string;
   author: string;
@@ -139,10 +140,19 @@ export const deleteSegment = async (segmentId: string): Promise<any> => {
 };
 
 export const getSegmentFeed = async (segmentId: string): Promise<FeedPost[]> => {
-  const data = await client.post(`/feed/${segmentId}/relevant-posts`, {
-    limit: 50,
-    timeframe: 'week',
-    relevanceThreshold: 0.15,
+  const data = await client.post(`/feed/${segmentId}/relevant-posts`);
+  return data.data.data;
+};
+
+export const generateSegmentFeedReply = async (
+  segmentId: string,
+  postId: string,
+  subreddit: string
+): Promise<string> => {
+  const data = await client.post(`/feed/reply`, {
+    segmentId,
+    postId,
+    subreddit,
   });
   return data.data.data;
 };
