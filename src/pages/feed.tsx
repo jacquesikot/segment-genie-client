@@ -480,6 +480,16 @@ export default function Feed() {
                             Spoiler
                           </span>
                         )}
+                        <Button
+                          onClick={() => handleGenerateReply(post.id, post.subreddit)}
+                          disabled={!!generatingReplies[post.id] || Object.values(generatingReplies).some(Boolean)}
+                          variant="outline"
+                          size="sm"
+                          className="text-xs"
+                        >
+                          {generatingReplies[post.id] && <RefreshCw className="mr-1.5 h-3 w-3 animate-spin" />}
+                          {generatingReplies[post.id] ? 'Generating...' : 'Generate Reply'}
+                        </Button>
                         <a
                           href={formatRedditUrl(post.permalink)}
                           target="_blank"
@@ -497,17 +507,6 @@ export default function Feed() {
                       <div className="flex items-center justify-between gap-2">
                         {/* Action buttons row */}
                         <div className="flex items-center gap-2">
-                          <Button
-                            onClick={() => handleGenerateReply(post.id, post.subreddit)}
-                            disabled={!!generatingReplies[post.id] || Object.values(generatingReplies).some(Boolean)}
-                            variant="outline"
-                            size="sm"
-                            className="text-xs"
-                          >
-                            {generatingReplies[post.id] && <RefreshCw className="mr-1.5 h-3 w-3 animate-spin" />}
-                            {generatingReplies[post.id] ? 'Generating...' : 'Generate Reply'}
-                          </Button>
-
                           {generatedReplies[post.id] && (
                             <Button
                               onClick={() => handleToggleReply(post.id)}
