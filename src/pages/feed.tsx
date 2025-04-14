@@ -272,6 +272,15 @@ export default function Feed() {
     return text.slice(0, maxLength) + '...';
   };
 
+  // Handler function for when a bookmark is removed from the modal
+  const handleBookmarkRemoved = (postId: string) => {
+    setBookmarkedPosts((prev) => {
+      const newState = { ...prev };
+      delete newState[postId];
+      return newState;
+    });
+  };
+
   return (
     <>
       <PageHeader />
@@ -282,6 +291,7 @@ export default function Feed() {
         onOpenChange={setIsBookmarksModalOpen}
         selectedSegmentId={selectedSegmentId}
         userId={userId}
+        onBookmarkRemoved={handleBookmarkRemoved}
       />
 
       <div className="container mx-auto py-6 px-4 md:px-6">

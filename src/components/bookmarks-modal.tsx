@@ -1,8 +1,9 @@
-import { getBookmarks } from '@/api/feed';
+import { deleteBookmark, getBookmarks } from '@/api/feed';
 import { Button } from '@/components/ui/button';
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetClose } from '@/components/ui/sheet';
-import { useQuery } from '@tanstack/react-query';
+import { useToast } from '@/hooks/use-toast';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AlertCircle,
   Bookmark,
@@ -12,8 +13,9 @@ import {
   MessageSquare,
   RefreshCw,
   ThumbsUp,
+  Trash2,
 } from 'lucide-react';
-import { FC, useEffect } from 'react';
+import { FC, useEffect, useState } from 'react';
 
 // Format relative time (e.g., "2 hours ago")
 const formatDistanceToNow = (date: Date, options?: { addSuffix?: boolean }): string => {
@@ -69,9 +71,20 @@ interface BookmarksModalProps {
   onOpenChange: (open: boolean) => void;
   selectedSegmentId: string;
   userId: string;
+  onBookmarkRemoved?: (postId: string) => void;
 }
 
-const BookmarksModal: FC<BookmarksModalProps> = ({ isOpen, onOpenChange, selectedSegmentId, userId }) => {
+const BookmarksModal: FC<BookmarksModalProps> = ({
+  isOpen,
+  onOpenChange,
+  selectedSegmentId,
+  userId,
+  onBookmarkRemoved,
+}) => {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [removingBookmarks, setRemovingBookmarks] = useState<Record<string, boolean>>({});
+
   // Query to fetch bookmarks
   const {
     data: bookmarks,
@@ -94,6 +107,45 @@ const BookmarksModal: FC<BookmarksModalProps> = ({ isOpen, onOpenChange, selecte
       refetchBookmarks();
     }
   }, [isOpen, selectedSegmentId, userId, refetchBookmarks]);
+
+  // Function to remove a bookmark
+  const handleRemoveBookmark = async (postId: string) => {
+    if (removingBookmarks[postId]) return;
+
+    // Set the loading state for this post
+    setRemovingBookmarks((prev) => ({ ...prev, [postId]: true }));
+
+    try {
+      // Call the API to remove the bookmark
+      await deleteBookmark(selectedSegmentId, postId, userId);
+
+      // Refresh the bookmarks query
+      queryClient.invalidateQueries({ queryKey: ['bookmarks', selectedSegmentId, userId] });
+
+      // Update parent component if callback is provided
+      if (onBookmarkRemoved) {
+        onBookmarkRemoved(postId);
+      }
+
+      toast({
+        title: 'Post removed from bookmarks',
+        description: 'The post has been removed from your bookmarks',
+      });
+    } catch (error) {
+      toast({
+        title: 'Failed to remove bookmark',
+        description: error instanceof Error ? error.message : 'Failed to remove bookmark. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      // Clear the loading state
+      setRemovingBookmarks((prev) => {
+        const newState = { ...prev };
+        delete newState[postId];
+        return newState;
+      });
+    }
+  };
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
@@ -132,16 +184,32 @@ const BookmarksModal: FC<BookmarksModalProps> = ({ isOpen, onOpenChange, selecte
                 {bookmarks.map((bookmark) => (
                   <Card key={bookmark.id} className="w-full hover:shadow-sm transition-shadow">
                     <CardHeader className="p-4 pb-2">
-                      <CardTitle className="text-base leading-tight">
-                        <a
-                          href={formatRedditUrl(bookmark.permalink)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="hover:underline text-primary"
+                      <div className="flex justify-between">
+                        <CardTitle className="text-base leading-tight">
+                          <a
+                            href={formatRedditUrl(bookmark.permalink)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="hover:underline text-primary"
+                          >
+                            {truncateText(bookmark.title, 80)}
+                          </a>
+                        </CardTitle>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                          onClick={() => handleRemoveBookmark(bookmark.id || bookmark.postId)}
+                          disabled={removingBookmarks[bookmark.id || bookmark.postId]}
                         >
-                          {truncateText(bookmark.title, 80)}
-                        </a>
-                      </CardTitle>
+                          {removingBookmarks[bookmark.id || bookmark.postId] ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="h-4 w-4" />
+                          )}
+                          <span className="sr-only">Remove bookmark</span>
+                        </Button>
+                      </div>
                       <CardDescription className="text-xs flex flex-wrap items-center gap-x-1.5 gap-y-1 mt-1">
                         <span className="font-medium text-foreground/80">r/{bookmark.subreddit}</span>
                         <span>•</span>
