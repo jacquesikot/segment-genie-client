@@ -1,4 +1,6 @@
 import { Segment, generateSegmentFeedReply, getSegmentFeed } from '@/api/segment';
+import { addBookmark, deleteBookmark, getBookmarks } from '@/api/feed';
+import BookmarksModal from '@/components/bookmarks-modal';
 import PageHeader from '@/components/page-header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,8 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { storage } from '@/lib/storage';
 import { useAppSelector } from '@/redux/hooks';
-import { useQuery } from '@tanstack/react-query';
-import { AlertCircle, Copy, ExternalLink, MessageSquare, RefreshCw, ThumbsUp, X } from 'lucide-react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { AlertCircle, Bookmark, Copy, ExternalLink, MessageSquare, RefreshCw, ThumbsUp, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { siReddit } from 'simple-icons/icons';
@@ -49,12 +51,17 @@ const STORAGE_KEY_SELECTED_SEGMENT = 'SELECTED_SEGMENT';
 
 export default function Feed() {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const segments = useAppSelector((state) => state.segment.segments) as Segment[];
+  const userId = 'user123'; // Mock user ID for now - in a real app, get this from auth state
   const [selectedSegmentId, setSelectedSegmentId] = useState<string>('');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [generatingReplies, setGeneratingReplies] = useState<Record<string, boolean>>({});
   const [generatedReplies, setGeneratedReplies] = useState<Record<string, string>>({});
   const [showReplies, setShowReplies] = useState<Record<string, boolean>>({});
+  const [bookmarkedPosts, setBookmarkedPosts] = useState<Record<string, boolean>>({});
+  const [isBookmarksModalOpen, setIsBookmarksModalOpen] = useState(false);
+  const [isBookmarking, setIsBookmarking] = useState<Record<string, boolean>>({});
 
   // Load selected segment from local storage on initial render
   useEffect(() => {
@@ -76,6 +83,7 @@ export default function Feed() {
     }
   }, [selectedSegmentId]);
 
+  // Query to get feed posts
   const {
     data: feedPosts,
     isLoading,
@@ -90,8 +98,33 @@ export default function Feed() {
     gcTime: 10 * 60 * 1000, // Keep data in cache for 10 minutes
   });
 
+  // Load bookmarks when segment or user changes
+  useEffect(() => {
+    fetchBookmarks();
+  }, [selectedSegmentId, userId]);
+
+  // Function to fetch and set bookmarks
+  const fetchBookmarks = async () => {
+    if (!selectedSegmentId || !userId) return;
+
+    try {
+      const bookmarks = await getBookmarks(selectedSegmentId, userId);
+
+      // Map the bookmarked posts to our state format
+      const bookmarksMap: Record<string, boolean> = {};
+      bookmarks.forEach((bookmark) => {
+        bookmarksMap[bookmark.id] = true;
+      });
+      setBookmarkedPosts(bookmarksMap);
+    } catch (error) {
+      console.error('Error loading bookmarks:', error);
+    }
+  };
+
   const handleSegmentChange = (value: string) => {
     setSelectedSegmentId(value);
+    // Reset bookmarked posts state when segment changes
+    setBookmarkedPosts({});
   };
 
   const handleRefresh = async () => {
@@ -157,6 +190,72 @@ export default function Feed() {
     setShowReplies((prev) => ({ ...prev, [postId]: !prev[postId] }));
   };
 
+  // Refresh bookmarks whenever modal opens
+  useEffect(() => {
+    if (isBookmarksModalOpen) {
+      queryClient.invalidateQueries({ queryKey: ['bookmarks', selectedSegmentId, userId] });
+    }
+  }, [isBookmarksModalOpen, queryClient, selectedSegmentId, userId]);
+
+  const handleToggleBookmark = async (postId: string, subreddit: string) => {
+    if (isBookmarking[postId]) return;
+
+    // Set the loading state for this post
+    setIsBookmarking((prev) => ({ ...prev, [postId]: true }));
+
+    try {
+      const isCurrentlyBookmarked = bookmarkedPosts[postId];
+
+      if (isCurrentlyBookmarked) {
+        // Remove from bookmarks
+        await deleteBookmark(selectedSegmentId, postId, userId);
+
+        setBookmarkedPosts((prev) => {
+          const newState = { ...prev };
+          delete newState[postId];
+          return newState;
+        });
+
+        toast({
+          title: 'Post removed from bookmarks',
+          description: 'The post has been removed from your bookmarks',
+        });
+      } else {
+        // Add to bookmarks
+        await addBookmark(selectedSegmentId, postId, subreddit, userId);
+
+        setBookmarkedPosts((prev) => ({
+          ...prev,
+          [postId]: true,
+        }));
+
+        toast({
+          title: 'Post added to bookmarks',
+          description: 'The post has been added to your bookmarks',
+        });
+      }
+
+      // Refresh all bookmarks in case the modal is open
+      if (isBookmarksModalOpen) {
+        // Refresh the bookmarks query
+        queryClient.invalidateQueries({ queryKey: ['bookmarks', selectedSegmentId, userId] });
+      }
+    } catch (error) {
+      toast({
+        title: 'Bookmark action failed',
+        description: error instanceof Error ? error.message : 'Failed to update bookmarks. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      // Clear the loading state
+      setIsBookmarking((prev) => {
+        const newState = { ...prev };
+        delete newState[postId];
+        return newState;
+      });
+    }
+  };
+
   // Helper to format Reddit URLs
   const formatRedditUrl = (permalink: string) => {
     return `https://reddit.com${permalink}`;
@@ -176,6 +275,15 @@ export default function Feed() {
   return (
     <>
       <PageHeader />
+
+      {/* Bookmarks Modal */}
+      <BookmarksModal
+        isOpen={isBookmarksModalOpen}
+        onOpenChange={setIsBookmarksModalOpen}
+        selectedSegmentId={selectedSegmentId}
+        userId={userId}
+      />
+
       <div className="container mx-auto py-6 px-4 md:px-6">
         {/* Add the animation styles */}
         <style
@@ -247,15 +355,22 @@ export default function Feed() {
                 </Select>
               </div>
 
-              <Button
-                onClick={handleRefresh}
-                disabled={!selectedSegmentId || isRefreshing || isLoading}
-                variant="outline"
-                className="w-full sm:w-auto self-end"
-              >
-                <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                Refresh
-              </Button>
+              <div className="flex flex-row gap-2 w-full sm:w-auto self-end">
+                <Button onClick={() => setIsBookmarksModalOpen(true)} variant="outline" className="flex-1 sm:flex-none">
+                  <Bookmark className="mr-2 h-4 w-4" />
+                  Bookmarks
+                </Button>
+
+                <Button
+                  onClick={handleRefresh}
+                  disabled={!selectedSegmentId || isRefreshing || isLoading}
+                  variant="outline"
+                  className="flex-1 sm:flex-none"
+                >
+                  <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                  Refresh
+                </Button>
+              </div>
             </div>
           </div>
 
@@ -447,7 +562,7 @@ export default function Feed() {
                       </div>
                     )}
                   </CardContent>
-                  <CardFooter className="pt-4 pb-4 border-t flex flex-col gap-4">
+                  <CardFooter className="pt-4 pb-0 border-t flex flex-col gap-4">
                     <div className="w-full flex flex-wrap justify-between items-center gap-2">
                       <div className="flex items-center flex-wrap gap-4 text-sm text-muted-foreground">
                         <div className="flex items-center gap-1.5">
@@ -480,6 +595,20 @@ export default function Feed() {
                             Spoiler
                           </span>
                         )}
+                        <Button
+                          onClick={() => handleToggleBookmark(post.id, post.subreddit)}
+                          variant="ghost"
+                          size="sm"
+                          disabled={isBookmarking[post.id]}
+                          className={`text-xs ${bookmarkedPosts[post.id] ? 'text-primary' : ''}`}
+                          title={bookmarkedPosts[post.id] ? 'Remove from bookmarks' : 'Add to bookmarks'}
+                        >
+                          {isBookmarking[post.id] ? (
+                            <RefreshCw className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Bookmark className="h-4 w-4" fill={bookmarkedPosts[post.id] ? 'currentColor' : 'none'} />
+                          )}
+                        </Button>
                         <Button
                           onClick={() => handleGenerateReply(post.id, post.subreddit)}
                           disabled={!!generatingReplies[post.id] || Object.values(generatingReplies).some(Boolean)}
