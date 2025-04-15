@@ -1,5 +1,5 @@
-import { Segment, generateSegmentFeedReply, getSegmentFeed } from '@/api/segment';
-import { addBookmark, deleteBookmark, getBookmarks } from '@/api/feed';
+import { addBookmark, deleteBookmark, generateSegmentFeedReply, getBookmarks, getSegmentFeed } from '@/api/feed';
+import { Segment } from '@/api/segment';
 import BookmarksModal from '@/components/bookmarks-modal';
 import PageHeader from '@/components/page-header';
 import { Button } from '@/components/ui/button';
