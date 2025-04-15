@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { LoadingSpinner } from '../main';
 import { useAnalytics } from '../hooks/use-analytics';
+import { setCookie } from '@/lib/utils';
 
 export default function AuthCallback() {
   const navigate = useNavigate();
@@ -21,6 +22,9 @@ export default function AuthCallback() {
 
         // If session exists, redirect to home page
         if (data.session) {
+          // Save access token
+          setCookie("_tk", data.session.access_token);
+
           // Determine if this is a new user or existing user by checking metadata
           const createdAt = new Date(data.session.user.created_at || '');
           const lastSignInAt = new Date(data.session.user.last_sign_in_at || '');
