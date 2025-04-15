@@ -140,7 +140,7 @@ export const deleteSegment = async (segmentId: string): Promise<any> => {
 };
 
 export const getSegmentFeed = async (segmentId: string): Promise<FeedPost[]> => {
-  const data = await client.post(`/feed/${segmentId}/relevant-posts`);
+  const data = await client.get(`/feed/${segmentId}/relevant-posts`);
   return data.data.data;
 };
 
