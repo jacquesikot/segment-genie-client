@@ -22,7 +22,7 @@ const useSocketIO = (url: string, onStatusUpdate: (data: WSEvent) => void) => {
 
     // Listen for status updates
     socket.on('statusUpdate', (data: WSEvent) => {
-      console.log('Status update received:', data);
+      // console.log('Status update received:', data);
       onStatusUpdate(data);
     });
 

@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from './supabase';
+import client from '@/api/client';
 
 type AuthContextType = {
   user: User | null;
@@ -40,6 +41,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     // Initial session fetch
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.access_token) {
+        // Set access token
+        client.defaults.headers.common['Authorization'] = `Bearer ${session?.access_token}`;
+      }
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -49,6 +54,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_, session) => {
+      if (session?.access_token) {
+        // Set access token
+        client.defaults.headers.common['Authorization'] = `Bearer ${session?.access_token}`;
+      }
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
