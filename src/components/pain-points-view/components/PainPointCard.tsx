@@ -157,7 +157,7 @@ const PainPointCard = ({ point }: { point: PainPoint }) => {
                           </Badge>
                           <Tooltip content="Statistical confidence in the accuracy of this data point">
                             <Badge variant="outline" className="text-xs py-1 px-2">
-                              Confidence: {(point.confidence * 100).toFixed(0)}%
+                              Confidence: {((point.confidence ?? 0) * 100).toFixed(0)}%
                             </Badge>
                           </Tooltip>
                         </div>
@@ -178,7 +178,7 @@ const PainPointCard = ({ point }: { point: PainPoint }) => {
                               <div className="flex items-center justify-between flex-wrap gap-1">
                                 <span className="text-sm font-medium break-words mb-2">{solution.name}</span>
                                 <Badge variant="outline" className="text-xs">
-                                  {(solution.effectiveness * 100).toFixed(0)}% Effective
+                                  {((solution.effectiveness ?? 0) * 100).toFixed(0)}% Effective
                                 </Badge>
                               </div>
                               <p className="text-xs text-muted-foreground line-clamp-2 mt-2">{solution.description}</p>

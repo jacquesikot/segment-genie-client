@@ -23,7 +23,7 @@ const SentimentIndicator = ({ score }: SentimentIndicatorProps) => {
         <div className="text-sm font-medium">Sentiment Score</div>
         <div className="flex items-center gap-2">
           <Progress value={(score + 1) * 50} className="w-24 h-2" />
-          <span className="text-xs font-mono text-muted-foreground">{score.toFixed(2)}</span>
+          <span className="text-xs font-mono text-muted-foreground">{(score ?? 0).toFixed(2)}</span>
         </div>
       </div>
     </div>

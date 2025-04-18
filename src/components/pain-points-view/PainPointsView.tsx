@@ -43,7 +43,7 @@ const PainPointsView = ({ data, status, onRetry }: Props) => {
               <CardTitle className="text-2xl dark:text-white break-words">Pain Points Analysis</CardTitle>
               <CardDescription className="mt-2 dark:text-gray-300 break-words">
                 {metadata.totalSourcesAnalyzed} Sources Analyzed · Confidence:{' '}
-                {(metadata.validationScore * 100).toFixed(0)}%
+                {((metadata.validationScore ?? 0) * 100).toFixed(0)}%
               </CardDescription>
             </div>
           </div>

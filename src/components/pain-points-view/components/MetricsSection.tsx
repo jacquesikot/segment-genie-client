@@ -38,13 +38,13 @@ const MetricsSection = ({ metadata }: MetricsSectionProps) => {
         />
         <MetricCard
           title="Source Diversity"
-          value={`${(metadata.sourceDiversity * 100).toFixed(0)}%`}
+          value={`${((metadata.sourceDiversity ?? 0) * 100).toFixed(0)}%`}
           icon={<Users className="w-5 h-5 text-green-500" />}
           tooltip="Measure of how diverse the sources are across different platforms"
         />
         <MetricCard
           title="Confidence Score"
-          value={`${(metadata.validationScore * 100).toFixed(0)}%`}
+          value={`${((metadata.validationScore ?? 0) * 100).toFixed(0)}%`}
           icon={<Flame className="w-5 h-5 text-orange-500" />}
           tooltip="Confidence level in the accuracy and reliability of the data"
         />
