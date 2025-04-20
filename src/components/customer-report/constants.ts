@@ -1,4 +1,4 @@
-import { BarChart3, Brain, Building2, Check, Target } from 'lucide-react';
+import { BarChart3, Brain, Building2, Target } from 'lucide-react';
 
 export const SECTIONS = [
   {
@@ -25,10 +25,10 @@ export const SECTIONS = [
     icon: Building2,
     description: 'Market segmentation and size analysis',
   },
-  {
-    id: 'validation',
-    label: 'Validation',
-    icon: Check,
-    description: 'Is your product ready for market?',
-  },
+  // {
+  //   id: 'validation',
+  //   label: 'Validation',
+  //   icon: Check,
+  //   description: 'Is your product ready for market?',
+  // },
 ];
