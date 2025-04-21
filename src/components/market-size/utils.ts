@@ -1,14 +1,19 @@
-export const formatCurrency = (value: number, currency: string, unit: string) => {
+export const formatCurrency = (value: number | undefined, currency: string | undefined, unit: string | undefined) => {
+  // Handle undefined values with safe defaults
+  const safeValue = value ?? 0;
+  const safeCurrency = currency || 'USD';
+  const safeUnit = unit || 'billion';
+
   const formatter = new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: currency || 'USD',
+    currency: safeCurrency,
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
 
-  let formattedValue = formatter.format(value);
+  let formattedValue = formatter.format(safeValue);
 
-  switch (unit) {
+  switch (safeUnit) {
     case 'trillion':
       formattedValue += 'T';
       break;
@@ -26,8 +31,11 @@ export const formatCurrency = (value: number, currency: string, unit: string) =>
   return formattedValue;
 };
 
-export const getMaturityStyles = (maturity: string) => {
-  switch (maturity) {
+export const getMaturityStyles = (maturity: string | undefined) => {
+  // If maturity is undefined, default to 'growing'
+  const safeMaturity = maturity || 'growing';
+
+  switch (safeMaturity.toLowerCase()) {
     case 'emerging':
       return {
         color: 'text-emerald-600 dark:text-emerald-400',
@@ -91,6 +99,15 @@ export const getMarketTypeStyles = (type: 'tam' | 'sam' | 'som') => {
         bgColor: 'bg-green-100 dark:bg-green-950/30',
         progressColor: 'bg-green-600 dark:bg-green-500',
         progressBgColor: 'bg-green-100 dark:bg-green-950/30',
+      };
+    default:
+      // Default to TAM if type is somehow invalid
+      return {
+        icon: 'Target',
+        color: 'text-indigo-600 dark:text-indigo-400',
+        bgColor: 'bg-indigo-100 dark:bg-indigo-950/30',
+        progressColor: 'bg-indigo-600 dark:bg-indigo-500',
+        progressBgColor: 'bg-indigo-100 dark:bg-indigo-950/30',
       };
   }
 };

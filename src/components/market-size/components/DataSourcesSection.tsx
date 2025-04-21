@@ -7,7 +7,7 @@ interface DataSourcesSectionProps {
   sources: Source[];
 }
 
-const DataSourcesSection = ({ sources }: DataSourcesSectionProps) => {
+const DataSourcesSection = ({ sources = [] }: DataSourcesSectionProps) => {
   return (
     <Card className="dark:bg-gray-900">
       <CardHeader className="pb-2">
@@ -16,9 +16,11 @@ const DataSourcesSection = ({ sources }: DataSourcesSectionProps) => {
       </CardHeader>
       <CardContent>
         <div className="grid gap-4">
-          {sources.map((source, index) => (
-            <SourceCard key={index} source={source} />
-          ))}
+          {sources && sources.length > 0 ? (
+            sources.map((source, index) => <SourceCard key={index} source={source} />)
+          ) : (
+            <div className="text-center text-gray-500 py-4">No research sources available</div>
+          )}
         </div>
       </CardContent>
     </Card>
@@ -36,7 +38,7 @@ const SourceCard = ({ source }: { source: Source }) => {
 
   return (
     <a
-      href={source.url}
+      href={source.url || '#'}
       target="_blank"
       rel="noopener noreferrer"
       className="group flex flex-col sm:flex-row sm:justify-between items-start p-4 rounded-lg border dark:border-gray-700 hover:border-indigo-500 dark:hover:border-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/10 transition-colors dark:bg-gray-800/50"

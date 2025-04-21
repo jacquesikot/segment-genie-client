@@ -24,16 +24,18 @@ interface MarketOverviewProps {
 }
 
 const MarketOverview = ({ marketSize }: MarketOverviewProps) => {
-  const industry = marketSize.marketAnalysis.industry;
-  const analysisDate = new Date(marketSize.metadata.analysisDate).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+  const industry = marketSize.marketAnalysis?.industry || {};
+  const analysisDate = marketSize.metadata?.analysisDate
+    ? new Date(marketSize.metadata.analysisDate).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })
+    : 'N/A';
 
-  const maturityInfo = getMaturityStyles(industry.industryMaturity || marketSize.metadata.marketMaturity);
-  const tam = marketSize.marketAnalysis.tam;
-  const som = marketSize.marketAnalysis.som;
+  const maturityInfo = getMaturityStyles(industry.industryMaturity || marketSize.metadata?.marketMaturity || 'growing');
+  const tam = marketSize.marketAnalysis?.tam || {};
+  const som = marketSize.marketAnalysis?.som || {};
 
   // Render the appropriate icon based on maturity
   const renderMaturityIcon = () => {
@@ -62,7 +64,7 @@ const MarketOverview = ({ marketSize }: MarketOverviewProps) => {
             <div className="min-w-0">
               <CardTitle className="text-2xl dark:text-white break-words">Market Analysis</CardTitle>
               <CardDescription className="mt-2 dark:text-gray-300 break-words">
-                {industry.primaryIndustry} · Last updated: {analysisDate}
+                {industry.primaryIndustry || 'Industry'} · Last updated: {analysisDate}
               </CardDescription>
             </div>
           </div>
@@ -70,11 +72,11 @@ const MarketOverview = ({ marketSize }: MarketOverviewProps) => {
             <div className="flex items-center gap-2 px-3 py-1.5">
               {renderMaturityIcon()}
               <span className={`text-sm font-medium capitalize ${maturityInfo.color} break-words`}>
-                {industry.industryMaturity || marketSize.metadata.marketMaturity} Market
+                {industry.industryMaturity || marketSize.metadata?.marketMaturity || 'Growing'} Market
               </span>
             </div>
             <ConfidenceIndicator
-              confidence={marketSize.metadata.dataQuality.score}
+              confidence={marketSize.metadata?.dataQuality?.score || 50}
               tooltip="Confidence in market data quality"
             />
           </div>
@@ -96,11 +98,15 @@ const MarketOverview = ({ marketSize }: MarketOverviewProps) => {
 
           <TabsContent value="overview" className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              <MetricCard icon={<Target className="w-4 h-4" />} label="Market Focus" value={industry.primaryIndustry} />
+              <MetricCard
+                icon={<Target className="w-4 h-4" />}
+                label="Market Focus"
+                value={industry.primaryIndustry || 'N/A'}
+              />
               <MetricCard
                 icon={<Clock className="w-4 h-4" />}
                 label="Time to Market"
-                value={`${som.timeToAchieve} years`}
+                value={som.timeToAchieve ? `${som.timeToAchieve} years` : 'N/A'}
               />
               <MetricCard
                 icon={<TrendingUp className="w-4 h-4" />}
@@ -120,7 +126,7 @@ const MarketOverview = ({ marketSize }: MarketOverviewProps) => {
                     Sub-Industries
                   </h4>
                   <div className="flex flex-wrap gap-2 mb-4">
-                    {industry.subIndustries.map((subIndustry, index) => (
+                    {(industry.subIndustries || []).map((subIndustry, index) => (
                       <Badge
                         key={index}
                         variant="outline"
@@ -129,6 +135,9 @@ const MarketOverview = ({ marketSize }: MarketOverviewProps) => {
                         {subIndustry}
                       </Badge>
                     ))}
+                    {!industry.subIndustries?.length && (
+                      <span className="text-sm text-gray-500">No sub-industries available</span>
+                    )}
                   </div>
                 </div>
 
@@ -137,7 +146,7 @@ const MarketOverview = ({ marketSize }: MarketOverviewProps) => {
                     Related Industries
                   </h4>
                   <div className="flex flex-wrap gap-2">
-                    {industry.relatedIndustries.map((relatedIndustry, index) => (
+                    {(industry.relatedIndustries || []).map((relatedIndustry, index) => (
                       <Badge
                         key={index}
                         variant="secondary"
@@ -146,6 +155,9 @@ const MarketOverview = ({ marketSize }: MarketOverviewProps) => {
                         {relatedIndustry}
                       </Badge>
                     ))}
+                    {!industry.relatedIndustries?.length && (
+                      <span className="text-sm text-gray-500">No related industries available</span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -157,11 +169,14 @@ const MarketOverview = ({ marketSize }: MarketOverviewProps) => {
                       Key Trends
                     </h5>
                     <ul className="space-y-1 pl-4 text-sm text-muted-foreground dark:text-gray-400">
-                      {industry.keyTrends.map((trend, index) => (
+                      {(industry.keyTrends || []).map((trend, index) => (
                         <li key={index} className="list-disc break-words">
                           {trend}
                         </li>
                       ))}
+                      {!industry.keyTrends?.length && (
+                        <li className="list-disc break-words">No key trends available</li>
+                      )}
                     </ul>
                   </div>
 
@@ -170,17 +185,20 @@ const MarketOverview = ({ marketSize }: MarketOverviewProps) => {
                       Regulatory Factors
                     </h5>
                     <ul className="space-y-1 pl-4 text-sm text-muted-foreground dark:text-gray-400">
-                      {industry.regulatoryFactors.map((factor, index) => (
+                      {(industry.regulatoryFactors || []).map((factor, index) => (
                         <li key={index} className="list-disc break-words">
                           {factor}
                         </li>
                       ))}
+                      {!industry.regulatoryFactors?.length && (
+                        <li className="list-disc break-words">No regulatory factors available</li>
+                      )}
                     </ul>
                   </div>
 
                   <MetricItem
                     label="Data Quality"
-                    value={marketSize.metadata.dataQuality.score}
+                    value={marketSize.metadata?.dataQuality?.score || 0}
                     icon={<FlaskConical className="w-4 h-4" />}
                   />
                 </div>
@@ -201,11 +219,16 @@ const MarketOverview = ({ marketSize }: MarketOverviewProps) => {
               </div>
 
               <ul className="space-y-2 pl-9">
-                {marketSize.metadata.dataQuality.limitations.map((limitation, index) => (
+                {(marketSize.metadata?.dataQuality?.limitations || []).map((limitation, index) => (
                   <li key={index} className="text-sm text-amber-700 dark:text-amber-400 list-disc break-words">
                     {limitation}
                   </li>
                 ))}
+                {!marketSize.metadata?.dataQuality?.limitations?.length && (
+                  <li className="text-sm text-amber-700 dark:text-amber-400 list-disc break-words">
+                    No specific limitations documented
+                  </li>
+                )}
               </ul>
             </div>
           </TabsContent>

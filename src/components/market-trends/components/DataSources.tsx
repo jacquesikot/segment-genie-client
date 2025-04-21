@@ -11,6 +11,10 @@ interface DataSourcesProps {
 const DataSources = ({ data }: DataSourcesProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
+  // Safely access data
+  const sources = data.metadata?.sources || [];
+  const sourceCount = sources.length;
+
   // Helper function to get credibility badge styling
   const getCredibilityBadgeStyle = (score: number) => {
     if (score >= 0.8) {
@@ -21,8 +25,6 @@ const DataSources = ({ data }: DataSourcesProps) => {
       return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400';
     }
   };
-
-  const sourceCount = data.metadata?.sources?.length || 0;
 
   return (
     <Card className="shadow-md dark:bg-gray-900 border-0 overflow-hidden">
@@ -40,38 +42,46 @@ const DataSources = ({ data }: DataSourcesProps) => {
       </CardHeader>
       {isOpen && (
         <CardContent>
-          <div className="grid grid-cols-1 gap-3">
-            {data.metadata?.sources?.map((source, index) => (
-              <a
-                key={index}
-                href={source.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex flex-col sm:flex-row justify-between gap-2 p-3 rounded-lg border hover:bg-indigo-50 dark:hover:bg-indigo-950/10 transition-colors"
-              >
-                <div className="flex flex-col max-w-full">
-                  <span className="text-indigo-600 dark:text-indigo-400 text-xs sm:text-sm break-words">
-                    {source.title}
-                  </span>
-                  <span className="text-xs text-gray-500 dark:text-gray-400 break-words">{source.url}</span>
-                  <div className="flex flex-wrap items-center gap-2 mt-1 text-xs text-gray-500 dark:text-gray-400">
-                    <Badge variant="outline" className="text-xs capitalize">
-                      {source.type}
-                    </Badge>
-                    <span>{source.publicationDate}</span>
+          {sourceCount === 0 ? (
+            <p className="text-gray-500 dark:text-gray-400 text-sm py-2">No data sources available.</p>
+          ) : (
+            <div className="grid grid-cols-1 gap-3">
+              {sources.map((source, index) => (
+                <a
+                  key={index}
+                  href={source.url || '#'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col sm:flex-row justify-between gap-2 p-3 rounded-lg border hover:bg-indigo-50 dark:hover:bg-indigo-950/10 transition-colors"
+                >
+                  <div className="flex flex-col max-w-full">
+                    <span className="text-indigo-600 dark:text-indigo-400 text-xs sm:text-sm break-words">
+                      {source.title || 'Unknown Source'}
+                    </span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 break-words">
+                      {source.url || 'No URL available'}
+                    </span>
+                    <div className="flex flex-wrap items-center gap-2 mt-1 text-xs text-gray-500 dark:text-gray-400">
+                      <Badge variant="outline" className="text-xs capitalize">
+                        {source.type || 'Unknown'}
+                      </Badge>
+                      <span>{source.publicationDate || 'No date'}</span>
+                    </div>
                   </div>
-                </div>
-                <div className="flex flex-row sm:flex-col max-[328px]:flex-col items-start sm:items-end gap-2 sm:gap-0 max-[328px]:gap-1 mt-1 sm:mt-0">
-                  <Badge className={`text-xs whitespace-nowrap ${getCredibilityBadgeStyle(source.credibilityScore)}`}>
-                    {(source.credibilityScore * 100).toFixed(0)}% Credibility
-                  </Badge>
-                  <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap sm:mt-1">
-                    {(source.relevanceScore * 100).toFixed(0)}% Relevance
-                  </span>
-                </div>
-              </a>
-            ))}
-          </div>
+                  <div className="flex flex-row sm:flex-col max-[328px]:flex-col items-start sm:items-end gap-2 sm:gap-0 max-[328px]:gap-1 mt-1 sm:mt-0">
+                    <Badge
+                      className={`text-xs whitespace-nowrap ${getCredibilityBadgeStyle(source.credibilityScore || 0)}`}
+                    >
+                      {((source.credibilityScore || 0) * 100).toFixed(0)}% Credibility
+                    </Badge>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap sm:mt-1">
+                      {((source.relevanceScore || 0) * 100).toFixed(0)}% Relevance
+                    </span>
+                  </div>
+                </a>
+              ))}
+            </div>
+          )}
         </CardContent>
       )}
     </Card>

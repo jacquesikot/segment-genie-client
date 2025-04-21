@@ -51,13 +51,13 @@ const MarketMetricCard = ({
   type,
   percentage,
   growthRate,
-  keyDrivers,
-  risks,
-  targetSegments,
-  exclusionCriteria,
-  competitiveDynamics,
+  keyDrivers = [],
+  risks = [],
+  targetSegments = [],
+  exclusionCriteria = [],
+  competitiveDynamics = [],
   timeToAchieve,
-  methodology,
+  methodology = 'N/A',
 }: MarketMetricCardProps) => {
   const styles = getMarketTypeStyles(type);
 
@@ -75,6 +75,13 @@ const MarketMetricCard = ({
     }
   };
 
+  // Ensure we have valid value properties
+  const safeValue = {
+    amount: value?.amount || 0,
+    currency: value?.currency || 'USD',
+    unit: value?.unit || 'billion',
+  };
+
   return (
     <Card className={marketCardVariants({ type })}>
       <CardHeader className="pb-3">
@@ -87,7 +94,7 @@ const MarketMetricCard = ({
             </div>
           </div>
           <span className={`${styles.color} font-semibold text-xl`}>
-            {formatCurrency(value.amount, value.currency, value.unit)}
+            {formatCurrency(safeValue.amount, safeValue.currency, safeValue.unit)}
           </span>
         </div>
       </CardHeader>
@@ -96,9 +103,9 @@ const MarketMetricCard = ({
           <div className="space-y-2">
             <div className="flex justify-between text-sm dark:text-gray-300">
               <span>Market Coverage</span>
-              <span>{(percentage * 100).toFixed(1)}%</span>
+              <span>{((percentage || 0) * 100).toFixed(1)}%</span>
             </div>
-            <Progress value={percentage * 100} className={`h-2 ${styles.progressBgColor}`} />
+            <Progress value={(percentage || 0) * 100} className={`h-2 ${styles.progressBgColor}`} />
           </div>
         )}
 

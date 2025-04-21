@@ -12,14 +12,16 @@ interface Props {
 }
 
 const MarketSizeView = ({ marketSize, status, onRetry }: Props) => {
+  const safeStatus = status || { progress: 0, message: 'Loading...', isComplete: false };
+
   if (!marketSize) {
     return (
       <SegmentLoader
-        progress={status.progress ? status.progress.toString() : '0'}
-        statusText={status.message}
-        isComplete={status.isComplete}
+        progress={safeStatus.progress ? safeStatus.progress.toString() : '0'}
+        statusText={safeStatus.message || 'Loading...'}
+        isComplete={!!safeStatus.isComplete}
         title="Market size"
-        error={status.progress < 0 ? status.message : undefined}
+        error={safeStatus.progress < 0 ? safeStatus.message : undefined}
         onRetry={onRetry}
       />
     );
@@ -29,7 +31,7 @@ const MarketSizeView = ({ marketSize, status, onRetry }: Props) => {
     <div className="space-y-8 pb-20">
       <MarketOverview marketSize={marketSize} />
       <MarketMetricsSection marketSize={marketSize} />
-      <DataSourcesSection sources={marketSize.metadata.sources} />
+      <DataSourcesSection sources={marketSize.metadata?.sources || []} />
     </div>
   );
 };
