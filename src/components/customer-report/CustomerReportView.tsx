@@ -5,7 +5,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { useAnalytics } from '@/hooks/use-analytics';
 import { researchInputForm } from '@/pages/schemas';
 import axios from 'axios';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { z } from 'zod';
 import CompetitionView from '../competition-view/CompetitionView';
 import MarketSizeView from '../market-size/MarketSizeView';
@@ -204,14 +204,14 @@ const CustomerReportView: React.FC<CustomerReportViewProps> = ({
     setIsChatModalOpen(false);
   };
 
-  const shouldAllowChat = useMemo(() => {
-    return segment?.data?.marketSize &&
-      segment?.data?.competitors &&
-      segment?.data?.painPoints &&
-      segment?.data?.marketTrends
-      ? true
-      : false;
-  }, [segment?.data]);
+  // const shouldAllowChat = useMemo(() => {
+  //   return segment?.data?.marketSize &&
+  //     segment?.data?.competitors &&
+  //     segment?.data?.painPoints &&
+  //     segment?.data?.marketTrends
+  //     ? true
+  //     : false;
+  // }, [segment?.data]);
 
   const handleOpenShareModal = () => {
     setIsShareModalOpen(true);
@@ -223,7 +223,7 @@ const CustomerReportView: React.FC<CustomerReportViewProps> = ({
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <MobileMenu
-            shouldAllowChat={shouldAllowChat}
+            shouldAllowChat
             activeSection={activeSection}
             onSectionChange={handleSectionChange}
             onClose={toggleMobileMenu}
@@ -235,7 +235,7 @@ const CustomerReportView: React.FC<CustomerReportViewProps> = ({
 
         {/* Desktop Navigation */}
         <DesktopNavigation
-          shouldAllowChat={shouldAllowChat}
+          shouldAllowChat
           activeSection={activeSection}
           onSectionChange={handleSectionChange}
           onRerunReport={handleRerunReport}
@@ -250,7 +250,7 @@ const CustomerReportView: React.FC<CustomerReportViewProps> = ({
 
         {/* Mobile Navigation */}
         <MobileNavigation
-          shouldAllowChat={shouldAllowChat}
+          shouldAllowChat
           activeSection={activeSection}
           onSectionChange={handleSectionChange}
           onOpenMenu={toggleMobileMenu}
@@ -260,11 +260,7 @@ const CustomerReportView: React.FC<CustomerReportViewProps> = ({
         />
 
         {/* Floating Chat Button - appears when scrolling */}
-        <FloatingChatButton
-          shouldAllowChat={shouldAllowChat}
-          onOpenChat={handleOpenChat}
-          isChatModalOpen={isChatModalOpen}
-        />
+        <FloatingChatButton shouldAllowChat onOpenChat={handleOpenChat} isChatModalOpen={isChatModalOpen} />
 
         {/* Chat Modal */}
         <ChatModal
