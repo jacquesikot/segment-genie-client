@@ -17,8 +17,8 @@ import DesktopNavigation from './components/DesktopNavigation';
 import FloatingChatButton from './components/FloatingChatButton';
 import MobileMenu from './components/MobileMenu';
 import MobileNavigation from './components/MobileNavigation';
-import { ReportShareModal } from './components/ReportShareModal';
 import RerunModal from './components/RerunModal';
+import ShareModal from './components/ShareModal';
 import { SECTIONS } from './constants';
 
 interface CustomerReportViewProps {
@@ -285,7 +285,13 @@ const CustomerReportView: React.FC<CustomerReportViewProps> = ({
         />
 
         {/* Share Modal */}
-        <ReportShareModal open={isShareModalOpen} onOpenChange={setIsShareModalOpen} reportId={segmentId} />
+        <ShareModal
+          open={isShareModalOpen}
+          onOpenChange={setIsShareModalOpen}
+          reportId={segmentId}
+          isPublic={segment?.isPublic || false}
+          refetchSegment={refetchSegment}
+        />
       </div>
     </TooltipProvider>
   );
