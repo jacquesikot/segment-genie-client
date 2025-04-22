@@ -18,6 +18,7 @@ import ForgotPassword from './pages/forgot-password.js';
 import { NotFound } from './pages/not-found.js';
 import ResetPassword from './pages/reset-password.js';
 import Segment from './pages/segment.js';
+import SharedReport from './pages/shared-report.tsx';
 import Segments from './pages/segments.js';
 import SignIn from './pages/sign-in.tsx';
 import SignUp from './pages/sign-up.tsx';
@@ -54,6 +55,15 @@ const router = createBrowserRouter([
   {
     path: '/auth/callback',
     element: <AuthCallback />,
+  },
+  {
+    path: '/shared-report/:id',
+    element: (
+      <Suspense fallback={<LoadingSpinner />}>
+        <SharedReport />
+      </Suspense>
+    ),
+    errorElement: <ErrorPage />,
   },
   {
     path: '*',
