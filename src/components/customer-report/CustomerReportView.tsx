@@ -3,22 +3,23 @@ import { rerunResearch, ResearchReport } from '@/api/research';
 import { Segment, SegmentStatus } from '@/api/segment';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { useAnalytics } from '@/hooks/use-analytics';
+import { researchInputForm } from '@/pages/schemas';
 import axios from 'axios';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { z } from 'zod';
 import CompetitionView from '../competition-view/CompetitionView';
 import MarketSizeView from '../market-size/MarketSizeView';
 import MarketTrendsView from '../market-trends/MarketTrendsView';
 import PainPointsView from '../pain-points-view/PainPointsView';
+import ChatModal from './components/ChatModal';
 import ComingSoonSection from './components/ComingSoonSection';
 import DesktopNavigation from './components/DesktopNavigation';
+import FloatingChatButton from './components/FloatingChatButton';
 import MobileMenu from './components/MobileMenu';
 import MobileNavigation from './components/MobileNavigation';
+import { ReportShareModal } from './components/ReportShareModal';
 import RerunModal from './components/RerunModal';
 import { SECTIONS } from './constants';
-import { z } from 'zod';
-import { researchInputForm } from '@/pages/schemas';
-import ChatModal from './components/ChatModal';
-import FloatingChatButton from './components/FloatingChatButton';
 
 interface CustomerReportViewProps {
   report?: ResearchReport;
@@ -43,6 +44,7 @@ const CustomerReportView: React.FC<CustomerReportViewProps> = ({
   const [isRerunModalOpen, setIsRerunModalOpen] = useState(false);
   const [isRerunLoading, setIsRerunLoading] = useState(false);
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const analytics = useAnalytics();
 
   useEffect(() => {
@@ -211,6 +213,10 @@ const CustomerReportView: React.FC<CustomerReportViewProps> = ({
       : false;
   }, [segment?.data]);
 
+  const handleOpenShareModal = () => {
+    setIsShareModalOpen(true);
+  };
+
   return (
     <TooltipProvider>
       <div className="flex flex-col flex-1 bg-background/50 overflow-hidden transition-all duration-300">
@@ -223,6 +229,7 @@ const CustomerReportView: React.FC<CustomerReportViewProps> = ({
             onClose={toggleMobileMenu}
             onRerunReport={handleRerunReport}
             onOpenChat={handleOpenChat}
+            onOpenShareModal={handleOpenShareModal}
           />
         )}
 
@@ -233,6 +240,7 @@ const CustomerReportView: React.FC<CustomerReportViewProps> = ({
           onSectionChange={handleSectionChange}
           onRerunReport={handleRerunReport}
           onOpenChat={handleOpenChat}
+          onOpenShareModal={handleOpenShareModal}
         />
 
         {/* Main Content Area */}
@@ -248,6 +256,7 @@ const CustomerReportView: React.FC<CustomerReportViewProps> = ({
           onOpenMenu={toggleMobileMenu}
           onRerunReport={handleRerunReport}
           onOpenChat={handleOpenChat}
+          onOpenShareModal={handleOpenShareModal}
         />
 
         {/* Floating Chat Button - appears when scrolling */}
@@ -274,6 +283,9 @@ const CustomerReportView: React.FC<CustomerReportViewProps> = ({
           segment={segment}
           isLoading={isRerunLoading}
         />
+
+        {/* Share Modal */}
+        <ReportShareModal open={isShareModalOpen} onOpenChange={setIsShareModalOpen} reportId={segmentId} />
       </div>
     </TooltipProvider>
   );

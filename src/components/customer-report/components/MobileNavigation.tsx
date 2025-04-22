@@ -1,6 +1,6 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import { Menu, MessageSquare, RefreshCw } from 'lucide-react';
+import { Menu, MessageSquare, RefreshCw, Share2 } from 'lucide-react';
 import React from 'react';
 import { SECTIONS } from '../../customer-report/constants';
 
@@ -10,6 +10,7 @@ interface MobileNavigationProps {
   onOpenMenu: () => void;
   onRerunReport: () => void;
   onOpenChat?: () => void;
+  onOpenShareModal?: () => void;
   shouldAllowChat: boolean;
 }
 
@@ -20,14 +21,15 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
   onOpenMenu,
   onRerunReport,
   onOpenChat = () => {},
+  onOpenShareModal = () => {},
 }) => {
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 flex justify-around bg-background border-t p-2 z-40">
       {SECTIONS.map((section, index) => {
         const Icon = section.icon;
         const isActive = activeSection === section.id;
-        // Only show first 2 items in the bottom nav to leave space for chat and re-run button
-        if (index > 1) return null;
+        // Only show first item in the bottom nav to leave space for other buttons
+        if (index > 0) return null;
 
         return (
           <Tooltip key={section.id}>
@@ -49,6 +51,22 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
           </Tooltip>
         );
       })}
+
+      {/* Share button */}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            onClick={onOpenShareModal}
+            className="flex flex-col items-center p-2 rounded-lg text-muted-foreground hover:text-primary transition-colors"
+          >
+            <Share2 className="w-5 h-5 mb-1" />
+            <span className="text-xs font-medium">Share</span>
+          </button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Share this report</p>
+        </TooltipContent>
+      </Tooltip>
 
       {/* AI Chat button */}
       <Tooltip>
@@ -83,7 +101,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
         </TooltipContent>
       </Tooltip>
 
-      {/* More button if there are more than 3 sections */}
+      {/* More button */}
       <button onClick={onOpenMenu} className="flex flex-col items-center p-2 rounded-lg text-muted-foreground">
         <Menu className="w-5 h-5 mb-1" />
         <span className="text-xs font-medium">More</span>

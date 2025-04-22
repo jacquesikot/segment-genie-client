@@ -1,5 +1,5 @@
 import React from 'react';
-import { MessageSquare, RefreshCw, X } from 'lucide-react';
+import { MessageSquare, RefreshCw, Share2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { SECTIONS } from '../../customer-report/constants';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,7 @@ interface MobileMenuProps {
   onClose: () => void;
   onRerunReport: () => void;
   onOpenChat?: () => void;
+  onOpenShareModal?: () => void;
 }
 
 const MobileMenu: React.FC<MobileMenuProps> = ({
@@ -20,6 +21,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
   onClose,
   onRerunReport,
   onOpenChat = () => {},
+  onOpenShareModal = () => {},
 }) => {
   return (
     <div className="fixed inset-0 z-50 bg-background/95 flex flex-col p-4">
@@ -62,6 +64,11 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
         >
           <MessageSquare className="w-4 h-4" />
           <span>Chat with AI Assistant</span>
+        </Button>
+
+        <Button onClick={onOpenShareModal} variant="outline" className="w-full flex items-center justify-center gap-2">
+          <Share2 className="w-4 h-4" />
+          <span>Share Report</span>
         </Button>
 
         <Button onClick={onRerunReport} variant="outline" className="w-full flex items-center justify-center gap-2">
