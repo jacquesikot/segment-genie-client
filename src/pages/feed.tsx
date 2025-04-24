@@ -313,6 +313,20 @@ export default function Feed() {
             animation: progressAnimation 2.5s ease-in-out infinite;
             width: 0%;
           }
+          /* Make sure markdown content respects container width */
+          .prose p, .prose pre, .prose code, .prose a, .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            word-break: break-word;
+            max-width: 100%;
+          }
+          .prose pre {
+            white-space: pre-wrap;
+            overflow-x: auto;
+          }
+          .prose code {
+            white-space: pre-wrap;
+          }
         `,
           }}
         />
@@ -513,7 +527,7 @@ export default function Feed() {
                   </CardHeader>
                   <CardContent className="pt-0">
                     {post.selftext ? (
-                      <div className="prose dark:prose-invert max-w-none text-sm text-muted-foreground">
+                      <div className="prose dark:prose-invert text-sm text-muted-foreground w-full max-w-full overflow-x-hidden">
                         <ReactMarkdown>{truncateText(post.selftext, 280)}</ReactMarkdown>
                       </div>
                     ) : null}
