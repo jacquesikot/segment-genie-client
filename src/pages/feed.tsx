@@ -451,7 +451,7 @@ export default function Feed() {
                 <div className="h-full bg-orange-500 dark:bg-orange-600 rounded-full progress-bar"></div>
               </div>
               <p className="text-sm text-orange-700 dark:text-orange-300">
-                Updating feed... This process typically takes 1-2 minutes depending on segment size.
+                Processing feed... This process typically takes 1-2 minutes.
               </p>
             </div>
           )}
