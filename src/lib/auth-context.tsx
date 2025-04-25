@@ -1,6 +1,16 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from './supabase';
+import { keys, storage } from './storage';
+
+// Define the interface for user data to be stored
+interface UserData {
+  email: string | undefined;
+  fullName: string | null;
+  imageUrl: string;
+  id: string;
+  token: string;
+}
 
 type AuthContextType = {
   user: User | null;
@@ -37,11 +47,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Function to update user data in storage
+  const updateUserInStorage = (currentUser: User | null, currentSession: Session | null) => {
+    if (currentUser && currentSession) {
+      try {
+        const userData: UserData = {
+          email: currentUser.email,
+          fullName: currentUser.user_metadata?.full_name || null,
+          imageUrl: currentUser.user_metadata?.avatar_url || '',
+          id: currentUser.id,
+          token: currentSession.access_token,
+        };
+
+        storage.setItem(keys.IS_LOGGED_IN, true);
+        storage.setItem(keys.USER, userData);
+      } catch (err) {
+        console.error('Failed to store user data:', err);
+      }
+    } else {
+      // Clear user data if user is null
+      storage.removeItem(keys.IS_LOGGED_IN);
+      storage.removeItem(keys.USER);
+    }
+  };
+
   useEffect(() => {
     // Initial session fetch
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+      updateUserInStorage(session?.user ?? null, session);
       setLoading(false);
     });
 
@@ -51,6 +86,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } = supabase.auth.onAuthStateChange((_, session) => {
       setSession(session);
       setUser(session?.user ?? null);
+      updateUserInStorage(session?.user ?? null, session);
       setLoading(false);
     });
 
