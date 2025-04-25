@@ -70,6 +70,7 @@ function AppNav({ segments, isLoading, ...props }: Props) {
         <NavSegments segments={segments || []} isLoading={isLoading} />
       </SidebarContent>
       <SidebarFooter>
+        {/* <SubscribeCTA /> */}
         <NavUser />
       </SidebarFooter>
     </CNSidebar>
