@@ -137,11 +137,13 @@ export default function Feed() {
   const handleUpdateFeed = async () => {
     setIsRefreshing(true);
     try {
+      const startTime = Date.now();
       const { addedCount, totalFetched } = await loadNewSegmentFeed(selectedSegmentId);
       await refetch();
+      const processingTime = ((Date.now() - startTime) / 1000).toFixed(1);
       toast({
         title: 'Feed updated',
-        description: `Latest posts have been loaded. ${addedCount} new posts added. ${totalFetched} posts fetched.`,
+        description: `Feed updated in ${processingTime}s. ${addedCount} new posts added out of ${totalFetched} fetched.`,
       });
     } catch {
       toast({
@@ -397,10 +399,14 @@ export default function Feed() {
                   onClick={handleUpdateFeed}
                   disabled={!selectedSegmentId || isRefreshing || isLoading}
                   variant="outline"
-                  className="flex-1 sm:flex-none"
+                  className="flex-1 sm:flex-none relative group"
+                  title="This process may take a few moments"
                 >
                   <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                  Update Feed
+                  {isRefreshing ? 'Updating...' : 'Update Feed'}
+                  <span className="absolute -top-10 right-1/2 w-40 bg-black text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                    This process may take a few moments
+                  </span>
                 </Button>
               </div>
             </div>
@@ -434,6 +440,18 @@ export default function Feed() {
               </div>
               <p className="text-xs text-muted-foreground mt-4">
                 We're collecting posts from various subreddits to find the most relevant content for you.
+              </p>
+            </div>
+          )}
+
+          {/* Refreshing state - adds a subtle indicator when refreshing */}
+          {!isLoading && isRefreshing && (
+            <div className="max-w-3xl mx-auto mb-4 bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-800 rounded-md p-3 flex items-center gap-3">
+              <div className="h-1.5 bg-orange-100 dark:bg-orange-950 rounded-full w-24 overflow-hidden flex-shrink-0">
+                <div className="h-full bg-orange-500 dark:bg-orange-600 rounded-full progress-bar"></div>
+              </div>
+              <p className="text-sm text-orange-700 dark:text-orange-300">
+                Updating feed... This process typically takes 1-2 minutes depending on segment size.
               </p>
             </div>
           )}
