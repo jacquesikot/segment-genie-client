@@ -1,4 +1,11 @@
-import { addBookmark, deleteBookmark, generateSegmentFeedReply, getBookmarks, getSegmentFeed } from '@/api/feed';
+import {
+  addBookmark,
+  deleteBookmark,
+  generateSegmentFeedReply,
+  getBookmarks,
+  getSegmentFeed,
+  loadNewSegmentFeed,
+} from '@/api/feed';
 import { Segment } from '@/api/segment';
 import BookmarksModal from '@/components/bookmarks-modal';
 import PageHeader from '@/components/page-header';
@@ -127,17 +134,18 @@ export default function Feed() {
     setBookmarkedPosts({});
   };
 
-  const handleRefresh = async () => {
+  const handleUpdateFeed = async () => {
     setIsRefreshing(true);
     try {
+      const { addedCount, totalFetched } = await loadNewSegmentFeed(selectedSegmentId);
       await refetch();
       toast({
-        title: 'Feed refreshed',
-        description: 'Latest posts have been loaded',
+        title: 'Feed updated',
+        description: `Latest posts have been loaded. ${addedCount} new posts added. ${totalFetched} posts fetched.`,
       });
     } catch {
       toast({
-        title: 'Failed to refresh feed',
+        title: 'Failed to update feed',
         description: 'Please try again later',
         variant: 'destructive',
       });
@@ -386,13 +394,13 @@ export default function Feed() {
                 </Button>
 
                 <Button
-                  onClick={handleRefresh}
+                  onClick={handleUpdateFeed}
                   disabled={!selectedSegmentId || isRefreshing || isLoading}
                   variant="outline"
                   className="flex-1 sm:flex-none"
                 >
                   <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                  Refresh
+                  Update Feed
                 </Button>
               </div>
             </div>
@@ -462,9 +470,9 @@ export default function Feed() {
                   There are no relevant Reddit posts for this segment at the moment. Try selecting a different segment
                   or refreshing later.
                 </p>
-                <Button onClick={handleRefresh} variant="outline">
+                <Button onClick={handleUpdateFeed} variant="outline">
                   <RefreshCw className="mr-2 h-4 w-4" />
-                  Refresh
+                  Update Feed
                 </Button>
               </div>
             </Card>
@@ -586,7 +594,9 @@ export default function Feed() {
                       </div>
                     )}
                   </CardContent>
-                  <CardFooter className="pt-4 pb-0 border-t flex flex-col gap-4">
+                  <CardFooter
+                    className={`pt-4 ${generatedReplies[post.id] ? 'pb-4' : 'pb-0'} border-t flex flex-col gap-4`}
+                  >
                     <div className="w-full flex flex-wrap justify-between items-center gap-2">
                       <div className="flex items-center flex-wrap gap-4 text-sm text-muted-foreground">
                         <div className="flex items-center gap-1.5">

@@ -101,6 +101,17 @@ export const getSegmentFeed = async (segmentId: string): Promise<FeedPost[]> => 
   return data.data.data;
 };
 
+export const loadNewSegmentFeed = async (
+  segmentId: string
+): Promise<{
+  addedCount: number;
+  totalFetched: number;
+  totalNew: number;
+}> => {
+  const data = await client.post(`/feed/${segmentId}/update-relevant-posts`);
+  return data.data.data;
+};
+
 export const generateSegmentFeedReply = async (
   segmentId: string,
   postId: string,
