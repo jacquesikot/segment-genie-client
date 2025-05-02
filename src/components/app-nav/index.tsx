@@ -13,6 +13,7 @@ import {
 import { NavMain } from './nav-main';
 import { NavSegments } from './nav-segments';
 import { NavUser } from './nav-user';
+import Logo from '../../../public/logo.png';
 
 const mainNavRoutes = {
   navMain: [
@@ -53,12 +54,11 @@ function AppNav({ segments, isLoading, ...props }: Props) {
           <SidebarMenuItem className="flex items-center justify-between">
             <SidebarMenuButton size="lg" asChild>
               <a href="/" className="flex items-center space-x-2">
-                {/* <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                  <Command className="size-4" />
-                </div> */}
+                <img src={Logo} alt="Logo" className="w-10" />
+
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">SegmentGenie</span>
-                  <span className="truncate text-xs">Product validation</span>
+                  <span className="truncate text-xs">Product research</span>
                 </div>
               </a>
             </SidebarMenuButton>

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/auth-context';
 import { useAnalytics } from '../hooks/use-analytics';
 import { Input } from '@/components/ui/input';
+import Logo from '../../public/logo.png';
 
 export default function SignIn() {
   const [email, setEmail] = useState('');
@@ -252,28 +253,8 @@ export default function SignIn() {
 
         <div className="relative z-10 max-w-md bg-indigo-950/40 dark:bg-black/40 p-8 rounded-xl backdrop-filter backdrop-blur-sm border border-indigo-600/20 dark:border-indigo-700/20">
           <div className="flex items-center mb-8">
-            <svg
-              className="h-10 w-10 mr-3 text-indigo-300"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M12 4.75L19.25 9L12 13.25L4.75 9L12 4.75Z"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M9.25 11.5L4.75 14L12 18.25L19.25 14L14.6722 11.5"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            <span className="text-2xl font-bold">SegmentGenie</span>
+            <img src={Logo} alt="Logo" className="w-10" />
+            <span className="text-2xl font-bold ml-2">SegmentGenie</span>
           </div>
 
           <h2 className="text-3xl font-bold mb-6 text-white">
@@ -323,11 +304,11 @@ export default function SignIn() {
             </div>
           </div>
 
-          <div className="mt-10 pt-10 border-t border-indigo-500/20">
+          {/* <div className="mt-10 pt-10 border-t border-indigo-500/20">
             <p className="font-semibold text-indigo-200">
               Join 500+ founders who improved their business with SegmentGenie
             </p>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
