@@ -12,7 +12,7 @@ export default function SharedReport() {
   const [isLoading, setIsLoading] = useState(true);
   const [segment, setSegment] = useState<Segment | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [segmentData, setSegmentData] = useState<ResearchReport>();
+  const [segmentData, setSegmentData] = useState<ResearchReport | undefined>(undefined);
   const [status, setStatus] = useState<SegmentStatus>({
     general: {
       progress: 100,
@@ -48,18 +48,37 @@ export default function SharedReport() {
 
   useEffect(() => {
     async function fetchSegment() {
-      if (!id) return;
+      if (!id) {
+        setError('No report ID provided');
+        setIsLoading(false);
+        return;
+      }
 
       try {
         setIsLoading(true);
-        const segmentData = await getSegment(id);
-        setSegment(segmentData);
+        const response = await getSegment(id);
 
-        if (segmentData.data) {
-          setSegmentData(segmentData.data);
+        // Add logging to debug mobile issues
+        console.log('API Response:', JSON.stringify(response));
+
+        if (!response) {
+          throw new Error('No data received from server');
         }
 
-        setStatus(segmentData.status);
+        setSegment(response);
+
+        // More safely handle the segmentData property
+        if (response.data) {
+          console.log('Setting segment data');
+          setSegmentData(response.data);
+        } else {
+          console.log('No segment data found in response');
+        }
+
+        // Make sure status exists before setting it
+        if (response.status) {
+          setStatus(response.status);
+        }
       } catch (err) {
         console.error('Error fetching segment:', err);
         setError('Failed to load the report. It may have been deleted or is no longer available.');
