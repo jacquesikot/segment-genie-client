@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../lib/auth-context';
 import { useAnalytics } from '../hooks/use-analytics';
 import { Input } from '@/components/ui/input';
-import Logo from '../../public/logo.png';
+import Logo from '../images/logo.png';
 
 export default function SignUp() {
   const [email, setEmail] = useState('');

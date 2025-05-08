@@ -13,7 +13,7 @@ import {
 import { NavMain } from './nav-main';
 import { NavSegments } from './nav-segments';
 import { NavUser } from './nav-user';
-import Logo from '../../../public/logo.png';
+import Logo from '../../images/logo.png';
 
 const mainNavRoutes = {
   navMain: [

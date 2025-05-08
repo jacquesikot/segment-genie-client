@@ -1,18 +1,14 @@
-import { ResearchReport } from '@/api/research';
-import { getSegment, Segment, SegmentStatus } from '@/api/segment';
+import { getSegment, SegmentStatus } from '@/api/segment';
 import SharedReportView from '@/components/customer-report/SharedReportView';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { useQuery } from '@tanstack/react-query';
 import { Loader2, ShieldAlert } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 
 export default function SharedReport() {
   const { id } = useParams<{ id: string }>();
-  const [isLoading, setIsLoading] = useState(true);
-  const [segment, setSegment] = useState<Segment | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [segmentData, setSegmentData] = useState<ResearchReport | undefined>(undefined);
   const [status, setStatus] = useState<SegmentStatus>({
     general: {
       progress: 100,
@@ -46,49 +42,36 @@ export default function SharedReport() {
     },
   });
 
-  useEffect(() => {
-    async function fetchSegment() {
+  // Use react-query to fetch the segment data
+  const {
+    data: segment,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ['segment', id],
+    queryFn: async () => {
       if (!id) {
-        setError('No report ID provided');
-        setIsLoading(false);
-        return;
+        throw new Error('No report ID provided');
+      }
+      const response = await getSegment(id);
+
+      if (!response) {
+        throw new Error('No data received from server');
       }
 
-      try {
-        setIsLoading(true);
-        const response = await getSegment(id);
-
-        // Add logging to debug mobile issues
-        console.log('API Response:', JSON.stringify(response));
-
-        if (!response) {
-          throw new Error('No data received from server');
-        }
-
-        setSegment(response);
-
-        // More safely handle the segmentData property
-        if (response.data) {
-          console.log('Setting segment data');
-          setSegmentData(response.data);
-        } else {
-          console.log('No segment data found in response');
-        }
-
-        // Make sure status exists before setting it
-        if (response.status) {
-          setStatus(response.status);
-        }
-      } catch (err) {
-        console.error('Error fetching segment:', err);
-        setError('Failed to load the report. It may have been deleted or is no longer available.');
-      } finally {
-        setIsLoading(false);
+      // Update status if it exists in the response
+      if (response.status) {
+        setStatus(response.status);
       }
-    }
 
-    fetchSegment();
-  }, [id]);
+      return response;
+    },
+    enabled: !!id, // Only run the query if id is available
+    retry: 1, // Only retry once on failure
+  });
+
+  // Derived state for segment data
+  const segmentData = segment?.data;
 
   if (isLoading) {
     return (
@@ -105,7 +88,7 @@ export default function SharedReport() {
         <Alert className="max-w-md">
           <ShieldAlert className="h-5 w-5" />
           <AlertTitle>Error</AlertTitle>
-          <AlertDescription>{error || 'Report not found'}</AlertDescription>
+          <AlertDescription>{error instanceof Error ? error.message : 'Report not found'}</AlertDescription>
         </Alert>
         <Button asChild className="mt-6">
           <Link to="/">Go to Home</Link>

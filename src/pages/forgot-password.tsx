@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../lib/auth-context';
 import { Input } from '@/components/ui/input';
-import Logo from '../../public/logo.png';
+import Logo from '../images/logo.png';
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
