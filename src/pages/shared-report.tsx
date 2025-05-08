@@ -1,4 +1,4 @@
-import { getSegment, SegmentStatus } from '@/api/segment';
+import { getPublicSegment, SegmentStatus } from '@/api/segment';
 import SharedReportView from '@/components/customer-report/SharedReportView';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -53,7 +53,7 @@ export default function SharedReport() {
       if (!id) {
         throw new Error('No report ID provided');
       }
-      const response = await getSegment(id);
+      const response = await getPublicSegment(id);
 
       if (!response) {
         throw new Error('No data received from server');

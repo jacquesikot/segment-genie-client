@@ -37,6 +37,10 @@ export const getSegment = async (segmentId: string): Promise<Segment> => {
   return (await client.get(`/segment/${segmentId}`)).data.data;
 };
 
+export const getPublicSegment = async (segmentId: string): Promise<Segment> => {
+  return (await client.get(`/segment/public/${segmentId}`)).data.data;
+};
+
 export const getUserSegments = async (userId: string): Promise<Segment[] | []> => {
   const data = await client.get(`/segment/user/${userId}`);
   return data.data.data;
